@@ -179,11 +179,20 @@ document.getElementById("googleLogin").addEventListener("click", ()=>{
 
 // Déconnexion
 function logout(){
-  signOut(auth).then(()=>{
-    localStorage.removeItem("umbrellaUser");
-    location.reload();
-  });
+  signOut(auth)
+    .then(()=>{
+      localStorage.removeItem("umbrellaUser"); // supprime les infos localement
+      // remettre avatar et texte par défaut
+      document.getElementById("userAvatar").src = "https://www.gravatar.com/avatar/?d=mp";
+      document.getElementById("userName").textContent = "Invité";
+      document.getElementById("userEmail").textContent = "Non connecté";
+      document.querySelectorAll(".go-dashboard").forEach(btn=>{
+        btn.href = "#"; // désactive le dashboard
+      });
+    })
+    .catch(err => console.error(err));
 }
+
 
 // Affichage utilisateur
 const u = JSON.parse(localStorage.getItem("umbrellaUser"));
@@ -199,4 +208,5 @@ if(u){
 
 </body>
 </html>
+
 
