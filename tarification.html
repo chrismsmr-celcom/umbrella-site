@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarification – Umbrella®</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root{
+  --primary:#0b1320;
+  --secondary:#1c2a44;
+  --accent:#f5c400;
+  --bg:#f6f8fb;
+  --text:#1f2937;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',sans-serif;
+  background:#fff;
+  color:var(--text);
+  line-height:1.6;
+}
+
+/* HEADER */
+.header{
+  background:linear-gradient(120deg,#0b1320,#1c2a44);
+  color:#fff;
+  padding:90px 30px;
+  text-align:center;
+}
+.header h1{
+  font-size:2.8rem;
+  margin-bottom:15px;
+}
+.header p{
+  max-width:780px;
+  margin:auto;
+  opacity:.9;
+  font-size:1.1rem;
+}
+
+/* SECTION */
+.section{
+  padding:90px 30px;
+  max-width:1200px;
+  margin:auto;
+}
+.section h2{
+  text-align:center;
+  font-size:2.2rem;
+  margin-bottom:50px;
+}
+
+/* PRICING */
+.pricing{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:30px;
+}
+.plan{
+  background:var(--bg);
+  border-radius:22px;
+  padding:35px;
+  position:relative;
+  transition:.35s;
+}
+.plan:hover{
+  transform:translateY(-8px);
+  box-shadow:0 25px 60px rgba(0,0,0,.12);
+}
+.plan.popular{
+  background:#fff;
+  border:2px solid var(--accent);
+}
+.badge{
+  position:absolute;
+  top:-14px;
+  right:20px;
+  background:var(--accent);
+  color:#000;
+  padding:6px 14px;
+  font-size:.75rem;
+  border-radius:20px;
+  font-weight:600;
+}
+
+.plan h3{
+  font-size:1.4rem;
+  margin-bottom:10px;
+}
+.price{
+  font-size:2.4rem;
+  font-weight:700;
+  margin:15px 0;
+}
+.price span{
+  font-size:.9rem;
+  font-weight:400;
+}
+.plan ul{
+  list-style:none;
+  margin:25px 0;
+}
+.plan ul li{
+  margin-bottom:12px;
+  font-size:.95rem;
+}
+.plan ul li i{
+  color:var(--secondary);
+  margin-right:8px;
+}
+
+.plan a{
+  display:block;
+  text-align:center;
+  padding:14px;
+  border-radius:30px;
+  font-weight:700;
+  text-decoration:none;
+}
+.btn-primary{
+  background:var(--accent);
+  color:#000;
+}
+.btn-secondary{
+  border:1px solid var(--secondary);
+  color:var(--secondary);
+}
+
+/* ENTERPRISE */
+.enterprise{
+  background:var(--bg);
+  border-radius:24px;
+  padding:50px;
+  text-align:center;
+}
+.enterprise h3{
+  font-size:1.8rem;
+  margin-bottom:15px;
+}
+.enterprise p{
+  max-width:700px;
+  margin:auto;
+  margin-bottom:25px;
+}
+
+/* FOOTER */
+footer{
+  background:#0b1320;
+  color:#fff;
+  padding:50px 30px;
+  text-align:center;
+  font-size:.9rem;
+  opacity:.85;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<section class="header">
+  <h1>Des offres adaptées à chaque entreprise</h1>
+  <p>
+    Que vous démarriez votre activité ou que vous gériez une entreprise établie,
+    Umbrella propose des solutions évolutives, simples et professionnelles.
+  </p>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <h2>Nos formules</h2>
+
+  <div class="pricing">
+    <!-- EXPRESS -->
+    <div class="plan">
+      <h3>Umbrella Express</h3>
+      <p>Pour entrepreneurs et indépendants</p>
+      <div class="price">Gratuit</div>
+      <ul>
+        <li><i class="fa fa-check"></i> Accès aux outils essentiels</li>
+        <li><i class="fa fa-check"></i> Gestionnaire de tâches</li>
+        <li><i class="fa fa-check"></i> QR Code & calculatrice</li>
+        <li><i class="fa fa-check"></i> Support communautaire</li>
+      </ul>
+      <a href="#" class="btn-secondary">Commencer</a>
+    </div>
+
+    <!-- SUIT PRO -->
+    <div class="plan popular">
+      <div class="badge">Le plus choisi</div>
+      <h3>Umbrella Suit Pro</h3>
+      <p>Pour TPE & PME en croissance</p>
+      <div class="price">29€ <span>/ mois</span></div>
+      <ul>
+        <li><i class="fa fa-check"></i> Tous les outils Umbrella</li>
+        <li><i class="fa fa-check"></i> Devis & facturation avancés</li>
+        <li><i class="fa fa-check"></i> Accès à Umbrella Moniteo</li>
+        <li><i class="fa fa-check"></i> Support prioritaire</li>
+      </ul>
+      <a href="#" class="btn-primary">Choisir cette offre</a>
+    </div>
+
+    <!-- ADVICE -->
+    <div class="plan">
+      <h3>Umbrella Advice</h3>
+      <p>Accompagnement stratégique</p>
+      <div class="price">79€ <span>/ mois</span></div>
+      <ul>
+        <li><i class="fa fa-check"></i> Umbrella Suit Pro inclus</li>
+        <li><i class="fa fa-check"></i> Conseil business personnalisé</li>
+        <li><i class="fa fa-check"></i> Aide à la structuration</li>
+        <li><i class="fa fa-check"></i> Support dédié</li>
+      </ul>
+      <a href="#" class="btn-secondary">Nous contacter</a>
+    </div>
+  </div>
+</section>
+
+<!-- ENTERPRISE -->
+<section class="section">
+  <div class="enterprise">
+    <h3>Solution Entreprise</h3>
+    <p>
+      Besoin d’une solution sur mesure, d’une intégration spécifique
+      ou d’un accompagnement à grande échelle ?
+    </p>
+    <a href="#" class="btn-primary">Parler à un expert Umbrella</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  © Umbrella ® – Tous droits réservés
+</footer>
+
+</body>
+</html>
