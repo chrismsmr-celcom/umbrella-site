@@ -466,8 +466,68 @@ if(menuToggle && mobileMenu){
     });
   });
 }
+  /* ================= FIREBASE CONFIG ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
+  authDomain: "umbrella-projet.firebaseapp.com",
+  projectId: "umbrella-projet",
+  storageBucket: "umbrella-projet.firebasestorage.app",
+  messagingSenderId: "776097627790",
+  appId: "1:776097627790:web:98510562d1559d9e5bd3df",
+  measurementId: "G-YCYQ7L30WY"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+/* ================= GOOGLE LOGIN ================= */
+const googleBtn = document.getElementById("googleLoginSlide");
+
+if (googleBtn) {
+  googleBtn.addEventListener("click", () => {
+    auth.signInWithPopup(provider)
+      .then(result => {
+        const user = result.user;
+
+        // Sauvegarde locale
+        localStorage.setItem("umbrellaUser", JSON.stringify({
+          name: user.displayName,
+          email: user.email,
+          photo: user.photoURL
+        }));
+
+        // UI update
+        document.querySelector(".account img").src = user.photoURL;
+        document.querySelector(".account-menu strong").textContent = user.displayName;
+
+        alert("Connexion réussie ✔");
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Erreur de connexion Google");
+      });
+  });
+}
+
+/* ================= AUTO SESSION ================= */
+const savedUser = localStorage.getItem("umbrellaUser");
+if (savedUser) {
+  const u = JSON.parse(savedUser);
+  document.querySelector(".account img").src = u.photo;
+  document.querySelector(".account-menu strong").textContent = u.name;
+}
+
+/* ================= LOGOUT ================= */
+function logout(){
+  auth.signOut().then(()=>{
+    localStorage.removeItem("umbrellaUser");
+    location.reload();
+  });
+}
+
 </script>
 
 </body>
 </html>
+
 
