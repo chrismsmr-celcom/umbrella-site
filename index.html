@@ -300,6 +300,73 @@ a{text-decoration:none;}
 
 .about{text-align:center;max-width:900px;margin:auto;}
 .contact{background:var(--bg);border-radius:20px;padding:40px;text-align:center;}
+.contact{
+  background:var(--bg);
+  border-radius:20px;
+  padding:60px 20px;
+  text-align:center;
+  max-width:900px;
+  margin:50px auto;
+}
+
+.contact h2{
+  font-size:2rem;
+  margin-bottom:20px;
+}
+
+.contact p{
+  font-size:1rem;
+  margin-bottom:35px;
+  opacity:.85;
+}
+
+.contact form{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  margin-bottom:30px;
+}
+
+.contact input, .contact textarea{
+  width:100%;
+  padding:12px 18px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:.95rem;
+}
+
+.contact button{
+  align-self:center;
+  padding:12px 30px;
+  border-radius:30px;
+  font-weight:700;
+  cursor:pointer;
+  background:var(--accent);
+  color:#000;
+  border:none;
+  transition:.3s;
+}
+.contact button:hover{
+  background:#ffd700;
+  transform:scale(1.05);
+}
+
+/* RESEAUX SOCIAUX */
+.socials{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  font-size:1.2rem;
+}
+
+.socials a{
+  color:var(--secondary);
+  transition:.3s;
+}
+
+.socials a:hover{
+  color:var(--accent);
+}
 
 /* ================= FOOTER ================= */
 footer{
@@ -450,14 +517,75 @@ footer a:hover{color:#fff;}
 <!-- ABOUT -->
 <section class="section about">
   <h2>Pourquoi Umbrella ?</h2>
-  <p>Umbrella accompagne les entrepreneurs, TPE et PME avec des solutions simples, professionnelles et évolutives.</p>
+  <p>Umbrella® est une plateforme de solutions professionnelles conçue pour simplifier, structurer et accélérer la gestion des activités des entrepreneurs, indépendants, TPE et PME.
+
+Dans un contexte où créer une entreprise est devenu plus accessible que jamais, beaucoup avancent sans outils fiables, sans méthode claire et sans accompagnement. Umbrella est née de ce constat.
+
+Notre mission
+
+Aider les professionnels à piloter leur activité avec clarté, grâce à des outils simples, centralisés et pensés pour la prise de décision.
+
+Nous ne cherchons pas à multiplier les fonctionnalités inutiles, mais à proposer l’essentiel qui fait gagner du temps, de la visibilité et de la performance.
+
+Ce que propose Umbrella
+
+Umbrella réunit dans un seul écosystème :
+
+Un dashboard intelligent pour suivre votre activité en temps réel
+
+Des outils métiers (gestion de tâches, devis, facturation, calculs financiers, QR codes, etc.)
+
+Des solutions évolutives, adaptées aussi bien aux indépendants qu’aux structures en croissance
+
+Une approche orientée productivité, autonomie et professionnalisation
+
+Une vision long terme
+
+Umbrella ne se limite pas à un logiciel. C’est une vision :
+celle d’un outil qui accompagne l’évolution de votre entreprise, de ses premiers pas jusqu’à sa maturité.
+
+À terme, Umbrella intégrera des espaces d’apprentissage, de conseil et d’accompagnement, afin de combler le manque de formation et de mentorat que rencontrent de nombreux entrepreneurs.
+
+Pour qui ?
+
+Entrepreneurs et freelances
+
+TPE & PME
+
+Porteurs de projets
+
+Structures en phase de structuration ou de croissance
+
+Notre engagement
+
+Simplicité d’utilisation
+
+Sécurité et fiabilité
+
+Design clair et professionnel
+
+Amélioration continue basée sur les besoins réels des utilisateurs
+
+Umbrella®, c’est moins de complexité, plus de contrôle.</p>
 </section>
 
 <!-- CONTACT -->
-<section class="section">
-  <div class="contact">
-    <h2>Contact</h2>
-    <p>contact@umbrella.com<br>+243 XXX XXX XXX</p>
+<section class="contact">
+  <h2>Contactez-nous</h2>
+  <p>Vous avez une question, besoin d’un support ou souhaitez en savoir plus sur nos solutions ?</p>
+  
+  <form id="contactForm">
+    <input type="text" name="name" placeholder="Votre nom" required>
+    <input type="email" name="email" placeholder="Votre email" required>
+    <textarea name="message" placeholder="Votre message" rows="5" required></textarea>
+    <button type="submit" class="cta-primary">Envoyer</button>
+  </form>
+
+  <div class="socials">
+    <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+    <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
   </div>
 </section>
 
