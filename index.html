@@ -14,117 +14,239 @@
   --bg:#f6f8fb;
   --text:#1f2937;
 }
+/* Reset */
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Inter',sans-serif;color:var(--text);background:#fff;line-height:1.6;}
+body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);line-height:1.6;}
 a{text-decoration:none;}
-
-/* NAVBAR */
+/* ================= NAVBAR ================= */
 .navbar{
   position:sticky;
   top:0;
   z-index:1000;
-  background:var(--primary);
-  color:#fff;
-  padding:18px 40px;
+  background:#fff;
+  padding:6px 30px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  box-shadow:0 10px 30px rgba(0,0,0,.15);
+  justify-content:space-between;
+  box-shadow:0 6px 25px rgba(0,0,0,.08);
 }
-.navbar img.logo{height:42px;}
-.nav-links{display:flex;align-items:center;gap:22px;}
-.nav-item{position:relative;cursor:pointer;}
-.nav-item span{font-size:.95rem;opacity:.9;}
-.nav-item:hover span{opacity:1;}
-.account{position:relative;cursor:pointer;}
-.account img{height:40px;width:40px;border-radius:50%;}
-.account-menu{display:none;position:absolute;right:0;top:55px;background:#fff;color:#000;min-width:240px;padding:15px;border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.18);font-size:.9rem;}
+
+.logo{
+  height:42px;
+  flex-shrink:0;
+}
+
+/* LINKS DESKTOP */
+.nav-links{
+  display:flex;
+  gap:24px;
+  align-items:center;
+  margin-left:auto;
+  margin-right:40px;
+}
+.nav-item span{
+  font-size:.95rem;
+  font-weight:500;
+  color:var(--muted);
+  cursor:pointer;
+}
+.nav-item span:hover{color:var(--text);}
+
+/* ICONS */
+.navbar-icons{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  flex-shrink:0;
+}
+.navbar-icons i{
+  font-size:1.05rem;
+  color:var(--muted);
+  cursor:pointer;
+}
+.navbar-icons i:hover{color:var(--text);}
+
+/* ACCOUNT */
+.account{position:relative;}
+.account img{
+  height:36px;
+  width:36px;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+/* ACCOUNT MENU */
+.account-menu{
+  display:none;
+  position:absolute;
+  right:0;
+  top:48px;
+  background:#fff;
+  min-width:220px;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 15px 40px rgba(0,0,0,.15);
+  font-size:.85rem;
+}
 .account:hover .account-menu{display:block;}
 .account-menu strong{display:block;}
-.account-menu span{font-size:.8rem;opacity:.7;}
+.account-menu span{color:#777;font-size:.75rem;}
 .account-menu hr{margin:10px 0;border:none;border-top:1px solid #eee;}
-.account-menu a{display:block;color:#333;font-size:.9rem;margin-bottom:8px;}
-.navbar-icons{display:flex;gap:15px;align-items:center;margin-left:auto;}
-.menu-toggle{display:none;cursor:pointer;font-size:1.4rem;color:#fff;}
-.mobile-menu{display:none;flex-direction:column;gap:15px;background:var(--primary);padding:20px;border-radius:12px;position:absolute;top:70px;right:30px;z-index:1000;}
-.mobile-menu a{color:#fff;font-weight:500;}
+.account-menu a{display:block;color:#333;margin-bottom:8px}
+
+/* BURGER */
+.menu-toggle{
+  display:none;
+  font-size:1.4rem;
+  cursor:pointer;
+  color:var(--muted);
+}
+.mobile-menu.active {
+  display: flex;
+}
+/* MOBILE MENU */
+.mobile-menu{
+  display:none;
+  position:absolute;
+  top:70px;
+  right:20px;
+  background:#fff;
+  padding:25px;
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,.18);
+  flex-direction:column;
+  gap:14px;
+}
+.mobile-menu a{font-weight:500;color:#333}
 
 /* HERO DYNAMIQUE PREMIUM */
 .hero{
-  background:linear-gradient(120deg,#0b1320,#1c2a44);
-  color:#fff;
-  padding:100px 20px;
-  text-align:center;
   position:relative;
+  min-height:500px;
   overflow:hidden;
+  background-color:var(--bg);
+  margin:20px;
+  border-radius:20px;
 }
-.hero-slides{position:relative;min-height:400px;}
-.slide{
+.hero-slide {
   position:absolute;
   width:100%;
+  height:100%;
   top:0;
   left:0;
+  background-size:cover;
+  background-position:center;
   opacity:0;
-  transform:scale(0.95);
-  transition:opacity 0.8s ease, transform 0.8s ease;
-}
-.slide.active{
-  opacity:1;
-  transform:scale(1);
-}
-.hero h1{font-size:2.4rem;margin-bottom:15px;}
-.hero p{max-width:800px;margin:0 auto 35px;font-size:1.05rem;opacity:.9;}
-.hero-actions{
+  transition:opacity 0.8s ease;
   display:flex;
-  justify-content:center;
-  gap:15px;
-  flex-wrap:wrap;
+  align-items:center;
+  justify-content:left;
+  padding:0 50px;
 }
-.cta-primary{
-  background:var(--accent);
-  color:#000;
-  padding:14px 30px;
-  border-radius:30px;
-  font-weight:700;
-  transition:.3s;
+.hero-slide.active {
+  opacity:1;
+  z-index:1;
 }
-.cta-primary:hover{background:#ffd700;transform:scale(1.05);}
-.cta-secondary{
-  border:1px solid rgba(255,255,255,.5);
+.hero-slide .overlay {
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+ background:rgba(0,0,0,1.50); /* Film noir léger */
+  pointer-events:none; /* Permet de cliquer sur le contenu */
+}
+.hero-content {
+  position:relative;
+  z-index:2;
+  max-width:600px;
+}
+.hero-content h1 {
+  font-size:2.4rem;
   color:#fff;
-  padding:14px 28px;
-  border-radius:30px;
-  transition:.3s;
-}
-.cta-secondary:hover{background:rgba(255,255,255,.2);}
-
-.badge{
-  display:inline-block;
-  background: rgba(255,255,255,0.12);
-  padding:6px 14px;
-  border-radius:20px;
-  font-size:.8rem;
   margin-bottom:15px;
 }
+.hero-content p {
+  color:#fff;
+  margin-bottom:20px;
+}
+.cta-primary, .cta-secondary {
+  display:inline-block;
+  padding:12px 25px;
+  border-radius:30px;
+  font-weight:700;
+  text-decoration:none;
+}
+.cta-primary {
+  background:#f5c400;
+  color:#000;
+}
+.cta-primary:hover {
+  background:#ffd700;
+  transform:scale(1.05);
+}
+.cta-secondary {
+  border:1px solid rgba(255,255,255,.5);
+  color:#fff;
+}
+.cta-secondary:hover {
+  background:rgba(255,255,255,.2);
+}
 
-.hero .dots{
+/* DOTS */
+.hero-dots {
   position:absolute;
   bottom:20px;
   width:100%;
   display:flex;
   justify-content:center;
   gap:10px;
+  z-index:2;
 }
-.hero .dot{
+.hero-dots .dot {
   width:12px;
   height:12px;
-  background:#bbb;
   border-radius:50%;
+  background:#bbb;
   cursor:pointer;
-  transition:.3s;
 }
-.hero .dot.active{background:#1f2937;}
-
+.hero-dots .dot.active {
+  background:#fff;
+}
+/* MODAL RECHERCHE */
+.modal {
+  display:none;
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.6);
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+}
+.modal-content {
+  background:#fff;
+  padding:25px;
+  border-radius:14px;
+  max-width:450px;
+  width:90%;
+  text-align:center;
+  position:relative;
+}
+.modal-content input {
+  width:100%;
+  padding:12px 18px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:.95rem;
+}
+.modal-content .close {
+  position:absolute;
+  top:10px;
+  right:14px;
+  font-size:1.2rem;
+  cursor:pointer;
+  color:#333;
+}
 /* SECTIONS */
 .section{padding:70px 20px;max-width:1200px;margin:auto;}
 .section h2{text-align:center;font-size:2rem;margin-bottom:40px;}
@@ -163,28 +285,33 @@ footer a:hover{color:#fff;}
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <img src="logo-umbrella.png" class="logo">
-  <div class="navbar-icons">
-    <i class="fa fa-search"></i>
-    <i class="fa fa-shopping-cart"></i>
-    <div class="account">
-      <img id="userAvatar" src="https://www.gravatar.com/avatar/?d=mp">
-      <div class="account-menu">
-        <strong id="userName">Invité</strong>
-        <span id="userEmail">Non connecté</span>
-        <hr>
-        <a href="#" onclick="logout()">Déconnexion</a>
-      </div>
-    </div>
-    <div class="menu-toggle" id="menuToggle"><i class="fa fa-bars"></i></div>
-  </div>
-  <div class="nav-links" id="navLinks">
+  <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" class="logo">
+
+  <div class="nav-links">
     <div class="nav-item"><span>Umbrella Suit Pro</span></div>
     <div class="nav-item"><span>Umbrella Advice</span></div>
     <div class="nav-item"><span>Umbrella Express</span></div>
     <div class="nav-item"><span>Offres TPE & PME</span></div>
-    <div class="nav-item"><span>Support technique</span></div>
+    <div class="nav-item"><span>Support</span></div>
   </div>
+
+  <div class="navbar-icons">
+    <i class="fa fa-search"></i>
+    <i class="fa fa-shopping-cart"></i>
+
+    <div class="account">
+      <img src="https://www.gravatar.com/avatar/?d=mp">
+      <div class="account-menu">
+        <strong>Invité</strong>
+        <span>Non connecté</span>
+        <hr>
+        <a href="#">Connexion</a>
+      </div>
+    </div>
+
+     <div class="menu-toggle" id="menuToggle"><i class="fa fa-bars"></i></div>
+  </div>
+
   <div class="mobile-menu" id="mobileMenu">
     <a>Umbrella Suit Pro</a>
     <a>Umbrella Advice</a>
@@ -197,45 +324,34 @@ footer a:hover{color:#fff;}
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-slides">
-    <!-- Slide 1 -->
-    <div class="slide active">
-      <span class="badge">Solutions professionnelles Umbrella</span>
-      <h1>Connectez-vous à Umbrella</h1>
-      <p>Accédez facilement à vos outils et à votre dashboard personnalisé.</p>
-      <div class="hero-actions">
-        <button id="googleLoginSlide" class="cta-primary"><i class="fa-brands fa-google"></i> Se connecter avec Google</button>
-      </div>
-    </div>
-    <!-- Slide 2 -->
-    <div class="slide">
-      <span class="badge">Dashboard Moniteo</span>
-      <h1>Votre Dashboard Moniteo</h1>
-      <p>Surveillez et gérez votre activité en temps réel avec Umbrella Moniteo.</p>
-      <div class="hero-actions">
-        <a href="https://chrismsmr-celcom.github.io/Parapluie-moniteur/index.html" target="_blank" class="cta-primary">Voir le Dashboard</a>
-      </div>
-    </div>
-    <!-- Slide 3 -->
-    <div class="slide">
-      <span class="badge">Outils Umbrella</span>
-      <h1>Découvrez nos outils</h1>
-      <p>Gestionnaire de tâches, générateur de QR code, calculatrice financière et générateur de devis/factures.</p>
-      <div class="hero-actions">
-        <a href="#outils" class="cta-secondary">Découvrir les outils</a>
-      </div>
-    </div>
-    <!-- Slide 4 -->
-    <div class="slide">
-      <span class="badge">Souscription Umbrella Pro</span>
-      <h1>Souscrivez à Umbrella Pro</h1>
-      <p>Commencez dès maintenant et simplifiez la gestion de votre business.</p>
-      <div class="hero-actions">
-        <a href="tarification.html" class="cta-primary">Souscrire</a>
-      </div>
+  <div class="hero-slide active" style="background-image:url('https://images.unsplash.com/photo-1767788115794-0e93fb905016?q=80&w=1752&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
+    <div class="hero-content">
+      <h1>Dashboard Moniteo</h1>
+      <p>Surveillez et gérez votre activité en temps réel.</p>
+      <a href="https://chrismsmr-celcom.github.io/Parapluie-moniteur/index.html" target="_blank" class="cta-primary">Voir le Dashboard</a>
+      <a href="tarification.html" class="cta-primary">Souscrire</a>
     </div>
   </div>
-  <div class="dots">
+
+  <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?q=80&w=868&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
+    <div class="hero-content">
+      <h1>Outils Umbrella</h1>
+      <p>Gestionnaire de tâches, QR code, devis et factures pour vos projets.</p>
+      <a href="#outils" class="cta-secondary">Découvrir les outils</a>
+    </div>
+  </div>
+  
+<div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
+    <div class="hero-content">
+      <h1>Connectez-vous à Umbrella</h1>
+      <p>Accédez facilement à vos outils et à votre dashboard personnalisé et relier votre quipe en un clic</p>
+     <button id="googleLoginSlide" class="cta-primary"><i class="fa-brands fa-google"></i> Se connecter avec Google</button>
+      </div>
+    </div>
+  <div class="hero-dots">
+    <span class="active"></span>
+    <span></span>
+  </div>  <div class="dots">
     <span class="dot active"></span>
     <span class="dot"></span>
     <span class="dot"></span>
@@ -271,8 +387,8 @@ footer a:hover{color:#fff;}
 </footer>
 
 <script>
-// Hero slides avec fade+scale
-const slides = document.querySelectorAll(".slide");
+// ================= SLIDES DYNAMIQUES HERO =================
+const slides = document.querySelectorAll(".hero-slide");
 const dots = document.querySelectorAll(".dot");
 let current = 0;
 
@@ -283,30 +399,75 @@ function showSlide(index){
   dots.forEach((d,i)=>{
     d.classList.toggle("active", i===index);
   });
-  current=index;
+  current = index;
 }
-setInterval(()=>{showSlide((current+1)%slides.length);},5000);
+
+setInterval(()=>{
+  showSlide((current+1)%slides.length);
+},5000);
+
 dots.forEach((dot,i)=>dot.addEventListener("click",()=>showSlide(i)));
 
-// Google login dummy
-document.getElementById("googleLoginSlide").addEventListener("click", ()=>alert("Connexion Google activée!"));
+// ================= GOOGLE LOGIN DEMO =================
+const googleLogin = document.getElementById("googleLoginSlide");
+if(googleLogin){
+  googleLogin.addEventListener("click", ()=>{
+    alert("Connexion Google activée!");
+  });
+}
 
-// Mobile menu toggle
-const menuToggle = document.getElementById("menuToggle");
-const mobileMenu = document.getElementById("mobileMenu");
-menuToggle.addEventListener("click", ()=>{
-  mobileMenu.style.display = mobileMenu.style.display==="flex"?"none":"flex";
-  mobileMenu.style.flexDirection = "column";
-});
+// ================= RECHERCHE MODAL =================
+const searchToggle = document.getElementById("searchToggle");
+const searchBox = document.querySelector(".search-box");
+if(searchToggle && searchBox){
+  searchToggle.addEventListener("click", ()=>{
+    searchBox.classList.toggle("active");
+    document.getElementById("searchInput").focus();
+  });
+}
 
-// Déconnexion
+// ================= PANIER =================
+let cartCount = 0;
+const cart = document.querySelector(".cart");
+const cartCountEl = document.getElementById("cartCount");
+if(cart && cartCountEl){
+  cart.addEventListener("click", ()=>{
+    cartCount++;
+    cartCountEl.textContent = cartCount;
+    window.location.href="tarification.html"; // Redirige vers tarification
+  });
+}
+
+// ================= DECONNEXION =================
 function logout(){
   localStorage.removeItem("umbrellaUser");
-  document.getElementById("userAvatar").src = "https://www.gravatar.com/avatar/?d=mp";
-  document.getElementById("userName").textContent = "Invité";
-  document.getElementById("userEmail").textContent = "Non connecté";
+  const avatar = document.getElementById("userAvatar");
+  const name = document.getElementById("userName");
+  const email = document.getElementById("userEmail");
+  if(avatar) avatar.src="https://www.gravatar.com/avatar/?d=mp";
+  if(name) name.textContent="Invité";
+  if(email) email.textContent="Non connecté";
+}
+
+// ================= MENU BURGER MOBILE =================
+const menuToggle = document.getElementById("menuToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+
+if(menuToggle && mobileMenu){
+  menuToggle.addEventListener("click", () => {
+    mobileMenu.classList.toggle("active");
+  });
+
+  // Fermer le menu mobile lorsqu'on clique sur un lien
+  const mobileLinks = mobileMenu.querySelectorAll("a");
+  mobileLinks.forEach(link => {
+    link.addEventListener("click", () => {
+      mobileMenu.classList.remove("active");
+    });
+  });
 }
 </script>
+
 </body>
 </html>
 
