@@ -78,11 +78,12 @@ async function generateQRCode(){
     }
 
     try {
-        const res = await fetch("https://umbrella-site.vercel.app/api/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bodyData)
-        });
+        const res = await fetch("https://umbrella-site-qr-code.onrender.com", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(bodyData)
+});
+
         const data = await res.json();
         qrResult.src = data.qr;
         downloadBtn.style.display = "inline-block";
