@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation – Umbrella</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root{
+  --primary:#0b1320;
+  --secondary:#1c2a44;
+  --accent:#f5c400;
+  --bg:#f6f8fb;
+  --text:#1f2937;
+  --muted:#6b7280;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+}
+
+a{color:var(--secondary);text-decoration:none}
+
+/* HERO */
+.header{
+  background:linear-gradient(120deg,#0b1320,#1c2a44);
+  color:#fff;
+  padding:80px 25px;
+  text-align:center;
+}
+.header h1{font-size:2.5rem;margin-bottom:10px}
+.header p{opacity:.9}
+
+/* LAYOUT */
+.container{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  max-width:1200px;
+  margin:60px auto;
+  gap:40px;
+  padding:0 20px;
+}
+
+/* SIDEBAR */
+.sidebar{
+  background:#fff;
+  border-radius:18px;
+  padding:25px;
+  height:fit-content;
+  position:sticky;
+  top:30px;
+}
+.sidebar h4{
+  margin-bottom:15px;
+}
+.sidebar a{
+  display:block;
+  padding:8px 0;
+  font-size:.95rem;
+  color:var(--muted);
+}
+.sidebar a:hover{
+  color:var(--text);
+}
+
+/* CONTENT */
+.content section{
+  background:#fff;
+  border-radius:18px;
+  padding:35px;
+  margin-bottom:30px;
+}
+.content h2{
+  font-size:1.6rem;
+  margin-bottom:15px;
+}
+.content p{
+  font-size:.95rem;
+  margin-bottom:12px;
+}
+.content ul{
+  margin-left:20px;
+  font-size:.95rem;
+}
+.content li{
+  margin-bottom:8px;
+}
+
+/* FAQ */
+.faq{
+  border-top:1px solid #eee;
+  padding-top:15px;
+}
+.faq h4{
+  cursor:pointer;
+  font-size:1rem;
+  margin-bottom:8px;
+}
+.faq p{
+  display:none;
+  font-size:.9rem;
+  opacity:.85;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .container{
+    grid-template-columns:1fr;
+  }
+  .sidebar{
+    position:relative;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<section class="header">
+  <h1>Documentation Umbrella</h1>
+  <p>Tout ce que vous devez savoir pour utiliser Umbrella efficacement</p>
+</section>
+
+<div class="container">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h4>Sommaire</h4>
+    <a href="#start">🚀 Démarrer</a>
+    <a href="#login">🔐 Connexion Google</a>
+    <a href="#offers">💳 Offres & abonnements</a>
+    <a href="#support">🛠 Support & sécurité</a>
+    <a href="#faq">❓ FAQ</a>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <section id="start">
+      <h2>Démarrer avec Umbrella</h2>
+      <p>
+        Umbrella est une plateforme professionnelle conçue pour simplifier la
+        gestion, la facturation et le pilotage des entreprises.
+      </p>
+      <ul>
+        <li>Accès rapide via navigateur</li>
+        <li>Aucune installation requise</li>
+        <li>Interface intuitive</li>
+      </ul>
+    </section>
+
+    <section id="login">
+      <h2>Connexion avec Google</h2>
+      <p>
+        Umbrella utilise l’authentification Google pour garantir un accès sécurisé.
+      </p>
+      <ul>
+        <li>Aucune création de mot de passe</li>
+        <li>Connexion rapide</li>
+        <li>Sécurité renforcée</li>
+      </ul>
+    </section>
+
+    <section id="offers">
+      <h2>Offres & abonnements</h2>
+      <p>
+        Umbrella propose plusieurs offres adaptées à tous les profils.
+      </p>
+      <ul>
+        <li>Express – Gratuit</li>
+        <li>Suit Pro – Mensuel ou Annuel</li>
+        <li>Advice – Accompagnement premium</li>
+      </ul>
+    </section>
+
+    <section id="support">
+      <h2>Support & sécurité</h2>
+      <p>
+        Notre support est disponible pour répondre à toutes vos questions.
+      </p>
+      <ul>
+        <li>Tickets support</li>
+        <li>FAQ</li>
+        <li>Données sécurisées</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>Questions fréquentes</h2>
+
+      <div class="faq">
+        <h4 onclick="toggleFaq(this)">Comment contacter le support ?</h4>
+        <p>Via la page support ou le système de ticket.</p>
+      </div>
+
+      <div class="faq">
+        <h4 onclick="toggleFaq(this)">Puis-je changer d’offre ?</h4>
+        <p>Oui, à tout moment depuis votre espace Umbrella.</p>
+      </div>
+
+      <div class="faq">
+        <h4 onclick="toggleFaq(this)">Mes données sont-elles sécurisées ?</h4>
+        <p>Oui, toutes les données sont protégées selon les standards actuels.</p>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+function toggleFaq(el){
+  const p = el.nextElementSibling;
+  p.style.display = p.style.display === "block" ? "none" : "block";
+}
+</script>
+
+</body>
+</html>

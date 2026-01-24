@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support – Umbrella</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root{
+  --primary:#0b1320;
+  --secondary:#1c2a44;
+  --accent:#f5c400;
+  --bg:#f6f8fb;
+  --text:#1f2937;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',sans-serif;
+  background:#fff;
+  color:var(--text);
+}
+
+header{
+  background:linear-gradient(120deg,#0b1320,#1c2a44);
+  color:#fff;
+  padding:80px 30px;
+  text-align:center;
+}
+header h1{
+  font-size:2.5rem;
+}
+header p{
+  margin-top:10px;
+  opacity:.9;
+}
+
+.section{
+  max-width:1100px;
+  margin:auto;
+  padding:70px 30px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:30px;
+}
+
+.card{
+  background:var(--bg);
+  border-radius:18px;
+  padding:30px;
+  transition:.3s;
+}
+.card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+
+.card i{
+  font-size:28px;
+  color:var(--secondary);
+  margin-bottom:15px;
+}
+
+.card h3{
+  margin-bottom:10px;
+}
+
+.card p{
+  font-size:.95rem;
+  opacity:.9;
+}
+
+.btn{
+  display:inline-block;
+  margin-top:15px;
+  padding:12px 18px;
+  border-radius:25px;
+  text-decoration:none;
+  font-weight:600;
+}
+.btn-primary{
+  background:var(--accent);
+  color:#000;
+}
+.btn-secondary{
+  border:1px solid var(--secondary);
+  color:var(--secondary);
+}
+
+.faq-item{
+  margin-bottom:15px;
+}
+.faq-question{
+  background:var(--bg);
+  padding:15px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+}
+.faq-answer{
+  display:none;
+  padding:15px;
+  font-size:.95rem;
+}
+
+footer{
+  background:#0b1320;
+  color:#fff;
+  text-align:center;
+  padding:40px;
+  font-size:.9rem;
+  opacity:.85;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Centre de support Umbrella</h1>
+  <p>Besoin d’aide ? Notre équipe est là pour vous accompagner</p>
+</header>
+
+<section class="section">
+  <div class="grid">
+
+    <!-- TICKET -->
+    <div class="card">
+      <i class="fa fa-ticket"></i>
+      <h3>Créer un ticket</h3>
+      <p>Signalez un problème ou posez une question à notre support.</p>
+      <a href="#" class="btn btn-primary" onclick="openTicket()">Créer un ticket</a>
+    </div>
+
+    <!-- DOC -->
+    <div class="card">
+      <i class="fa fa-book"></i>
+      <h3>Documentation</h3>
+      <p>Guides et tutoriels pour bien démarrer avec Umbrella.</p>
+      <a href="documentation.html" class="btn btn-secondary" onclick="comingSoon()">Voir la documentation</a>
+    </div>
+
+    <!-- FAQ -->
+    <div class="card">
+      <i class="fa fa-circle-question"></i>
+      <h3>FAQ</h3>
+      <p>Les réponses aux questions les plus fréquentes.</p>
+      <a href="#faq" class="btn btn-secondary">Consulter la FAQ</a>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="card">
+      <i class="fa fa-envelope"></i>
+      <h3>Contact</h3>
+      <p>Une demande spécifique ou commerciale ?</p>
+      <a href="mailto:support@umbrella.app" class="btn btn-secondary">Nous contacter</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <h2 style="text-align:center;margin-bottom:40px;">Questions fréquentes</h2>
+
+  <div class="faq-item">
+    <div class="faq-question" onclick="toggleFaq(this)">
+      Umbrella est-il gratuit ?
+    </div>
+    <div class="faq-answer">
+      Oui, Umbrella Express est gratuit. Des offres premium sont disponibles.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question" onclick="toggleFaq(this)">
+      Comment passer à Umbrella Suit Pro ?
+    </div>
+    <div class="faq-answer">
+      Vous pouvez souscrire directement depuis la page Offres.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question" onclick="toggleFaq(this)">
+      Mes données sont-elles sécurisées ?
+    </div>
+    <div class="faq-answer">
+      Oui, Umbrella applique des standards de sécurité professionnels.
+    </div>
+  </div>
+</section>
+<!-- MODAL TICKET -->
+<div id="ticketModal" style="display:none;
+position:fixed;inset:0;
+background:rgba(0,0,0,.6);
+z-index:999;
+align-items:center;
+justify-content:center;">
+
+  <div style="
+    background:#fff;
+    width:100%;
+    max-width:420px;
+    border-radius:18px;
+    padding:30px;
+  ">
+    <h3>Créer un ticket support</h3>
+    <p style="font-size:.9rem;opacity:.8;margin-bottom:20px;">
+      Notre équipe vous répondra rapidement.
+    </p>
+
+    <form id="ticketForm">
+      <input required placeholder="Votre email"
+        style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid #ccc">
+
+      <select required
+        style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid #ccc">
+        <option value="">Type de demande</option>
+        <option>Problème technique</option>
+        <option>Facturation</option>
+        <option>Compte & accès</option>
+        <option>Autre</option>
+      </select>
+
+      <textarea required placeholder="Décrivez votre problème"
+        style="width:100%;padding:12px;height:110px;border-radius:10px;border:1px solid #ccc"></textarea>
+
+      <button type="submit"
+        style="margin-top:15px;width:100%;padding:14px;border:none;border-radius:25px;
+        background:#f5c400;font-weight:700;cursor:pointer">
+        Envoyer le ticket
+      </button>
+    </form>
+
+    <button onclick="closeTicket()"
+      style="margin-top:12px;width:100%;background:none;border:none;color:#555;cursor:pointer">
+      Fermer
+    </button>
+  </div>
+</div>
+    
+<footer>
+  © Umbrella ® – Support & Assistance
+</footer>
+
+<script>
+function openTicket(){
+  document.getElementById("ticketModal").style.display = "flex";
+}
+
+function closeTicket(){
+  document.getElementById("ticketModal").style.display = "none";
+}
+
+document.getElementById("ticketForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  alert("🎉 Ticket envoyé avec succès !\nNotre équipe vous contactera.");
+  closeTicket();
+  this.reset();
+});
+
+function toggleFaq(el){
+  const answer = el.nextElementSibling;
+  answer.style.display = answer.style.display === "block" ? "none" : "block";
+}
+</script>
+
+</body>
+</html>
