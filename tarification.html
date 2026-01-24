@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tarification – Umbrella®</title>
+<title>Offres – Umbrella®</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -16,46 +16,71 @@
   --bg:#f6f8fb;
   --text:#1f2937;
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   font-family:'Inter',sans-serif;
   background:#fff;
   color:var(--text);
-  line-height:1.6;
 }
 
-/* HEADER */
-.header{
+/* HERO */
+.hero{
   background:linear-gradient(120deg,#0b1320,#1c2a44);
   color:#fff;
-  padding:90px 30px;
+  padding:90px 20px 110px;
   text-align:center;
 }
-.header h1{
-  font-size:2.8rem;
-  margin-bottom:15px;
+.hero h1{font-size:2.6rem;margin-bottom:12px}
+.hero p{max-width:760px;margin:auto;opacity:.9}
+
+/* TOGGLE */
+.toggle-wrap{
+  margin-top:35px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
 }
-.header p{
-  max-width:780px;
-  margin:auto;
-  opacity:.9;
-  font-size:1.1rem;
+.toggle{
+  width:58px;
+  height:28px;
+  background:#ccc;
+  border-radius:20px;
+  position:relative;
+  cursor:pointer;
+}
+.toggle::after{
+  content:"";
+  width:22px;
+  height:22px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:3px;
+  left:3px;
+  transition:.3s;
+}
+.toggle.active{
+  background:var(--accent);
+}
+.toggle.active::after{
+  transform:translateX(30px);
+}
+.save{
+  background:var(--accent);
+  color:#000;
+  font-size:.7rem;
+  padding:4px 10px;
+  border-radius:20px;
+  font-weight:600;
 }
 
 /* SECTION */
 .section{
-  padding:90px 30px;
   max-width:1200px;
   margin:auto;
+  padding:90px 20px;
 }
-.section h2{
-  text-align:center;
-  font-size:2.2rem;
-  margin-bottom:50px;
-}
-
-/* PRICING */
 .pricing{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
@@ -63,33 +88,26 @@ body{
 }
 .plan{
   background:var(--bg);
-  border-radius:22px;
   padding:35px;
-  position:relative;
-  transition:.35s;
+  border-radius:22px;
+  transition:.3s;
 }
 .plan:hover{
-  transform:translateY(-8px);
-  box-shadow:0 25px 60px rgba(0,0,0,.12);
+  transform:translateY(-6px);
+  box-shadow:0 25px 50px rgba(0,0,0,.12);
 }
 .plan.popular{
   background:#fff;
   border:2px solid var(--accent);
 }
 .badge{
-  position:absolute;
-  top:-14px;
-  right:20px;
   background:var(--accent);
   color:#000;
   padding:6px 14px;
-  font-size:.75rem;
   border-radius:20px;
+  font-size:.75rem;
   font-weight:600;
-}
-
-.plan h3{
-  font-size:1.4rem;
+  display:inline-block;
   margin-bottom:10px;
 }
 .price{
@@ -97,23 +115,18 @@ body{
   font-weight:700;
   margin:15px 0;
 }
-.price span{
-  font-size:.9rem;
-  font-weight:400;
-}
+.price span{font-size:.9rem;font-weight:400}
 .plan ul{
   list-style:none;
   margin:25px 0;
 }
 .plan ul li{
-  margin-bottom:12px;
-  font-size:.95rem;
+  margin-bottom:10px;
 }
-.plan ul li i{
+.plan ul i{
   color:var(--secondary);
   margin-right:8px;
 }
-
 .plan a{
   display:block;
   text-align:center;
@@ -131,112 +144,104 @@ body{
   color:var(--secondary);
 }
 
-/* ENTERPRISE */
-.enterprise{
-  background:var(--bg);
-  border-radius:24px;
-  padding:50px;
-  text-align:center;
-}
-.enterprise h3{
-  font-size:1.8rem;
-  margin-bottom:15px;
-}
-.enterprise p{
-  max-width:700px;
-  margin:auto;
-  margin-bottom:25px;
-}
-
 /* FOOTER */
 footer{
   background:#0b1320;
   color:#fff;
-  padding:50px 30px;
   text-align:center;
-  font-size:.9rem;
-  opacity:.85;
+  padding:40px;
+  font-size:.85rem;
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<section class="header">
-  <h1>Des offres adaptées à chaque entreprise</h1>
-  <p>
-    Que vous démarriez votre activité ou que vous gériez une entreprise établie,
-    Umbrella propose des solutions évolutives, simples et professionnelles.
-  </p>
+<section class="hero">
+  <h1>Choisissez l’offre qui vous correspond</h1>
+  <p>Une tarification simple, transparente et évolutive.</p>
+
+  <div class="toggle-wrap">
+    <span>Mensuel</span>
+    <div class="toggle" id="billingToggle"></div>
+    <span>Annuel</span>
+    <span class="save">-20%</span>
+  </div>
 </section>
 
-<!-- PRICING -->
 <section class="section">
-  <h2>Nos formules</h2>
-
   <div class="pricing">
+
     <!-- EXPRESS -->
     <div class="plan">
       <h3>Umbrella Express</h3>
-      <p>Pour entrepreneurs et indépendants</p>
+      <p>Pour démarrer</p>
       <div class="price">Gratuit</div>
       <ul>
-        <li><i class="fa fa-check"></i> Accès aux outils essentiels</li>
-        <li><i class="fa fa-check"></i> Gestionnaire de tâches</li>
-        <li><i class="fa fa-check"></i> QR Code & calculatrice</li>
-        <li><i class="fa fa-check"></i> Support communautaire</li>
+        <li><i class="fa fa-check"></i> Outils essentiels</li>
+        <li><i class="fa fa-check"></i> Gestion tâches</li>
+        <li><i class="fa fa-check"></i> QR Code</li>
       </ul>
-      <a href="#" class="btn-secondary">Commencer</a>
+      <a class="btn-secondary">Commencer</a>
     </div>
 
     <!-- SUIT PRO -->
     <div class="plan popular">
-      <div class="badge">Le plus choisi</div>
+      <span class="badge">Le plus choisi</span>
       <h3>Umbrella Suit Pro</h3>
-      <p>Pour TPE & PME en croissance</p>
-      <div class="price">29€ <span>/ mois</span></div>
+      <p>TPE & PME</p>
+      <div class="price" id="proPrice">35$ <span>/ mois</span></div>
       <ul>
-        <li><i class="fa fa-check"></i> Tous les outils Umbrella</li>
-        <li><i class="fa fa-check"></i> Devis & facturation avancés</li>
-        <li><i class="fa fa-check"></i> Accès à Umbrella Moniteo</li>
+        <li><i class="fa fa-check"></i> Tous les outils</li>
+        <li><i class="fa fa-check"></i> Facturation avancée</li>
         <li><i class="fa fa-check"></i> Support prioritaire</li>
       </ul>
-      <a href="#" class="btn-primary">Choisir cette offre</a>
+      <a id="proLink" class="btn-primary"
+         href="https://buy.stripe.com/test_6oU5kD3JW1KMaIyeO6bbG00">
+         Choisir cette offre
+      </a>
     </div>
 
     <!-- ADVICE -->
     <div class="plan">
       <h3>Umbrella Advice</h3>
       <p>Accompagnement stratégique</p>
-      <div class="price">79€ <span>/ mois</span></div>
+      <div class="price">Sur devis</div>
       <ul>
-        <li><i class="fa fa-check"></i> Umbrella Suit Pro inclus</li>
-        <li><i class="fa fa-check"></i> Conseil business personnalisé</li>
-        <li><i class="fa fa-check"></i> Aide à la structuration</li>
+        <li><i class="fa fa-check"></i> Suit Pro inclus</li>
+        <li><i class="fa fa-check"></i> Conseil business</li>
         <li><i class="fa fa-check"></i> Support dédié</li>
       </ul>
-      <a href="#" class="btn-secondary">Nous contacter</a>
+      <a class="btn-secondary">Nous contacter</a>
     </div>
+
   </div>
 </section>
 
-<!-- ENTERPRISE -->
-<section class="section">
-  <div class="enterprise">
-    <h3>Solution Entreprise</h3>
-    <p>
-      Besoin d’une solution sur mesure, d’une intégration spécifique
-      ou d’un accompagnement à grande échelle ?
-    </p>
-    <a href="#" class="btn-primary">Parler à un expert Umbrella</a>
-  </div>
-</section>
-
-<!-- FOOTER -->
 <footer>
-  © Umbrella ® – Tous droits réservés
+© Umbrella ® – Tous droits réservés
 </footer>
+
+<script>
+const toggle = document.getElementById("billingToggle");
+const price = document.getElementById("proPrice");
+const link = document.getElementById("proLink");
+
+let annual = false;
+
+toggle.onclick = () => {
+  annual = !annual;
+  toggle.classList.toggle("active");
+
+  if(annual){
+    price.innerHTML = "336$ <span>/ an</span>";
+    link.href = "https://buy.stripe.com/test_3cI3cv6W8exycQGgWebbG01";
+  }else{
+    price.innerHTML = "35$ <span>/ mois</span>";
+    link.href = "https://buy.stripe.com/test_6oU5kD3JW1KMaIyeO6bbG00";
+  }
+};
+</script>
 
 </body>
 </html>
