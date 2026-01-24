@@ -401,7 +401,37 @@ footer a:hover{color:#fff;}
   flex-wrap:wrap;
   font-size:.8rem;
 }
-
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+.modal-box{
+  background:#fff;
+  padding:30px;
+  border-radius:16px;
+  width:100%;
+  max-width:420px;
+  position:relative;
+}
+.modal-box button#closeModal{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:none;
+  border:none;
+  font-size:18px;
+  cursor:pointer;
+}
+.modal input, .modal select, .modal button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+}
 /* ================= RESPONSIVE ================= */
 @media(max-width:900px){
   .nav-links{display:none;}
@@ -443,9 +473,6 @@ footer a:hover{color:#fff;}
         <span id="userEmail">Non connecté</span>
         <hr>
         <a href="#" onclick="logout()">Déconnexion</a>
-        <div id="enterpriseBox" style="display:none">
-  <h3 id="companyName"></h3>
-  <p id="companyType"></p>
       </div>
     </div>
     
@@ -607,15 +634,30 @@ Umbrella®, c’est moins de complexité, plus de contrôle.</p>
     <span>© Umbrella ® – Tous droits réservés</span>
   </div>
 </footer>
+<div id="companyModal" class="modal">
+  <div class="modal-box">
+    <button id="closeModal">✕</button>
+    <h3>Créer votre espace Umbrella</h3>
 
+    <input id="companyNameInput" placeholder="Nom entreprise / projet">
+    <select id="companyTypeInput">
+      <option>Freelance</option>
+      <option>Startup</option>
+      <option>PME</option>
+      <option>Étudiant</option>
+    </select>
+
+    <button id="saveCompany">Créer mon espace</button>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 import {
@@ -624,11 +666,13 @@ import {
   query,
   where,
   getDocs,
+  addDoc,
   doc,
-  getDoc
+  getDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-/* ================= CONFIG ================= */
+/* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
@@ -640,57 +684,78 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-/* ================= LOGIN ================= */
-const googleBtn = document.getElementById("googleLogin");
-if (googleBtn) {
-  googleBtn.onclick = async () => {
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (e) {
-      alert("Erreur connexion Google");
-      console.error(e);
-    }
-  };
-}
+/* LOGIN */
+document.getElementById("googleLogin")?.addEventListener("click", async () => {
+  await signInWithPopup(auth, provider);
+});
 
-/* ================= LOGOUT ================= */
+/* LOGOUT */
 window.logout = async () => {
   await signOut(auth);
   location.reload();
 };
 
-/* ================= AUTH FLOW ================= */
+/* UI */
+const modal = document.getElementById("companyModal");
+const closeModal = document.getElementById("closeModal");
+
+closeModal.onclick = () => modal.style.display = "none";
+
+/* AUTH FLOW */
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
-  // 1️⃣ chercher entreprise liée à l'utilisateur
   const q = query(
     collection(db, "company_users"),
     where("userId", "==", user.uid)
   );
   const snap = await getDocs(q);
 
-  // 2️⃣ pas d'entreprise → création
+  // ❌ aucune entreprise → popup
   if (snap.empty) {
-    window.location.href = "./create-company.html";
+    modal.style.display = "flex";
     return;
   }
 
-  // 3️⃣ récupérer infos entreprise
+  // ✅ afficher entreprise
   const companyId = snap.docs[0].data().companyId;
-  const companyRef = doc(db, "companies", companyId);
-  const companySnap = await getDoc(companyRef);
+  const companySnap = await getDoc(doc(db, "companies", companyId));
 
-  if (!companySnap.exists()) return;
-
-  const company = companySnap.data();
-
-  // 4️⃣ afficher dans index.html
-  document.getElementById("enterpriseBox").style.display = "block";
-  document.getElementById("companyName").textContent = company.name;
-  document.getElementById("companyType").textContent =
-    "Type : " + company.type;
+  if (companySnap.exists()) {
+    const c = companySnap.data();
+    document.getElementById("companyName").textContent = c.name;
+    document.getElementById("companyType").textContent = c.type;
+    document.getElementById("enterpriseBox").style.display = "block";
+  }
 });
+
+/* SAVE COMPANY */
+document.getElementById("saveCompany").onclick = async () => {
+  const name = document.getElementById("companyNameInput").value;
+  const type = document.getElementById("companyTypeInput").value;
+  const user = auth.currentUser;
+
+  if (!name || !user) return;
+
+  // 1️⃣ create company
+  const companyRef = await addDoc(collection(db, "companies"), {
+    name,
+    type,
+    ownerId: user.uid,
+    createdAt: serverTimestamp()
+  });
+
+  // 2️⃣ link user
+  await addDoc(collection(db, "company_users"), {
+    userId: user.uid,
+    companyId: companyRef.id,
+    role: "owner",
+    createdAt: serverTimestamp()
+  });
+
+  modal.style.display = "none";
+  location.reload();
+};
 
 /* ================= HERO SLIDER ================= */
 const slides = document.querySelectorAll(".hero-slide");
@@ -733,4 +798,5 @@ if (cartBtn) {
 </script>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 </body>
 </html>
+
 
