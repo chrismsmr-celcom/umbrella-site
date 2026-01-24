@@ -606,16 +606,27 @@ Umbrella®, c’est moins de complexité, plus de contrôle.</p>
 </footer>
 
 <script type="module">
-/* ================= FIREBASE ================= */
+/* ================= FIREBASE CORE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
+
+/* ================= AUTH ================= */
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
-  signOut
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+/* ================= FIRESTORE ================= */
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 /* ================= CONFIG ================= */
 const firebaseConfig = {
@@ -633,57 +644,72 @@ const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 
 const auth = getAuth(app);
+const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-/* ================= HANDLE REDIRECT RESULT ================= */
-getRedirectResult(auth)
-  .then(res => {
-    if (res && res.user) {
+/* ================= ROUTING SAAS ================= */
+async function routeAfterLogin(user) {
+  const q = query(
+    collection(db, "company_users"),
+    where("userId", "==", user.uid)
+  );
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    window.location.href = "company.html";
+  } else {
+    window.location.href = "dashboard.html";
+  }
+}
+
+/* ================= GOOGLE LOGIN ================= */
+const googleBtn = document.getElementById("googleLogin");
+
+if (googleBtn) {
+  googleBtn.addEventListener("click", async () => {
+    try {
+      const res = await signInWithPopup(auth, provider);
       const u = res.user;
+
       localStorage.setItem("umbrellaUser", JSON.stringify({
         uid: u.uid,
         name: u.displayName,
         email: u.email,
         avatar: u.photoURL
       }));
-      location.reload();
-    }
-  })
-  .catch(err => {
-    console.error("Google redirect error:", err.code, err.message);
-  });
 
-/* ================= GOOGLE LOGIN ================= */
-const googleBtn = document.getElementById("googleLogin");
-if (googleBtn) {
-  googleBtn.addEventListener("click", () => {
-    signInWithRedirect(auth, provider);
+      await routeAfterLogin(u);
+
+    } catch (err) {
+      console.error("Google login error:", err);
+      alert("Erreur lors de la connexion Google");
+    }
   });
 }
 
 /* ================= LOGOUT ================= */
-window.logout = function () {
-  signOut(auth).then(() => {
-    localStorage.removeItem("umbrellaUser");
-    location.reload();
-  });
+window.logout = async function () {
+  await signOut(auth);
+  localStorage.removeItem("umbrellaUser");
+  window.location.href = "./index.html";
 };
 
 /* ================= USER UI ================= */
-const user = JSON.parse(localStorage.getItem("umbrellaUser"));
-if (user) {
+onAuthStateChanged(auth, user => {
+  if (!user) return;
+
+  const stored = JSON.parse(localStorage.getItem("umbrellaUser"));
+  if (!stored) return;
+
   const avatar = document.getElementById("userAvatar");
   const name = document.getElementById("userName");
   const email = document.getElementById("userEmail");
 
-  if (avatar) avatar.src = user.avatar;
-  if (name) name.textContent = user.name;
-  if (email) email.textContent = user.email;
-
-  document.querySelectorAll(".go-dashboard").forEach(btn => {
-    btn.href = "./dashboard.html";
-  });
-}
+  if (avatar) avatar.src = stored.avatar;
+  if (name) name.textContent = stored.name;
+  if (email) email.textContent = stored.email;
+});
 
 /* ================= HERO SLIDER ================= */
 const slides = document.querySelectorAll(".hero-slide");
@@ -696,7 +722,7 @@ function showSlide(n) {
   current = n;
 }
 
-if (slides.length > 0) {
+if (slides.length) {
   setInterval(() => showSlide((current + 1) % slides.length), 5000);
   dots.forEach((d, i) => d.addEventListener("click", () => showSlide(i)));
 }
@@ -704,6 +730,7 @@ if (slides.length > 0) {
 /* ================= MENU MOBILE ================= */
 const menuToggle = document.getElementById("menuToggle");
 const mobileMenu = document.getElementById("mobileMenu");
+
 if (menuToggle && mobileMenu) {
   menuToggle.onclick = () => mobileMenu.classList.toggle("active");
 }
@@ -711,6 +738,7 @@ if (menuToggle && mobileMenu) {
 /* ================= SEARCH ================= */
 const searchBtn = document.getElementById("searchBtn");
 const searchModal = document.getElementById("searchModal");
+
 if (searchBtn && searchModal) {
   searchBtn.onclick = () => searchModal.classList.add("active");
   searchModal.onclick = e => {
@@ -721,11 +749,12 @@ if (searchBtn && searchModal) {
 /* ================= CART ================= */
 const cartBtn = document.getElementById("cartBtn");
 if (cartBtn) {
-  cartBtn.onclick = () => location.href = "tarification.html";
+  cartBtn.onclick = () => window.location.href = "tarification.html";
 }
 </script>
 </body>
 </html>
+
 
 
 
