@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Créer mon entreprise – Umbrella</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body{
+      font-family:Inter,sans-serif;
+      background:#f6f8fb;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+    }
+    .card{
+      background:#fff;
+      padding:40px;
+      border-radius:16px;
+      width:100%;
+      max-width:420px;
+      box-shadow:0 20px 50px rgba(0,0,0,.12);
+      text-align:center;
+    }
+    h1{margin-bottom:10px;}
+    p{opacity:.7;margin-bottom:25px;}
+    input{
+      width:100%;
+      padding:12px 16px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      font-size:1rem;
+      margin-bottom:20px;
+    }
+    button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:30px;
+      font-weight:700;
+      background:#f5c400;
+      cursor:pointer;
+    }
+    button:hover{background:#ffd700;}
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Créer mon entreprise</h1>
+  <p>Donnez un nom à votre organisation Umbrella</p>
+
+  <input type="text" id="companyName" placeholder="Nom de l’entreprise" required>
+  <button id="createCompanyBtn">Créer l’entreprise</button>
+</div>
+
+<script type="module">
+/* ================= FIREBASE ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+/* ================= CONFIG ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
+  authDomain: "umbrella-projet.firebaseapp.com",
+  projectId: "umbrella-projet",
+  storageBucket: "umbrella-projet.firebasestorage.app",
+  messagingSenderId: "776097627790",
+  appId: "1:776097627790:web:98510562d1559d9e5bd3df"
+};
+
+/* ================= INIT ================= */
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ================= AUTH PROTECTION ================= */
+let currentUser = null;
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "/";
+  } else {
+    currentUser = user;
+  }
+});
+
+/* ================= CREATE COMPANY ================= */
+const btn = document.getElementById("createCompanyBtn");
+
+btn.onclick = async () => {
+  const name = document.getElementById("companyName").value.trim();
+  if (!name) {
+    alert("Veuillez entrer un nom d’entreprise");
+    return;
+  }
+
+  try {
+    // 1️⃣ créer entreprise
+    const companyRef = await addDoc(collection(db, "companies"), {
+      name,
+      ownerId: currentUser.uid,
+      plan: "free",
+      createdAt: new Date()
+    });
+
+    // 2️⃣ lier user à l’entreprise
+    await addDoc(collection(db, "company_users"), {
+      companyId: companyRef.id,
+      userId: currentUser.uid,
+      role: "admin",
+      createdAt: new Date()
+    });
+
+    // 3️⃣ redirection
+    window.location.href = "dashboard.html";
+
+  } catch (err) {
+    console.error("Erreur création entreprise:", err);
+    alert("Erreur lors de la création");
+  }
+};
+</script>
+
+</body>
+</html>
