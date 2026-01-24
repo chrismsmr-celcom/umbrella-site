@@ -609,14 +609,27 @@ Umbrella®, c’est moins de complexité, plus de contrôle.</p>
 /* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
+
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-/* CONFIG */
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+/* ================= CONFIG ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
@@ -627,50 +640,79 @@ const firebaseConfig = {
   measurementId: "G-YCYQ7L30WY"
 };
 
-/* INIT */
+/* ================= INIT ================= */
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 
 const auth = getAuth(app);
+const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 /* ================= GOOGLE LOGIN ================= */
 const googleBtn = document.getElementById("googleLogin");
+
 if (googleBtn) {
-  googleBtn.addEventListener("click", () => {
-    signInWithPopup(auth, provider)
-      .then(res => {
-        const u = res.user;
-        localStorage.setItem("umbrellaUser", JSON.stringify({
+  googleBtn.addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const u = result.user;
+
+      // 1️⃣ Créer / MAJ user Firestore
+      const userRef = doc(db, "users", u.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
           name: u.displayName,
           email: u.email,
-          avatar: u.photoURL
-        }));
-        location.reload();
-      })
-      .catch(err => console.error("Google login error:", err));
+          avatar: u.photoURL,
+          createdAt: new Date()
+        });
+      }
+
+      // 2️⃣ Vérifier s'il appartient à une entreprise
+      const q = query(
+        collection(db, "company_users"),
+        where("userId", "==", u.uid)
+      );
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        window.location.href = "company.html";
+      } else {
+        window.location.href = "dashboard.html";
+      }
+
+    } catch (err) {
+      console.error("Google login error:", err);
+      alert("Erreur lors de la connexion Google");
+    }
   });
 }
 
-/* ================= LOGOUT (GLOBAL) ================= */
-window.logout = function () {
-  signOut(auth).then(() => {
-    localStorage.removeItem("umbrellaUser");
-    location.reload();
-  });
-};
+/* ================= SESSION & UI ================= */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
 
-/* ================= USER UI ================= */
-const user = JSON.parse(localStorage.getItem("umbrellaUser"));
-if (user) {
-  document.getElementById("userAvatar").src = user.avatar;
-  document.getElementById("userName").textContent = user.name;
-  document.getElementById("userEmail").textContent = user.email;
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+  if (!userDoc.exists()) return;
+
+  const data = userDoc.data();
+
+  document.getElementById("userAvatar").src = data.avatar;
+  document.getElementById("userName").textContent = data.name;
+  document.getElementById("userEmail").textContent = data.email;
 
   document.querySelectorAll(".go-dashboard").forEach(btn => {
-    btn.href = "https://chrismsmr-celcom.github.io/Parapluie-moniteur/index.html";
+    btn.href = "dashboard.html";
   });
-}
+});
+
+/* ================= LOGOUT ================= */
+window.logout = async function () {
+  await signOut(auth);
+  window.location.href = "/";
+};
 
 /* ================= HERO SLIDER ================= */
 const slides = document.querySelectorAll(".hero-slide");
@@ -714,6 +756,7 @@ if (cartBtn) {
 </script>
 </body>
 </html>
+
 
 
 
