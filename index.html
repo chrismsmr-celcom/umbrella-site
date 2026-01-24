@@ -691,6 +691,46 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("companyType").textContent =
     "Type : " + company.type;
 });
-</script>
+
+/* ================= HERO SLIDER ================= */
+const slides = document.querySelectorAll(".hero-slide");
+const dots = document.querySelectorAll(".hero-dots span");
+let current = 0;
+
+function showSlide(n) {
+  slides.forEach((s, i) => s.classList.toggle("active", i === n));
+  dots.forEach((d, i) => d.classList.toggle("active", i === n));
+  current = n;
+}
+
+if (slides.length > 0) {
+  setInterval(() => showSlide((current + 1) % slides.length), 5000);
+  dots.forEach((d, i) => d.addEventListener("click", () => showSlide(i)));
+}
+
+/* ================= MENU MOBILE ================= */
+const menuToggle = document.getElementById("menuToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+if (menuToggle && mobileMenu) {
+  menuToggle.onclick = () => mobileMenu.classList.toggle("active");
+}
+
+/* ================= SEARCH ================= */
+const searchBtn = document.getElementById("searchBtn");
+const searchModal = document.getElementById("searchModal");
+if (searchBtn && searchModal) {
+  searchBtn.onclick = () => searchModal.classList.add("active");
+  searchModal.onclick = e => {
+    if (e.target === searchModal) searchModal.classList.remove("active");
+  };
+}
+
+/* ================= CART ================= */
+const cartBtn = document.getElementById("cartBtn");
+if (cartBtn) {
+  cartBtn.onclick = () => location.href = "tarification.html";
+}
+</script>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 </body>
 </html>
+
