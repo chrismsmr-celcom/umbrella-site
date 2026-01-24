@@ -607,69 +607,82 @@ Umbrella®, c’est moins de complexité, plus de contrôle.</p>
 <script type="module">
 /* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged
+  signInWithRedirect,
+  getRedirectResult,
+  signOut
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-/* CONFIG */
+/* ================= CONFIG ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
   projectId: "umbrella-projet",
-  appId: "1:776097627790:web:98510562d1559d9e5bd3df"
+  storageBucket: "umbrella-projet.firebasestorage.app",
+  messagingSenderId: "776097627790",
+  appId: "1:776097627790:web:98510562d1559d9e5bd3df",
+  measurementId: "G-YCYQ7L30WY"
 };
 
-/* INIT */
+/* ================= INIT ================= */
 const app = initializeApp(firebaseConfig);
+getAnalytics(app);
+
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ================= LOGIN GOOGLE ================= */
-const googleBtn = document.getElementById("googleLogin");
-
-if (googleBtn) {
-  googleBtn.addEventListener("click", async () => {
-    try {
-      await signInWithPopup(auth, provider);
-      // la redirection se fait via onAuthStateChanged
-    } catch (err) {
-      console.error("Erreur login Google:", err);
-      alert("Erreur lors de la connexion Google");
+/* ================= HANDLE REDIRECT RESULT ================= */
+getRedirectResult(auth)
+  .then(res => {
+    if (res && res.user) {
+      const u = res.user;
+      localStorage.setItem("umbrellaUser", JSON.stringify({
+        uid: u.uid,
+        name: u.displayName,
+        email: u.email,
+        avatar: u.photoURL
+      }));
+      location.reload();
     }
+  })
+  .catch(err => {
+    console.error("Google redirect error:", err.code, err.message);
+  });
+
+/* ================= GOOGLE LOGIN ================= */
+const googleBtn = document.getElementById("googleLogin");
+if (googleBtn) {
+  googleBtn.addEventListener("click", () => {
+    signInWithRedirect(auth, provider);
   });
 }
 
 /* ================= LOGOUT ================= */
-window.logout = async () => {
-  await signOut(auth);
-  location.reload();
+window.logout = function () {
+  signOut(auth).then(() => {
+    localStorage.removeItem("umbrellaUser");
+    location.reload();
+  });
 };
 
-/* ================= SESSION ================= */
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // utilisateur connecté
-    console.log("Connecté :", user.email);
+/* ================= USER UI ================= */
+const user = JSON.parse(localStorage.getItem("umbrellaUser"));
+if (user) {
+  const avatar = document.getElementById("userAvatar");
+  const name = document.getElementById("userName");
+  const email = document.getElementById("userEmail");
 
-    // EXEMPLE : redirection dashboard
-    if (location.pathname.includes("index.html")) {
-      window.location.href = "./dashboard.html";
-    }
+  if (avatar) avatar.src = user.avatar;
+  if (name) name.textContent = user.name;
+  if (email) email.textContent = user.email;
 
-  } else {
-    // utilisateur NON connecté
-    console.log("Non connecté");
-
-    // EXEMPLE : protection dashboard
-    if (location.pathname.includes("dashboard.html")) {
-      window.location.href = "./index.html";
-    }
-  }
-});
+  document.querySelectorAll(".go-dashboard").forEach(btn => {
+    btn.href = "./dashboard.html";
+  });
+}
 
 /* ================= HERO SLIDER ================= */
 const slides = document.querySelectorAll(".hero-slide");
@@ -712,6 +725,7 @@ if (cartBtn) {
 </script>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 </body>
 </html>
+
 
 
 
