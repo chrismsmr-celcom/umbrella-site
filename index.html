@@ -443,6 +443,9 @@ footer a:hover{color:#fff;}
         <span id="userEmail">Non connecté</span>
         <hr>
         <a href="#" onclick="logout()">Déconnexion</a>
+        <div id="enterpriseBox" style="display:none">
+  <h3 id="companyName"></h3>
+  <p id="companyType"></p>
       </div>
     </div>
     
@@ -606,11 +609,7 @@ Umbrella®, c’est moins de complexité, plus de contrôle.</p>
 </footer>
 
 <script type="module">
-/* ================= FIREBASE CORE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-
-/* ================= AUTH ================= */
 import {
   getAuth,
   GoogleAuthProvider,
@@ -619,144 +618,79 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-/* ================= FIRESTORE ================= */
 import {
   getFirestore,
   collection,
   query,
   where,
-  getDocs
+  getDocs,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 /* ================= CONFIG ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
-  projectId: "umbrella-projet",
-  storageBucket: "umbrella-projet.firebasestorage.app",
-  messagingSenderId: "776097627790",
-  appId: "1:776097627790:web:98510562d1559d9e5bd3df",
-  measurementId: "G-YCYQ7L30WY"
+  projectId: "umbrella-projet"
 };
 
-/* ================= INIT ================= */
 const app = initializeApp(firebaseConfig);
-getAnalytics(app);
-
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-/* ================= ROUTING SAAS ================= */
-async function routeAfterLogin(user) {
+/* ================= LOGIN ================= */
+const googleBtn = document.getElementById("googleLogin");
+if (googleBtn) {
+  googleBtn.onclick = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      alert("Erreur connexion Google");
+      console.error(e);
+    }
+  };
+}
+
+/* ================= LOGOUT ================= */
+window.logout = async () => {
+  await signOut(auth);
+  location.reload();
+};
+
+/* ================= AUTH FLOW ================= */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+
+  // 1️⃣ chercher entreprise liée à l'utilisateur
   const q = query(
     collection(db, "company_users"),
     where("userId", "==", user.uid)
   );
-
   const snap = await getDocs(q);
 
+  // 2️⃣ pas d'entreprise → création
   if (snap.empty) {
-    window.location.href = "company.html";
-  } else {
-    window.location.href = "dashboard.html";
+    window.location.href = "./create-company.html";
+    return;
   }
-}
 
-/* ================= GOOGLE LOGIN ================= */
-const googleBtn = document.getElementById("googleLogin");
+  // 3️⃣ récupérer infos entreprise
+  const companyId = snap.docs[0].data().companyId;
+  const companyRef = doc(db, "companies", companyId);
+  const companySnap = await getDoc(companyRef);
 
-if (googleBtn) {
-  googleBtn.addEventListener("click", async () => {
-    try {
-      const res = await signInWithPopup(auth, provider);
-      const u = res.user;
+  if (!companySnap.exists()) return;
 
-      localStorage.setItem("umbrellaUser", JSON.stringify({
-        uid: u.uid,
-        name: u.displayName,
-        email: u.email,
-        avatar: u.photoURL
-      }));
+  const company = companySnap.data();
 
-      await routeAfterLogin(u);
-
-    } catch (err) {
-      console.error("Google login error:", err);
-      alert("Erreur lors de la connexion Google");
-    }
-  });
-}
-
-/* ================= LOGOUT ================= */
-window.logout = async function () {
-  await signOut(auth);
-  localStorage.removeItem("umbrellaUser");
-  window.location.href = "./index.html";
-};
-
-/* ================= USER UI ================= */
-onAuthStateChanged(auth, user => {
-  if (!user) return;
-
-  const stored = JSON.parse(localStorage.getItem("umbrellaUser"));
-  if (!stored) return;
-
-  const avatar = document.getElementById("userAvatar");
-  const name = document.getElementById("userName");
-  const email = document.getElementById("userEmail");
-
-  if (avatar) avatar.src = stored.avatar;
-  if (name) name.textContent = stored.name;
-  if (email) email.textContent = stored.email;
+  // 4️⃣ afficher dans index.html
+  document.getElementById("enterpriseBox").style.display = "block";
+  document.getElementById("companyName").textContent = company.name;
+  document.getElementById("companyType").textContent =
+    "Type : " + company.type;
 });
-
-/* ================= HERO SLIDER ================= */
-const slides = document.querySelectorAll(".hero-slide");
-const dots = document.querySelectorAll(".hero-dots span");
-let current = 0;
-
-function showSlide(n) {
-  slides.forEach((s, i) => s.classList.toggle("active", i === n));
-  dots.forEach((d, i) => d.classList.toggle("active", i === n));
-  current = n;
-}
-
-if (slides.length) {
-  setInterval(() => showSlide((current + 1) % slides.length), 5000);
-  dots.forEach((d, i) => d.addEventListener("click", () => showSlide(i)));
-}
-
-/* ================= MENU MOBILE ================= */
-const menuToggle = document.getElementById("menuToggle");
-const mobileMenu = document.getElementById("mobileMenu");
-
-if (menuToggle && mobileMenu) {
-  menuToggle.onclick = () => mobileMenu.classList.toggle("active");
-}
-
-/* ================= SEARCH ================= */
-const searchBtn = document.getElementById("searchBtn");
-const searchModal = document.getElementById("searchModal");
-
-if (searchBtn && searchModal) {
-  searchBtn.onclick = () => searchModal.classList.add("active");
-  searchModal.onclick = e => {
-    if (e.target === searchModal) searchModal.classList.remove("active");
-  };
-}
-
-/* ================= CART ================= */
-const cartBtn = document.getElementById("cartBtn");
-if (cartBtn) {
-  cartBtn.onclick = () => window.location.href = "tarification.html";
-}
 </script>
 </body>
 </html>
-
-
-
-
-
-
