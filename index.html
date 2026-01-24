@@ -401,37 +401,7 @@ footer a:hover{color:#fff;}
   flex-wrap:wrap;
   font-size:.8rem;
 }
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-}
-.modal-box{
-  background:#fff;
-  padding:30px;
-  border-radius:16px;
-  width:100%;
-  max-width:420px;
-  position:relative;
-}
-.modal-box button#closeModal{
-  position:absolute;
-  top:10px;
-  right:10px;
-  background:none;
-  border:none;
-  font-size:18px;
-  cursor:pointer;
-}
-.modal input, .modal select, .modal button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-}
+
 /* ================= RESPONSIVE ================= */
 @media(max-width:900px){
   .nav-links{display:none;}
@@ -634,128 +604,72 @@ Umbrella®, c’est moins de complexité, plus de contrôle.</p>
     <span>© Umbrella ® – Tous droits réservés</span>
   </div>
 </footer>
-<div id="companyModal" class="modal">
-  <div class="modal-box">
-    <button id="closeModal">✕</button>
-    <h3>Créer votre espace Umbrella</h3>
-
-    <input id="companyNameInput" placeholder="Nom entreprise / projet">
-    <select id="companyTypeInput">
-      <option>Freelance</option>
-      <option>Startup</option>
-      <option>PME</option>
-      <option>Étudiant</option>
-    </select>
-
-    <button id="saveCompany">Créer mon espace</button>
-  </div>
-</div>
 <script type="module">
+/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  onAuthStateChanged,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  doc,
-  getDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 /* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
-  projectId: "umbrella-projet"
+  projectId: "umbrella-projet",
+  appId: "1:776097627790:web:98510562d1559d9e5bd3df"
 };
 
+/* INIT */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-/* LOGIN */
-document.getElementById("googleLogin")?.addEventListener("click", async () => {
-  await signInWithPopup(auth, provider);
-});
+/* ================= LOGIN GOOGLE ================= */
+const googleBtn = document.getElementById("googleLogin");
 
-/* LOGOUT */
+if (googleBtn) {
+  googleBtn.addEventListener("click", async () => {
+    try {
+      await signInWithPopup(auth, provider);
+      // la redirection se fait via onAuthStateChanged
+    } catch (err) {
+      console.error("Erreur login Google:", err);
+      alert("Erreur lors de la connexion Google");
+    }
+  });
+}
+
+/* ================= LOGOUT ================= */
 window.logout = async () => {
   await signOut(auth);
   location.reload();
 };
 
-/* UI */
-const modal = document.getElementById("companyModal");
-const closeModal = document.getElementById("closeModal");
+/* ================= SESSION ================= */
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // utilisateur connecté
+    console.log("Connecté :", user.email);
 
-closeModal.onclick = () => modal.style.display = "none";
+    // EXEMPLE : redirection dashboard
+    if (location.pathname.includes("index.html")) {
+      window.location.href = "./dashboard.html";
+    }
 
-/* AUTH FLOW */
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return;
+  } else {
+    // utilisateur NON connecté
+    console.log("Non connecté");
 
-  const q = query(
-    collection(db, "company_users"),
-    where("userId", "==", user.uid)
-  );
-  const snap = await getDocs(q);
-
-  // ❌ aucune entreprise → popup
-  if (snap.empty) {
-    modal.style.display = "flex";
-    return;
-  }
-
-  // ✅ afficher entreprise
-  const companyId = snap.docs[0].data().companyId;
-  const companySnap = await getDoc(doc(db, "companies", companyId));
-
-  if (companySnap.exists()) {
-    const c = companySnap.data();
-    document.getElementById("companyName").textContent = c.name;
-    document.getElementById("companyType").textContent = c.type;
-    document.getElementById("enterpriseBox").style.display = "block";
+    // EXEMPLE : protection dashboard
+    if (location.pathname.includes("dashboard.html")) {
+      window.location.href = "./index.html";
+    }
   }
 });
-
-/* SAVE COMPANY */
-document.getElementById("saveCompany").onclick = async () => {
-  const name = document.getElementById("companyNameInput").value;
-  const type = document.getElementById("companyTypeInput").value;
-  const user = auth.currentUser;
-
-  if (!name || !user) return;
-
-  // 1️⃣ create company
-  const companyRef = await addDoc(collection(db, "companies"), {
-    name,
-    type,
-    ownerId: user.uid,
-    createdAt: serverTimestamp()
-  });
-
-  // 2️⃣ link user
-  await addDoc(collection(db, "company_users"), {
-    userId: user.uid,
-    companyId: companyRef.id,
-    role: "owner",
-    createdAt: serverTimestamp()
-  });
-
-  modal.style.display = "none";
-  location.reload();
-};
 
 /* ================= HERO SLIDER ================= */
 const slides = document.querySelectorAll(".hero-slide");
@@ -795,8 +709,9 @@ const cartBtn = document.getElementById("cartBtn");
 if (cartBtn) {
   cartBtn.onclick = () => location.href = "tarification.html";
 }
-</script>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+</script>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 </body>
 </html>
+
 
 
