@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umbrella Suit Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+/* ==== STYLE GLOBAL (IDENTIQUE INDEX) ==== */
+:root{
+  --primary:#0b1320;
+  --secondary:#1c2a44;
+  --accent:#f5c400;
+  --bg:#f6f8fb;
+  --text:#1f2937;
+  --muted:#6b7280;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{text-decoration:none;color:inherit;}
+
+/* ==== NAVBAR ==== */
+.navbar{
+  position:sticky;
+  top:0;
+  z-index:3000;
+  background:#fff;
+  padding:6px 30px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 6px 25px rgba(0,0,0,.08);
+}
+.logo{height:42px;}
+
+.nav-links{
+  display:flex;
+  gap:24px;
+  margin-left:auto;
+  margin-right:40px;
+}
+.nav-item a{
+  font-size:.95rem;
+  font-weight:500;
+  color:var(--muted);
+}
+.nav-item a:hover{color:var(--text);}
+
+.navbar-icons{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.account{position:relative;}
+.account img{
+  height:36px;width:36px;border-radius:50%;
+}
+.account-menu{
+  display:none;
+  position:absolute;
+  right:0;
+  top:48px;
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 15px 40px rgba(0,0,0,.15);
+  font-size:.85rem;
+}
+.account:hover .account-menu{display:block;}
+
+.menu-toggle{display:none}
+
+/* ==== CONTENU ==== */
+.page-header{
+  padding:80px 20px;
+  text-align:center;
+}
+.page-header h1{
+  font-size:2.6rem;
+  margin-bottom:15px;
+}
+.page-header p{
+  max-width:700px;
+  margin:auto;
+  opacity:.85;
+}
+
+.features{
+  max-width:1100px;
+  margin:60px auto;
+  padding:0 20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:25px;
+}
+
+.feature-card{
+  background:#fff;
+  border-radius:20px;
+  padding:30px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  transition:.3s;
+}
+.feature-card:hover{
+  transform:translateY(-6px);
+}
+.feature-card i{
+  font-size:2rem;
+  color:var(--secondary);
+  margin-bottom:15px;
+}
+
+.cta-section{
+  background:var(--primary);
+  color:#fff;
+  padding:80px 20px;
+  text-align:center;
+}
+.cta-section h2{font-size:2rem;margin-bottom:20px;}
+.cta-section button{
+  padding:14px 32px;
+  border-radius:30px;
+  font-weight:700;
+  border:none;
+  cursor:pointer;
+  background:var(--accent);
+  color:#000;
+}
+.cta-section button:hover{
+  background:#ffd700;
+}
+
+/* ==== RESPONSIVE ==== */
+@media(max-width:900px){
+  .nav-links{display:none;}
+  .menu-toggle{display:block;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+  <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" class="logo">
+
+  <div class="nav-links">
+    <div class="nav-item"><a href="suitpro.html">Umbrella Suit Pro</a></div>
+    <div class="nav-item"><a href="advice.html">Umbrella Advice</a></div>
+    <div class="nav-item"><a href="express.html">Umbrella Express</a></div>
+    <div class="nav-item"><a href="offrestpepme.html">Offres TPE & PME</a></div>
+    <div class="nav-item"><a href="support.html">Support</a></div>
+  </div>
+
+  <div class="navbar-icons">
+    <div class="account">
+      <img src="https://www.gravatar.com/avatar/?d=mp">
+      <div class="account-menu">
+        <strong>Invité</strong>
+        <span>Non connecté</span>
+      </div>
+    </div>
+    <div class="menu-toggle"><i class="fa fa-bars"></i></div>
+  </div>
+</nav>
+
+<!-- ===== HEADER ===== -->
+<section class="page-header">
+  <h1>Umbrella Suit Pro</h1>
+  <p>
+    La suite professionnelle tout-en-un pour piloter,
+    structurer et développer votre activité.
+  </p>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features">
+  <div class="feature-card">
+    <i class="fa fa-chart-line"></i>
+    <h3>Dashboard intelligent</h3>
+    <p>Vue globale de votre activité en temps réel.</p>
+  </div>
+
+  <div class="feature-card">
+    <i class="fa fa-file-invoice"></i>
+    <h3>Facturation & devis</h3>
+    <p>Documents clairs, professionnels et conformes.</p>
+  </div>
+
+  <div class="feature-card">
+    <i class="fa fa-list-check"></i>
+    <h3>Gestion de tâches</h3>
+    <p>Organisation simple pour équipes et indépendants.</p>
+  </div>
+
+  <div class="feature-card">
+    <i class="fa fa-comments"></i>
+    <h3>Messagerie interne</h3>
+    <p>Communication fluide entre collaborateurs.</p>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section">
+  <h2>Prêt à structurer votre activité ?</h2>
+  <button onclick="location.href='tarification.html'">
+    Découvrir Umbrella Pro
+  </button>
+</section>
+
+</body>
+</html>
