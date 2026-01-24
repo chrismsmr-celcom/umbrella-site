@@ -102,49 +102,54 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-/* ================= CONFIG ================= */
+/* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
   projectId: "umbrella-projet",
-  storageBucket: "umbrella-projet.firebasestorage.app",
-  messagingSenderId: "776097627790",
-  appId: "1:776097627790:web:98510562d1559d9e5bd3df"
 };
 
-/* ================= INIT ================= */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 const form = document.getElementById("companyForm");
-let currentUser = null;
+const button = form.querySelector("button");
 
-/* ================= AUTH GUARD ================= */
+let currentUser = null;
+button.disabled = true;
+
+/* AUTH GUARD */
 onAuthStateChanged(auth, user => {
   if (!user) {
     window.location.href = "./index.html";
   } else {
     currentUser = user;
+    button.disabled = false;
   }
 });
 
-/* ================= CREATE COMPANY ================= */
+/* CREATE COMPANY */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  form.classList.add("loading");
+
+  if (!currentUser) {
+    alert("Utilisateur non chargé, réessayez.");
+    return;
+  }
 
   const name = document.getElementById("companyName").value.trim();
   const type = document.getElementById("companyType").value;
 
   if (!name) {
     alert("Nom d’entreprise requis");
-    form.classList.remove("loading");
     return;
   }
 
+  button.textContent = "Création en cours...";
+  button.disabled = true;
+
   try {
-    // 1️⃣ Create company
     const companyRef = await addDoc(collection(db, "companies"), {
       name,
       type,
@@ -152,7 +157,6 @@ form.addEventListener("submit", async (e) => {
       createdAt: serverTimestamp()
     });
 
-    // 2️⃣ Link user to company
     await addDoc(collection(db, "company_users"), {
       companyId: companyRef.id,
       userId: currentUser.uid,
@@ -160,13 +164,13 @@ form.addEventListener("submit", async (e) => {
       createdAt: serverTimestamp()
     });
 
-    // 3️⃣ Redirect dashboard
     window.location.href = "./dashboard.html";
 
   } catch (err) {
-    console.error(err);
-    alert("Erreur lors de la création de l’entreprise");
-    form.classList.remove("loading");
+    console.error("Firestore error:", err);
+    alert("Erreur Firestore : " + err.message);
+    button.disabled = false;
+    button.textContent = "Créer mon espace Umbrella";
   }
 });
 </script>
