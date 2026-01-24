@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umbrella Advice</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root{
+  --primary:#0b1320;
+  --secondary:#1c2a44;
+  --accent:#f5c400;
+  --bg:#f6f8fb;
+  --text:#1f2937;
+  --muted:#6b7280;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{text-decoration:none;color:inherit;}
+
+/* NAVBAR */
+.navbar{
+  position:sticky;
+  top:0;
+  background:#fff;
+  padding:6px 30px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 6px 25px rgba(0,0,0,.08);
+  z-index:3000;
+}
+.logo{height:42px;}
+.nav-links{
+  display:flex;
+  gap:24px;
+  margin-left:auto;
+  margin-right:40px;
+}
+.nav-item a{
+  font-size:.95rem;
+  font-weight:500;
+  color:var(--muted);
+}
+.nav-item a:hover{color:var(--text);}
+.navbar-icons{display:flex;gap:18px;}
+.account img{height:36px;width:36px;border-radius:50%}
+
+/* PAGE */
+.header{
+  padding:80px 20px;
+  text-align:center;
+}
+.header h1{font-size:2.6rem;margin-bottom:15px;}
+.header p{max-width:720px;margin:auto;opacity:.85;}
+
+.blocks{
+  max-width:1100px;
+  margin:60px auto;
+  padding:0 20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:30px;
+}
+
+.block{
+  background:#fff;
+  border-radius:20px;
+  padding:30px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+.block i{
+  font-size:2rem;
+  color:var(--secondary);
+  margin-bottom:15px;
+}
+
+.cta{
+  background:var(--primary);
+  color:#fff;
+  padding:80px 20px;
+  text-align:center;
+}
+.cta button{
+  padding:14px 32px;
+  border-radius:30px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+  background:var(--accent);
+  color:#000;
+}
+.cta button:hover{background:#ffd700;}
+
+@media(max-width:900px){
+  .nav-links{display:none;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" class="logo">
+
+  <div class="nav-links">
+    <div class="nav-item"><a href="suitpro.html">Umbrella Suit Pro</a></div>
+    <div class="nav-item"><a href="advice.html">Umbrella Advice</a></div>
+    <div class="nav-item"><a href="express.html">Umbrella Express</a></div>
+    <div class="nav-item"><a href="offrestpepme.html">Offres TPE & PME</a></div>
+    <div class="nav-item"><a href="support.html">Support</a></div>
+  </div>
+
+  <div class="navbar-icons">
+    <div class="account">
+      <img src="https://www.gravatar.com/avatar/?d=mp">
+    </div>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<section class="header">
+  <h1>Umbrella Advice</h1>
+  <p>
+    Des conseils clairs pour prendre les bonnes décisions,
+    structurer votre activité et éviter les erreurs courantes.
+  </p>
+</section>
+
+<!-- CONTENT -->
+<section class="blocks">
+  <div class="block">
+    <i class="fa fa-lightbulb"></i>
+    <h3>Conseil stratégique</h3>
+    <p>Aide à la prise de décision, positionnement et vision long terme.</p>
+  </div>
+
+  <div class="block">
+    <i class="fa fa-briefcase"></i>
+    <h3>Structuration d’activité</h3>
+    <p>Organisation, process, outils et priorités.</p>
+  </div>
+
+  <div class="block">
+    <i class="fa fa-graduation-cap"></i>
+    <h3>Apprentissage & ressources</h3>
+    <p>Guides, méthodes et bonnes pratiques pour entrepreneurs.</p>
+  </div>
+
+  <div class="block">
+    <i class="fa fa-shield-halved"></i>
+    <h3>Sécurité & conformité</h3>
+    <p>Bonnes bases juridiques, financières et organisationnelles.</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Besoin d’un accompagnement clair ?</h2>
+  <button onclick="location.href='support.html'">
+    Contacter Umbrella
+  </button>
+</section>
+
+</body>
+</html>
