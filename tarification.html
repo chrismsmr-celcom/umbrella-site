@@ -136,12 +136,32 @@ body{
   text-decoration:none;
 }
 .btn-primary{
-  background:var(--accent);
-  color:#000;
+  background: var(--accent);
+  color: #000;
+  text-decoration: none;   /* enlève le soulignement */
+  display: inline-block;   /* pour qu'il se comporte comme un bouton */
+}
+
+.btn-primary:visited{
+  color: #000;             /* empêche le violet après clic */
+}
+
+.btn-primary:hover{
+  opacity: 0.9;            /* optionnel, effet hover sympa */
 }
 .btn-secondary{
-  border:1px solid var(--secondary);
-  color:var(--secondary);
+  border: 1px solid var(--secondary);
+  color: var(--secondary);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-secondary:visited{
+  color: var(--secondary);
+}
+a.btn-primary,
+a.btn-secondary{
+  text-decoration: none;
 }
 
 /* FOOTER */
@@ -245,6 +265,7 @@ toggle.onclick = () => {
 
 </body>
 </html>
+
 
 
 
