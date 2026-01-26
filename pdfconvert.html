@@ -4,164 +4,198 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDF Converter</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-:root {
-  --background: #FFF;
-  --accent: #0070F6;
-  --onBackground: #242424;
-  --scrollTrack: #E8E8E8;
-  --scrollThumb: #A1A1A1;
-  --buttonHover: #E0E0E0;
-}
-
-body, html {
+body {
   margin: 0;
-  height: 100%;
-  font-family: Graphik, Arial, sans-serif;
+  font-family: Arial, sans-serif;
+  display: flex; /* row par défaut */
+  height: 100vh;
   background: #f5f5fa;
-  color: var(--onBackground);
 }
 
-#container {
-  display: flex;
-  height: 100%;
-}
-
-#sidebar {
-  width: 220px;
-  background: #fff;
-  border-right: 1px solid #ddd;
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background: #0070F6;
+  color: #fff;
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 20px;
+  flex-shrink: 0;
 }
-
-#sidebar button {
-  margin-bottom: 12px;
-  padding: 10px;
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.action-select button {
+  padding: 12px;
+  margin-bottom: 10px;
+  width: 100%;
   border: none;
-  border-radius: 4px;
-  background: var(--accent);
-  color: #fff;
+  background: #0056c1;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
-  font-size: 14px;
 }
-
-#sidebar button:hover {
-  background: var(--buttonHover);
-  color: var(--accent);
+.action-select button:hover {
+  background: #003f8a;
 }
-
-.tool__workarea {
-  flex: 1;
-  padding: 24px;
-  background-color: #f5f5fa;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow-y: auto;
-  position: relative;
-}
-
-.tool__workarea iframe,
-.tool__workarea img {
-  width: 80%;
-  height: 70%;
+.download-btn {
+  margin-top: 20px;
+  padding: 12px;
+  background: #fff;
+  color: #0070F6;
   border: none;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-#downloadLink {
-  padding: 10px 20px;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 4px;
-  text-decoration: none;
+  cursor: pointer;
   font-weight: bold;
 }
 
-#downloadLink:hover {
-  background: var(--buttonHover);
-  color: var(--accent);
+/* Workarea */
+.workarea {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
-.tool__workarea ::-webkit-scrollbar {
-  width: 6px;
+/* Dropzone */
+.dropzone {
+  width: 100%;
+  max-width: 600px;
+  padding: 40px;
+  border: 3px dashed #0070F6;
+  border-radius: 12px;
+  text-align: center;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
 }
-
-.tool__workarea ::-webkit-scrollbar-thumb {
-  background-color: var(--scrollThumb);
-  border-radius: 8px;
+.dropzone.dragover {
+  background: #e0f0ff;
+  border-color: #0056c1;
 }
-
-.tool__workarea ::-webkit-scrollbar-track {
-  background-color: var(--scrollTrack);
+.dropzone p {
+  margin: 0;
+  font-size: 18px;
+  color: #0070F6;
+}
+.uploaded-file {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #0070F6;
 }
 </style>
 </head>
 <body>
-<div id="container">
-  <div id="sidebar">
-    <button onclick="selectFile('pdf2word')">PDF → Word</button>
-    <button onclick="selectFile('word2pdf')">Word → PDF</button>
-    <button onclick="selectFile('pdf2image')">PDF → Image</button>
-    <button onclick="selectFile('image2pdf')">Image → PDF</button>
-    <input type="file" id="fileInput" style="display:none" />
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <h2>Convertisseur</h2>
+  <div class="action-select">
+    <button onclick="setAction('pdf2word')"><i class="fa fa-file-pdf"></i> PDF → Word</button>
+    <button onclick="setAction('word2pdf')"><i class="fa fa-file-word"></i> Word → PDF</button>
+    <button onclick="setAction('pdf2image')"><i class="fa fa-file-image"></i> PDF → Image</button>
+    <button onclick="setAction('image2pdf')"><i class="fa fa-file-image"></i> Image → PDF</button>
   </div>
-  <div class="tool__workarea">
-    <iframe id="viewer"></iframe>
-    <img id="imagePreview" style="display:none" />
-    <a id="downloadLink" download style="display:none">📥 Télécharger</a>
+  <button id="downloadBtn" class="download-btn">Télécharger / Convertir</button>
+</div>
+
+<!-- Workarea -->
+<div class="workarea">
+  <div class="dropzone" id="dropzone">
+    <p>Glissez votre fichier ici ou cliquez pour sélectionner</p>
+    <input type="file" id="fileInput" />
+    <div class="uploaded-file" id="uploadedFile"></div>
   </div>
 </div>
 
 <script>
-let currentAction = '';
+let currentAction = 'pdf2word';
+let uploadedFile = null;
 
-function selectFile(action) {
+function setAction(action) {
   currentAction = action;
-  document.getElementById('fileInput').click();
+  console.log('Action choisie:', action);
 }
 
-document.getElementById('fileInput').addEventListener('change', async (event) => {
-  const file = event.target.files[0];
+// Drag & Drop
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const uploadedFileDiv = document.getElementById('uploadedFile');
+const downloadBtn = document.getElementById('downloadBtn');
+
+dropzone.addEventListener('click', () => fileInput.click());
+
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+dropzone.addEventListener('dragleave', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+});
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  handleFile(file);
+});
+
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  handleFile(file);
+});
+
+function handleFile(file) {
   if (!file) return;
+  uploadedFile = file;
+  uploadedFileDiv.textContent = file.name;
+}
+
+// Convertir & télécharger
+downloadBtn.addEventListener('click', async () => {
+  if (!uploadedFile) {
+    alert('Veuillez sélectionner un fichier.');
+    return;
+  }
 
   const formData = new FormData();
-  formData.append('file', file);
-  formData.append('action', currentAction);
+  formData.append('file', uploadedFile);
 
-  // On simule un envoi à ton backend Render
   try {
-    const res = await fetch('https://umbrella-site-qr-code.onrender.com/convert', {
+    const res = await fetch(`https://umbrella-site-qr-code.onrender.com/${currentAction}`, {
       method: 'POST',
       body: formData
     });
+    if (!res.ok) throw new Error(`Erreur serveur: ${res.statusText}`);
     const blob = await res.blob();
-
-    const downloadLink = document.getElementById('downloadLink');
-    const viewer = document.getElementById('viewer');
-    const imagePreview = document.getElementById('imagePreview');
-
-    downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.style.display = 'inline-block';
-
-    // Affichage selon type
-    if (currentAction === 'pdf2image' || currentAction === 'image2pdf') {
-      viewer.style.display = 'none';
-      imagePreview.style.display = 'block';
-      imagePreview.src = URL.createObjectURL(blob);
-    } else {
-      viewer.style.display = 'block';
-      imagePreview.style.display = 'none';
-      viewer.src = URL.createObjectURL(blob);
-    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = uploadedFile.name
+      .replace(/\.[^/.]+$/, '')
+      + getExtension(currentAction);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   } catch (err) {
     alert('Erreur lors de la conversion: ' + err.message);
   }
 });
+
+function getExtension(action) {
+  switch(action) {
+    case 'pdf2word': return '.docx';
+    case 'word2pdf': return '.pdf';
+    case 'pdf2image': return '.png';
+    case 'image2pdf': return '.pdf';
+    default: return '';
+  }
+}
 </script>
+
 </body>
 </html>
+
