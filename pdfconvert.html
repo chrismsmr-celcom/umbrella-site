@@ -47,7 +47,7 @@ body {
   background: #003f8a;
 }
 .download-btn {
-  margin-top:370px;
+  margin-top:450px;
   padding: 12px;
   width: 100%;
   background: #311038;
@@ -106,9 +106,7 @@ body {
   <h2>Convertisseur</h2>
   <div class="action-select">
     <button onclick="setAction('pdf2word')"><i class="fa fa-file-pdf"></i> PDF → Word</button>
-    <button onclick="setAction('word2pdf')"><i class="fa fa-file-word"></i> Word → PDF</button>
     <button onclick="setAction('pdf2image')"><i class="fa fa-file-image"></i> PDF → Image</button>
-    <button onclick="setAction('image2pdf')"><i class="fa fa-file-image"></i> Image → PDF</button>
   </div>
   <button id="downloadBtn" class="download-btn">Télécharger / Convertir</button>
 </div>
@@ -116,19 +114,18 @@ body {
 <!-- Workarea -->
 <div class="workarea">
   <div class="dropzone" id="dropzone">
-    <p>Glissez votre fichier ici ou cliquez pour sélectionner</p>
-    <input type="file" id="fileInput" />
+    <p>Glissez vos fichiers ici ou cliquez pour sélectionner</p>
+    <input type="file" id="fileInput" multiple accept=".pdf" />
     <div class="uploaded-file" id="uploadedFile"></div>
   </div>
 </div>
 
 <script>
 let currentAction = 'pdf2word';
-let uploadedFile = null;
+let uploadedFiles = [];
 
 function setAction(action) {
   currentAction = action;
-  console.log('Action choisie:', action);
 }
 
 // Drag & Drop
@@ -150,30 +147,28 @@ dropzone.addEventListener('dragleave', e => {
 dropzone.addEventListener('drop', e => {
   e.preventDefault();
   dropzone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  handleFile(file);
+  handleFiles(e.dataTransfer.files);
 });
 
 fileInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  handleFile(file);
+  handleFiles(e.target.files);
 });
 
-function handleFile(file) {
-  if (!file) return;
-  uploadedFile = file;
-  uploadedFileDiv.textContent = file.name;
+function handleFiles(files) {
+  if (!files || files.length === 0) return;
+  uploadedFiles = Array.from(files);
+  uploadedFileDiv.innerHTML = uploadedFiles.map(f => f.name).join('<br>');
 }
 
-// Convertir & télécharger
+// Convertir & télécharger ZIP
 downloadBtn.addEventListener('click', async () => {
-  if (!uploadedFile) {
-    alert('Veuillez sélectionner un fichier.');
+  if (uploadedFiles.length === 0) {
+    alert('Veuillez sélectionner au moins un fichier PDF.');
     return;
   }
 
   const formData = new FormData();
-  formData.append('file', uploadedFile);
+  uploadedFiles.forEach(f => formData.append('files', f));
 
   try {
     const res = await fetch(`https://umbrella-site-qr-code.onrender.com/${currentAction}`, {
@@ -181,13 +176,12 @@ downloadBtn.addEventListener('click', async () => {
       body: formData
     });
     if (!res.ok) throw new Error(`Erreur serveur: ${res.statusText}`);
+
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = uploadedFile.name
-      .replace(/\.[^/.]+$/, '')
-      + getExtension(currentAction);
+    a.download = currentAction === 'pdf2word' ? 'converted_word_files.zip' : 'pdf_images.zip';
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -195,16 +189,6 @@ downloadBtn.addEventListener('click', async () => {
     alert('Erreur lors de la conversion: ' + err.message);
   }
 });
-
-function getExtension(action) {
-  switch(action) {
-    case 'pdf2word': return '.docx';
-    case 'word2pdf': return '.pdf';
-    case 'pdf2image': return '.png';
-    case 'image2pdf': return '.pdf';
-    default: return '';
-  }
-}
 </script>
 
 </body>
