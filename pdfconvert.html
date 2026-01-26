@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<title>Umbrella Converter</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Converter</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  display: flex;
+  display: flex; /* row par défaut */
   height: 100vh;
   background: #f5f5fa;
 }
@@ -16,144 +17,196 @@ body {
 /* Sidebar */
 .sidebar {
   width: 280px;
-  background: #0070F6;
+  background: #FFF;
   color: #fff;
+  display: flex;
+  flex-direction: column;
   padding: 20px;
+  flex-shrink: 0;
+  align-items: center;
 }
-
-.sidebar button {
-  width: 100%;
+.sidebar img.logo {
+  width: 150px;
+  margin-bottom: 20px;
+}
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.action-select button {
+  padding: 12px;
   margin-bottom: 10px;
-  padding: 10px;
+  width: 100%;
   border: none;
-  background: #fff;
-  color: #0070F6;
-  font-weight: bold;
+  background: #311038;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
-  border-radius: 6px;
+}
+.action-select button:hover {
+  background: #003f8a;
+}
+.download-btn {
+  margin-top:370px;
+  padding: 12px;
+  width: 100%;
+  background: #311038;
+  color: #F0D13C;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+.download-btn:hover {
+  background: #003f8a;
 }
 
 /* Workarea */
 .workarea {
   flex: 1;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
 /* Dropzone */
 .dropzone {
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
   padding: 40px;
-  border: 3px dashed #0070F6;
+  border: 3px dashed #311038;
   border-radius: 12px;
-  background: #fff;
   text-align: center;
+  background: #fff;
   cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
 }
-
 .dropzone.dragover {
-  background: #e6f2ff;
+  background: #e0f0ff;
+  border-color: #0056c1;
 }
-
-#convertBtn {
-  margin-top: 20px;
-  padding: 12px 20px;
-  font-size: 16px;
-  background: #0070F6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+.dropzone p {
+  margin: 0;
+  font-size: 18px;
+  color: #311038;
+}
+.uploaded-file {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #311038;
 }
 </style>
 </head>
-
 <body>
 
+<!-- Sidebar -->
 <div class="sidebar">
-  <h3>Convertisseur</h3>
-  <button onclick="setAction('pdf2word')">PDF → Word</button>
-  <button onclick="setAction('image2pdf')">Image → PDF</button>
+  <!-- Logo -->
+  <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" alt="Logo" class="logo">
+  <h2>Convertisseur</h2>
+  <div class="action-select">
+    <button onclick="setAction('pdf2word')"><i class="fa fa-file-pdf"></i> PDF → Word</button>
+    <button onclick="setAction('word2pdf')"><i class="fa fa-file-word"></i> Word → PDF</button>
+    <button onclick="setAction('pdf2image')"><i class="fa fa-file-image"></i> PDF → Image</button>
+    <button onclick="setAction('image2pdf')"><i class="fa fa-file-image"></i> Image → PDF</button>
+  </div>
+  <button id="downloadBtn" class="download-btn">Télécharger / Convertir</button>
 </div>
 
+<!-- Workarea -->
 <div class="workarea">
-  <div>
-    <div class="dropzone" id="dropzone">
-      <p id="dropText">Cliquez ou glissez un fichier</p>
-      <input type="file" id="fileInput" hidden />
-    </div>
-    <button id="convertBtn">Convertir & Télécharger</button>
+  <div class="dropzone" id="dropzone">
+    <p>Glissez votre fichier ici ou cliquez pour sélectionner</p>
+    <input type="file" id="fileInput" />
+    <div class="uploaded-file" id="uploadedFile"></div>
   </div>
 </div>
 
 <script>
-const API_URL = "https://umbrella-site-qr-code.onrender.com";
-let selectedFile = null;
-let action = "pdf2word";
+let currentAction = 'pdf2word';
+let uploadedFile = null;
 
-function setAction(a) {
-  action = a;
-  document.getElementById("dropText").textContent =
-    a === "pdf2word" ? "Déposez un PDF" : "Déposez une image";
+function setAction(action) {
+  currentAction = action;
+  console.log('Action choisie:', action);
 }
 
-const dropzone = document.getElementById("dropzone");
-const fileInput = document.getElementById("fileInput");
+// Drag & Drop
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const uploadedFileDiv = document.getElementById('uploadedFile');
+const downloadBtn = document.getElementById('downloadBtn');
 
-dropzone.onclick = () => fileInput.click();
+dropzone.addEventListener('click', () => fileInput.click());
 
-fileInput.onchange = e => {
-  selectedFile = e.target.files[0];
-  dropzone.querySelector("p").textContent = selectedFile.name;
-};
-
-dropzone.ondragover = e => {
+dropzone.addEventListener('dragover', e => {
   e.preventDefault();
-  dropzone.classList.add("dragover");
-};
-
-dropzone.ondragleave = () => dropzone.classList.remove("dragover");
-
-dropzone.ondrop = e => {
+  dropzone.classList.add('dragover');
+});
+dropzone.addEventListener('dragleave', e => {
   e.preventDefault();
-  dropzone.classList.remove("dragover");
-  selectedFile = e.dataTransfer.files[0];
-  dropzone.querySelector("p").textContent = selectedFile.name;
-};
+  dropzone.classList.remove('dragover');
+});
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  handleFile(file);
+});
 
-document.getElementById("convertBtn").onclick = async () => {
-  if (!selectedFile) {
-    alert("Veuillez sélectionner un fichier");
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  handleFile(file);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  uploadedFile = file;
+  uploadedFileDiv.textContent = file.name;
+}
+
+// Convertir & télécharger
+downloadBtn.addEventListener('click', async () => {
+  if (!uploadedFile) {
+    alert('Veuillez sélectionner un fichier.');
     return;
   }
 
   const formData = new FormData();
-  formData.append("file", selectedFile);
+  formData.append('file', uploadedFile);
 
   try {
-    const response = await fetch(`${API_URL}/${action}`, {
-      method: "POST",
+    const res = await fetch(`https://umbrella-site-qr-code.onrender.com/${currentAction}`, {
+      method: 'POST',
       body: formData
     });
-
-    if (!response.ok) throw new Error("Erreur serveur");
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
+    if (!res.ok) throw new Error(`Erreur serveur: ${res.statusText}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
     a.href = url;
-    a.download = selectedFile.name;
+    a.download = uploadedFile.name
+      .replace(/\.[^/.]+$/, '')
+      + getExtension(currentAction);
+    document.body.appendChild(a);
     a.click();
-
+    a.remove();
   } catch (err) {
-    alert("Erreur lors de la conversion");
-    console.error(err);
+    alert('Erreur lors de la conversion: ' + err.message);
   }
-};
+});
+
+function getExtension(action) {
+  switch(action) {
+    case 'pdf2word': return '.docx';
+    case 'word2pdf': return '.pdf';
+    case 'pdf2image': return '.png';
+    case 'image2pdf': return '.pdf';
+    default: return '';
+  }
+}
 </script>
 
 </body>
 </html>
+
