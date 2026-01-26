@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import FileResponse
 from pdf2docx import Converter
 from pdf2image import convert_from_path
@@ -13,8 +13,7 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # --- PDF -> Word ---
-@app.post("/pdf2word")
-async def pdf_to_word(file: UploadFile = File(...)):
+async def pdf_to_word(file: UploadFile):
     input_path = os.path.join(UPLOAD_DIR, file.filename)
     output_path = os.path.join(UPLOAD_DIR, file.filename.replace(".pdf", ".docx"))
 
@@ -25,18 +24,20 @@ async def pdf_to_word(file: UploadFile = File(...)):
     cv.convert(output_path, start=0, end=None)
     cv.close()
 
-    return FileResponse(output_path, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", filename=os.path.basename(output_path))
+    return FileResponse(
+        output_path,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        filename=os.path.basename(output_path)
+    )
 
 # --- Word -> PDF ---
-@app.post("/word2pdf")
-async def word_to_pdf(file: UploadFile = File(...)):
+async def word_to_pdf(file: UploadFile):
     input_path = os.path.join(UPLOAD_DIR, file.filename)
     output_path = os.path.join(UPLOAD_DIR, file.filename.replace(".docx", ".pdf"))
 
     with open(input_path, "wb") as f:
         f.write(await file.read())
 
-    # Lire Word et convertir en PDF via ReportLab
     doc = Document(input_path)
     pdf_buffer = BytesIO()
     from reportlab.pdfgen import canvas
@@ -54,8 +55,7 @@ async def word_to_pdf(file: UploadFile = File(...)):
     return FileResponse(output_path, media_type="application/pdf", filename=os.path.basename(output_path))
 
 # --- PDF -> Image ---
-@app.post("/pdf2image")
-async def pdf_to_image(file: UploadFile = File(...)):
+async def pdf_to_image(file: UploadFile):
     input_path = os.path.join(UPLOAD_DIR, file.filename)
     output_path = os.path.join(UPLOAD_DIR, file.filename.replace(".pdf", ".png"))
 
@@ -68,8 +68,7 @@ async def pdf_to_image(file: UploadFile = File(...)):
     return FileResponse(output_path, media_type="image/png", filename=os.path.basename(output_path))
 
 # --- Image -> PDF ---
-@app.post("/image2pdf")
-async def image_to_pdf(file: UploadFile = File(...)):
+async def image_to_pdf(file: UploadFile):
     input_path = os.path.join(UPLOAD_DIR, file.filename)
     output_path = os.path.join(UPLOAD_DIR, file.filename.rsplit(".", 1)[0] + ".pdf")
 
@@ -80,3 +79,17 @@ async def image_to_pdf(file: UploadFile = File(...)):
     image.save(output_path, "PDF")
 
     return FileResponse(output_path, media_type="application/pdf", filename=os.path.basename(output_path))
+
+# --- Route unique /convert ---
+@app.post("/convert")
+async def convert(file: UploadFile = File(...), action: str = Form(...)):
+    if action == "pdf2word":
+        return await pdf_to_word(file)
+    elif action == "word2pdf":
+        return await word_to_pdf(file)
+    elif action == "pdf2image":
+        return await pdf_to_image(file)
+    elif action == "image2pdf":
+        return await image_to_pdf(file)
+    else:
+        return {"error": "Action inconnue"}
