@@ -10,14 +10,14 @@ import zipfile
 app = FastAPI(title="Umbrella PDF Converter")
 
 # =========================
-# ROOT
+# ACCUEIL
 # =========================
 @app.get("/")
 def root():
     return {"status": "PDF Converter backend running"}
 
 # -----------------------------
-# PDF -> Word
+# PDF -> Word (Route corrigée)
 # -----------------------------
 def convert_pdf_to_word(pdf_path: str, docx_path: str):
     cv = Converter(pdf_path)
@@ -25,7 +25,7 @@ def convert_pdf_to_word(pdf_path: str, docx_path: str):
     cv.close()
     return docx_path
 
-@app.post("/convert/pdf-to-word")
+@app.post("/pdf2word")  # Changé de /convert/pdf-to-word à /pdf2word
 async def pdf_to_word(files: list[UploadFile] = File(...)):
     temp_dir = tempfile.mkdtemp()
     zip_path = os.path.join(temp_dir, "converted_word_files.zip")
@@ -52,7 +52,7 @@ async def pdf_to_word(files: list[UploadFile] = File(...)):
     return FileResponse(zip_path, filename="converted_word_files.zip", media_type="application/zip")
 
 # -----------------------------
-# PDF -> Images (PNG)
+# PDF -> Images (Route corrigée)
 # -----------------------------
 def convert_pdf_to_images(pdf_path: str, output_folder: str):
     images = convert_from_path(pdf_path)
@@ -63,7 +63,7 @@ def convert_pdf_to_images(pdf_path: str, output_folder: str):
         paths.append(img_path)
     return paths
 
-@app.post("/convert/pdf-to-images")
+@app.post("/pdf2image")  # Changé de /convert/pdf-to-images à /pdf2image
 async def pdf_to_images(files: list[UploadFile] = File(...)):
     temp_dir = tempfile.mkdtemp()
     zip_path = os.path.join(temp_dir, "pdf_images.zip")
@@ -90,3 +90,4 @@ async def pdf_to_images(files: list[UploadFile] = File(...)):
                 zipf.write(img_file, os.path.join(os.path.basename(folder), os.path.basename(img_file)))
 
     return FileResponse(zip_path, filename="pdf_images.zip", media_type="application/zip")
+
