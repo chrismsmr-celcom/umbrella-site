@@ -1,58 +1,92 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import FileResponse
 from pdf2docx import Converter
-from PIL import Image
+from pdf2image import convert_from_path
 import os
+import tempfile
+import shutil
+import zipfile
 
-app = FastAPI()
+app = FastAPI(title="Umbrella PDF Converter")
 
-# Dossier pour stocker les fichiers uploadés et convertis
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# =========================
+# ROOT
+# =========================
+@app.get("/")
+def root():
+    return {"status": "PDF Converter backend running"}
 
-# --- PDF → Word ---
-@app.post("/pdf2word")
-async def pdf_to_word(file: UploadFile = File(...)):
-    try:
-        input_path = os.path.join(UPLOAD_DIR, file.filename)
-        output_path = os.path.join(UPLOAD_DIR, file.filename.replace(".pdf", ".docx"))
+# -----------------------------
+# PDF -> Word
+# -----------------------------
+def convert_pdf_to_word(pdf_path: str, docx_path: str):
+    cv = Converter(pdf_path)
+    cv.convert(docx_path, start=0, end=None)
+    cv.close()
+    return docx_path
 
-        # Sauvegarde du fichier PDF
-        with open(input_path, "wb") as f:
-            f.write(await file.read())
+@app.post("/convert/pdf-to-word")
+async def pdf_to_word(files: list[UploadFile] = File(...)):
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, "converted_word_files.zip")
+    tasks = []
 
-        # Conversion PDF → Word
-        cv = Converter(input_path)
-        cv.convert(output_path, start=0, end=None)
-        cv.close()
+    for file in files:
+        if not file.filename.lower().endswith(".pdf"):
+            continue
+        pdf_path = os.path.join(temp_dir, file.filename)
+        docx_path = pdf_path.replace(".pdf", ".docx")
+        with open(pdf_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+        tasks.append((pdf_path, docx_path))
 
-        return FileResponse(
-            output_path,
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            filename=os.path.basename(output_path)
-        )
-    except Exception as e:
-        return {"error": str(e)}
+    converted_files = []
+    for pdf_path, docx_path in tasks:
+        converted_files.append(convert_pdf_to_word(pdf_path, docx_path))
 
-# --- Image → PDF ---
-@app.post("/image2pdf")
-async def image_to_pdf(file: UploadFile = File(...)):
-    try:
-        input_path = os.path.join(UPLOAD_DIR, file.filename)
-        output_path = os.path.join(UPLOAD_DIR, file.filename.rsplit(".", 1)[0] + ".pdf")
+    # Zip les fichiers Word
+    with zipfile.ZipFile(zip_path, "w") as zipf:
+        for docx_file in converted_files:
+            zipf.write(docx_file, os.path.basename(docx_file))
 
-        # Sauvegarde de l'image
-        with open(input_path, "wb") as f:
-            f.write(await file.read())
+    return FileResponse(zip_path, filename="converted_word_files.zip", media_type="application/zip")
 
-        # Conversion Image → PDF
-        image = Image.open(input_path).convert("RGB")
-        image.save(output_path, "PDF")
+# -----------------------------
+# PDF -> Images (PNG)
+# -----------------------------
+def convert_pdf_to_images(pdf_path: str, output_folder: str):
+    images = convert_from_path(pdf_path)
+    paths = []
+    for i, img in enumerate(images):
+        img_path = os.path.join(output_folder, f"page_{i+1}.png")
+        img.save(img_path, "PNG")
+        paths.append(img_path)
+    return paths
 
-        return FileResponse(
-            output_path,
-            media_type="application/pdf",
-            filename=os.path.basename(output_path)
-        )
-    except Exception as e:
-        return {"error": str(e)}
+@app.post("/convert/pdf-to-images")
+async def pdf_to_images(files: list[UploadFile] = File(...)):
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, "pdf_images.zip")
+    tasks = []
+
+    for file in files:
+        if not file.filename.lower().endswith(".pdf"):
+            continue
+        pdf_path = os.path.join(temp_dir, file.filename)
+        with open(pdf_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+        output_folder = os.path.join(temp_dir, file.filename.replace(".pdf", ""))
+        os.makedirs(output_folder, exist_ok=True)
+        tasks.append((pdf_path, output_folder))
+
+    converted_folders = []
+    for pdf_path, folder in tasks:
+        converted_folders.append((folder, convert_pdf_to_images(pdf_path, folder)))
+
+    # Zip les images
+    with zipfile.ZipFile(zip_path, "w") as zipf:
+        for folder, imgs in converted_folders:
+            for img_file in imgs:
+                zipf.write(img_file, os.path.join(os.path.basename(folder), os.path.basename(img_file)))
+
+    return FileResponse(zip_path, filename="pdf_images.zip", media_type="application/zip")
