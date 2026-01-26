@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Converter</title>
+<style>
+:root {
+  --background: #FFF;
+  --accent: #0070F6;
+  --onBackground: #242424;
+  --scrollTrack: #E8E8E8;
+  --scrollThumb: #A1A1A1;
+  --buttonHover: #E0E0E0;
+}
+
+body, html {
+  margin: 0;
+  height: 100%;
+  font-family: Graphik, Arial, sans-serif;
+  background: #f5f5fa;
+  color: var(--onBackground);
+}
+
+#container {
+  display: flex;
+  height: 100%;
+}
+
+#sidebar {
+  width: 220px;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+#sidebar button {
+  margin-bottom: 12px;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#sidebar button:hover {
+  background: var(--buttonHover);
+  color: var(--accent);
+}
+
+.tool__workarea {
+  flex: 1;
+  padding: 24px;
+  background-color: #f5f5fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  position: relative;
+}
+
+.tool__workarea iframe,
+.tool__workarea img {
+  width: 80%;
+  height: 70%;
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+#downloadLink {
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#downloadLink:hover {
+  background: var(--buttonHover);
+  color: var(--accent);
+}
+
+.tool__workarea ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tool__workarea ::-webkit-scrollbar-thumb {
+  background-color: var(--scrollThumb);
+  border-radius: 8px;
+}
+
+.tool__workarea ::-webkit-scrollbar-track {
+  background-color: var(--scrollTrack);
+}
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="sidebar">
+    <button onclick="selectFile('pdf2word')">PDF → Word</button>
+    <button onclick="selectFile('word2pdf')">Word → PDF</button>
+    <button onclick="selectFile('pdf2image')">PDF → Image</button>
+    <button onclick="selectFile('image2pdf')">Image → PDF</button>
+    <input type="file" id="fileInput" style="display:none" />
+  </div>
+  <div class="tool__workarea">
+    <iframe id="viewer"></iframe>
+    <img id="imagePreview" style="display:none" />
+    <a id="downloadLink" download style="display:none">📥 Télécharger</a>
+  </div>
+</div>
+
+<script>
+let currentAction = '';
+
+function selectFile(action) {
+  currentAction = action;
+  document.getElementById('fileInput').click();
+}
+
+document.getElementById('fileInput').addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('action', currentAction);
+
+  // On simule un envoi à ton backend Render
+  try {
+    const res = await fetch('https://umbrella-site-qr-code.onrender.com/convert', {
+      method: 'POST',
+      body: formData
+    });
+    const blob = await res.blob();
+
+    const downloadLink = document.getElementById('downloadLink');
+    const viewer = document.getElementById('viewer');
+    const imagePreview = document.getElementById('imagePreview');
+
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.style.display = 'inline-block';
+
+    // Affichage selon type
+    if (currentAction === 'pdf2image' || currentAction === 'image2pdf') {
+      viewer.style.display = 'none';
+      imagePreview.style.display = 'block';
+      imagePreview.src = URL.createObjectURL(blob);
+    } else {
+      viewer.style.display = 'block';
+      imagePreview.style.display = 'none';
+      viewer.src = URL.createObjectURL(blob);
+    }
+  } catch (err) {
+    alert('Erreur lors de la conversion: ' + err.message);
+  }
+});
+</script>
+</body>
+</html>
