@@ -3,3 +3,7 @@ uvicorn
 python-multipart
 pdf2docx
 pdf2image
+python-pptx
+pillow
+camelot-py[cv]
+opencv-python-headless
