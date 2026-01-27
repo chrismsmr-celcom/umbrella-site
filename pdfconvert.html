@@ -123,6 +123,7 @@ body {
 <script>
 let currentAction = 'pdf2word';
 let uploadedFiles = [];
+let isProcessing = false;
 
 function setAction(action) {
   currentAction = action;
@@ -140,10 +141,11 @@ dropzone.addEventListener('dragover', e => {
   e.preventDefault();
   dropzone.classList.add('dragover');
 });
-dropzone.addEventListener('dragleave', e => {
-  e.preventDefault();
+
+dropzone.addEventListener('dragleave', () => {
   dropzone.classList.remove('dragover');
 });
+
 dropzone.addEventListener('drop', e => {
   e.preventDefault();
   dropzone.classList.remove('dragover');
@@ -160,33 +162,53 @@ function handleFiles(files) {
   uploadedFileDiv.innerHTML = uploadedFiles.map(f => f.name).join('<br>');
 }
 
-// Convertir & télécharger ZIP
+// Convertir & télécharger
 downloadBtn.addEventListener('click', async () => {
   if (uploadedFiles.length === 0) {
     alert('Veuillez sélectionner au moins un fichier PDF.');
     return;
   }
 
+  if (isProcessing) return;
+  isProcessing = true;
+  downloadBtn.textContent = "Conversion en cours...";
+
   const formData = new FormData();
   uploadedFiles.forEach(f => formData.append('files', f));
 
   try {
-    const res = await fetch(`https://umbrella-site-qr-code.onrender.com/${currentAction}`, {
-      method: 'POST',
-      body: formData
-    });
-    if (!res.ok) throw new Error(`Erreur serveur: ${res.statusText}`);
+    const response = await fetch(
+      `https://umbrella-site-qr-code.onrender.com/${currentAction}`,
+      {
+        method: 'POST',
+        body: formData
+      }
+    );
 
-    const blob = await res.blob();
+    if (!response.ok) {
+      throw new Error("Erreur serveur");
+    }
+
+    const blob = await response.blob();
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement('a');
     a.href = url;
-    a.download = currentAction === 'pdf2word' ? 'converted_word_files.zip' : 'pdf_images.zip';
+    a.download =
+      currentAction === 'pdf2word'
+        ? 'converted_word_files.zip'
+        : 'pdf_images.zip';
+
     document.body.appendChild(a);
     a.click();
     a.remove();
+
   } catch (err) {
-    alert('Erreur lors de la conversion: ' + err.message);
+    alert("Erreur lors de la conversion.");
+    console.error(err);
+  } finally {
+    isProcessing = false;
+    downloadBtn.textContent = "Télécharger / Convertir";
   }
 });
 </script>
