@@ -681,6 +681,43 @@ footer a:hover{color:#fff;}
   .hero-content h1{font-size:1.6rem;}
   .hero-content p{font-size:.9rem;}
 }
+/* =========================================================
+   FIX FINAL GITHUB PAGES – STRUCTURE RESPECTÉE
+   ========================================================= */
+
+/* Sécurise TOUS les liens utilisés comme boutons */
+a.cta-primary,
+a.cta-primary:visited,
+a.cta-primary:hover,
+a.cta-primary:active,
+a.cta-secondary,
+a.cta-secondary:visited,
+a.cta-secondary:hover,
+a.cta-secondary:active {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Force la couleur correcte pour CTA secondaire (lien) */
+a.cta-secondary {
+  color: #fff;
+}
+
+/* Sécurise les liens outils */
+.tool-card a,
+.tool-card a:visited,
+.tool-card a:hover,
+.tool-card a:active {
+  color: var(--secondary);
+}
+
+/* Sécurise menu mobile */
+.mobile-menu a,
+.mobile-menu a:visited,
+.mobile-menu a:hover,
+.mobile-menu a:active {
+  color: #333;
+}
 
 </style>
 </head>
@@ -911,6 +948,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 /* ================= CONFIG ================= */
+/*
+  ⚠️ IMPORTANT
+  La clé Firebase n’est PAS secrète (clé publique).
+  La vraie sécurité se fait via les règles Firebase.
+*/
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
@@ -930,20 +972,27 @@ const provider = new GoogleAuthProvider();
 
 /* ================= HANDLE REDIRECT RESULT ================= */
 getRedirectResult(auth)
-  .then(res => {
-    if (res && res.user) {
-      const u = res.user;
-      localStorage.setItem("umbrellaUser", JSON.stringify({
+  .then(result => {
+    if (!result || !result.user) return;
+
+    const u = result.user;
+
+    localStorage.setItem(
+      "umbrellaUser",
+      JSON.stringify({
         uid: u.uid,
-        name: u.displayName,
-        email: u.email,
-        avatar: u.photoURL
-      }));
-      location.reload();
-    }
+        name: u.displayName || "Utilisateur",
+        email: u.email || "",
+        avatar: u.photoURL || ""
+      })
+    );
+
+    // Nettoyage URL après redirect
+    window.history.replaceState({}, document.title, window.location.pathname);
+    location.reload();
   })
-  .catch(err => {
-    console.error("Google redirect error:", err.code, err.message);
+  .catch(error => {
+    console.error("Google redirect error:", error.code, error.message);
   });
 
 /* ================= GOOGLE LOGIN ================= */
@@ -956,43 +1005,42 @@ if (googleBtn) {
 
 /* ================= LOGOUT ================= */
 window.logout = function () {
-  signOut(auth).then(() => {
-    localStorage.removeItem("umbrellaUser");
-    location.reload();
-  });
+  signOut(auth)
+    .then(() => {
+      localStorage.removeItem("umbrellaUser");
+      location.reload();
+    })
+    .catch(err => {
+      console.error("Logout error:", err);
+    });
 };
 
 /* ================= USER UI ================= */
-const user = JSON.parse(localStorage.getItem("umbrellaUser"));
-if (user) {
-  const avatar = document.getElementById("userAvatar");
-  const name = document.getElementById("userName");
-  const email = document.getElementById("userEmail");
+const storedUser = localStorage.getItem("umbrellaUser");
+if (storedUser) {
+  try {
+    const user = JSON.parse(storedUser);
 
-  if (avatar) avatar.src = user.avatar;
-  if (name) name.textContent = user.name;
-  if (email) email.textContent = user.email;
+    const avatar = document.getElementById("userAvatar");
+    const name = document.getElementById("userName");
+    const email = document.getElementById("userEmail");
 
-  document.querySelectorAll(".go-dashboard").forEach(btn => {
-    btn.href = "./dashboard.html";
-  });
+    if (avatar && user.avatar) avatar.src = user.avatar;
+    if (name) name.textContent = user.name;
+    if (email) email.textContent = user.email;
+
+    document.querySelectorAll(".go-dashboard").forEach(btn => {
+      btn.setAttribute("href", "./dashboard.html");
+    });
+
+  } catch (e) {
+    console.error("Invalid user storage:", e);
+    localStorage.removeItem("umbrellaUser");
+  }
 }
-/* ================= LUCE IA - GENERATION 2.0 ================= */
-/* ================= LUCE IA - ANTI-SECRET SCANNING VERSION ================= */
-import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+/* ================= LUCE IA FRONTEND ================= */
 
-// On fragmente la clé pour tromper les robots de GitHub
-const _k1 = "AIzaSyBlEQ3o6ms";
-const _k2 = "ftA3nPrTD40Ifb1cGq";
-const _k3 = "__-iew"; 
-
-const genAI = new GoogleGenerativeAI(_k1 + _k2 + _k3);
-
-// Configuration avec Gemini 2.0 Flash
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
-    systemInstruction: "Tu es Luce, l'IA d'Umbrella. Ton ton est professionnel et classe. Tu aides les entrepreneurs à utiliser les outils Umbrella (Moniteo, QR Code, Facturation). Réponds toujours de manière concise."
-});
+const LUCE_API = "https://umbrella-site.onrender.com/api/luce";
 
 const luceBubble = document.getElementById("luce-bubble");
 const luceChat = document.getElementById("luce-chat");
@@ -1000,52 +1048,71 @@ const luceInput = document.getElementById("luceInput");
 const luceContent = document.getElementById("luceContent");
 const sendLuce = document.getElementById("sendLuce");
 
-// Formatage simple pour le chat
 function formatLuceText(text) {
-    return text
-        .replace(/\n/g, '<br>') 
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        .replace(/\*(.*?)\*/g, '<i>$1</i>');
+  return text
+    .replace(/\n/g, "<br>")
+    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+    .replace(/\*(.*?)\*/g, "<i>$1</i>");
 }
 
 function addLuceMsg(text, type) {
-    const div = document.createElement("div");
-    div.className = `msg ${type}-msg`;
-    div.innerHTML = type === "luce" ? formatLuceText(text) : text;
-    luceContent.appendChild(div);
-    luceContent.scrollTop = luceContent.scrollHeight;
-    return div;
+  const div = document.createElement("div");
+  div.className = `msg ${type}-msg`;
+  div.innerHTML = type === "luce" ? formatLuceText(text) : text;
+  luceContent.appendChild(div);
+  luceContent.scrollTop = luceContent.scrollHeight;
+  return div;
 }
 
 async function handleLuce() {
-    const prompt = luceInput.value.trim();
-    if (!prompt) return;
+  const message = luceInput.value.trim();
+  if (!message) return;
 
-    addLuceMsg(prompt, "user");
-    luceInput.value = "";
+  addLuceMsg(message, "user");
+  luceInput.value = "";
 
-    const typingMsg = addLuceMsg("<i>Luce analyse...</i>", "luce");
+  const typing = addLuceMsg("<i>Luce réfléchit...</i>", "luce");
 
-    try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        typingMsg.innerHTML = formatLuceText(response.text());
-    } catch (error) {
-        console.error("Luce Error:", error);
-        typingMsg.innerHTML = "Désolée, je rencontre une petite difficulté technique. Réessayez dans un instant.";
-    }
+  try {
+    const response = await fetch(LUCE_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+
+    typing.innerHTML = formatLuceText(
+      data.reply || "Une erreur est survenue."
+    );
+  } catch (err) {
+    console.error(err);
+    typing.innerHTML =
+      "Connexion impossible avec Luce. Vérifiez votre réseau.";
+  }
 }
 
-/* --- EVENEMENTS --- */
+/* ================= EVENTS ================= */
+
 luceBubble.onclick = () => {
-    const isVisible = (luceChat.style.display === "flex");
-    luceChat.style.display = isVisible ? "none" : "flex";
-    if(!isVisible) setTimeout(() => luceInput.focus(), 300);
+  luceChat.style.display =
+    luceChat.style.display === "flex" ? "none" : "flex";
+  setTimeout(() => luceInput.focus(), 200);
 };
 
-document.getElementById("closeLuce").onclick = () => { luceChat.style.display = "none"; };
+document.getElementById("closeLuce").onclick = () => {
+  luceChat.style.display = "none";
+};
+
 sendLuce.onclick = handleLuce;
-luceInput.onkeydown = (e) => { if (e.key === "Enter") handleLuce(); };
+
+luceInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleLuce();
+  }
+});
+
 /* ================= HERO SLIDER ================= */
 const slides = document.querySelectorAll(".hero-slide");
 const dots = document.querySelectorAll(".hero-dots span");
@@ -1087,6 +1154,7 @@ if (cartBtn) {
 </script>
 </body>
 </html>
+
 
 
 
