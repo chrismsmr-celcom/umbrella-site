@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import fetch from "node-fetch";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-/* ================= TEST ROUTE ================= */
+/* ================= TEST ================= */
 app.get("/", (req, res) => {
   res.send("Umbrella Luce Backend is running");
 });
@@ -20,20 +19,20 @@ app.get("/", (req, res) => {
 app.get("/api/luce", (req, res) => {
   res.json({
     status: "OK",
-    message: "Luce backend is ready. Use POST to talk."
+    message: "Luce backend is ready. Use POST."
   });
 });
 
 /* ================= LUCE API ================= */
 app.post("/api/luce", async (req, res) => {
-  const userMessage = req.body.message;
+  const { message } = req.body;
 
-  if (!userMessage) {
+  if (!message) {
     return res.status(400).json({ error: "Message manquant" });
   }
 
   if (!process.env.GEMINI_API_KEY) {
-    return res.status(500).json({ error: "Clé API Gemini manquante" });
+    return res.status(500).json({ error: "Clé Gemini absente" });
   }
 
   const GEMINI_URL =
@@ -50,8 +49,8 @@ app.post("/api/luce", async (req, res) => {
             parts: [
               {
                 text:
-                  "Tu es Luce, l'IA d'Umbrella. Ton ton est pro, clair et chaleureux. Réponds court.\n\nUtilisateur: " +
-                  userMessage
+                  "Tu es Luce, l'IA d'Umbrella. Ton ton est pro et chaleureux. Réponds court.\n\nUtilisateur: " +
+                  message
               }
             ]
           }
@@ -62,22 +61,22 @@ app.post("/api/luce", async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Gemini API error:", data);
+      console.error("Gemini error:", data);
       return res.status(500).json({ error: "Erreur Gemini API" });
     }
 
-    const text =
+    const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Je n'ai pas compris votre demande.";
+      "Je n’ai pas compris votre demande.";
 
-    res.json({ reply: text });
+    res.json({ reply });
   } catch (err) {
-    console.error("Server error:", err);
+    console.error("Erreur serveur:", err);
     res.status(500).json({ error: "Erreur serveur Luce" });
   }
 });
 
 /* ================= START ================= */
 app.listen(PORT, () => {
-  console.log(`Luce backend running on port ${PORT}`);
+  console.log("Luce backend running on port", PORT);
 });
