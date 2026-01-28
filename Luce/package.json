@@ -1,0 +1,9 @@
+{
+  "name": "umbrella-secure-api",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.19.2",
+    "@google/generative-ai": "^0.5.0",
+    "cors": "^2.8.5"
+  }
+}
