@@ -287,7 +287,126 @@ a{text-decoration:none;}
   font-size:1.2rem;
   cursor:pointer;
 }
+/* ================= LUCE IA STYLES ================= */
+#luce-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 5000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
 
+#luce-tooltip {
+    background: white;
+    padding: 8px 15px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: 1px solid #eee;
+    color: var(--primary);
+    animation: bounce 2s infinite;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+#luce-bubble {
+    width: 60px;
+    height: 60px;
+    background: rgba(11, 19, 32, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#luce-bubble i {
+    color: var(--accent);
+    font-size: 26px;
+    filter: drop-shadow(0 0 5px rgba(245, 196, 0, 0.5));
+}
+
+#luce-chat {
+    display:none;
+    position: fixed;
+    bottom: 105px;
+    right: 30px;
+    width: 350px;
+    height: 480px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    z-index: 5000;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.luce-header {
+    background: var(--primary);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.online-indicator {
+    width: 10px;
+    height: 10px;
+    background: #4ade80;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #4ade80;
+}
+
+.luce-body {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.luce-msg { background: white; border: 1px solid #eee; align-self: flex-start; border-bottom-left-radius: 2px; }
+.user-msg { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+.luce-footer {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 8px;
+}
+
+.luce-input {
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 10px;
+    outline: none;
+}
+
+@keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-5px);} }
 /* ================= SECTIONS ================= */
 .section{padding:70px 20px;max-width:1200px;margin:auto;}
 .section h2{text-align:center;font-size:2rem;margin-bottom:40px;}
@@ -313,8 +432,142 @@ a{text-decoration:none;}
 .tool-card p{font-size:.9rem;opacity:.85;}
 .tool-card a{display:inline-block;margin-top:12px;font-weight:600;color:var(--secondary);}
 
-.about{text-align:center;max-width:900px;margin:auto;}
-.contact{background:var(--bg);border-radius:20px;padding:40px;text-align:center;}
+/* ================= ABOUT PREMIUM CSS ================= */
+.about-premium {
+    padding: 100px 20px;
+    background: #fff;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.about-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 60px;
+}
+
+.badge {
+    background: rgba(245, 196, 0, 0.1);
+    color: #b89300;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.about-header h2 {
+    font-size: 2.8rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+.about-header .lead {
+    font-size: 1.2rem;
+    color: var(--muted);
+}
+
+/* Grille de cartes */
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 80px;
+}
+
+.about-card {
+    padding: 40px;
+    background: var(--bg);
+    border-radius: 24px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.about-card:hover {
+    background: #fff;
+    border-color: #eee;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    transform: translateY(-10px);
+}
+
+.icon-box {
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+}
+
+.about-card h3 {
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
+/* Story section */
+.about-story {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 50px;
+    align-items: center;
+    background: var(--secondary);
+    padding: 60px;
+    border-radius: 30px;
+    color: #fff;
+}
+
+.story-content h3 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: var(--accent);
+}
+
+.target-groups {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.tags {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.tags span {
+    background: rgba(255,255,255,0.1);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+.story-quote blockquote {
+    font-size: 1.5rem;
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.4;
+    position: relative;
+    padding-left: 20px;
+    border-left: 4px solid var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .about-story { grid-template-columns: 1fr; padding: 40px; }
+    .about-header h2 { font-size: 2.2rem; }
+}.contact{background:var(--bg);border-radius:20px;padding:40px;text-align:center;}
 .contact{
   background:var(--bg);
   border-radius:20px;
@@ -416,7 +669,6 @@ footer a:hover{color:#fff;}
   flex-wrap:wrap;
   font-size:.8rem;
 }
-
 /* ================= RESPONSIVE ================= */
 @media(max-width:900px){
   .nav-links{display:none;}
@@ -429,6 +681,7 @@ footer a:hover{color:#fff;}
   .hero-content h1{font-size:1.6rem;}
   .hero-content p{font-size:.9rem;}
 }
+
 </style>
 </head>
 <body>
@@ -532,59 +785,53 @@ footer a:hover{color:#fff;}
   </div>
 </section>
 
-<!-- ABOUT -->
-<section class="section about">
-  <h2>Pourquoi Umbrella ?</h2>
-  <p>Umbrella® est une plateforme de solutions professionnelles conçue pour simplifier, structurer et accélérer la gestion des activités des entrepreneurs, indépendants, TPE et PME.
+<section class="section about-premium" id="a-propos">
+    <div class="container">
+        <div class="about-header">
+            <span class="badge">Notre Vision</span>
+            <h2>Pourquoi choisir Umbrella ?</h2>
+            <p class="lead">Umbrella® est bien plus qu'une plateforme. C'est l'écosystème conçu pour transformer la complexité entrepreneuriale en une clarté absolue.</p>
+        </div>
 
-Dans un contexte où créer une entreprise est devenu plus accessible que jamais, beaucoup avancent sans outils fiables, sans méthode claire et sans accompagnement. Umbrella est née de ce constat.
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="icon-box"><i class="fa fa-bullseye"></i></div>
+                <h3>Notre Mission</h3>
+                <p>Aider les professionnels à piloter leur activité avec clarté, grâce à des outils centralisés pensés pour la prise de décision stratégique.</p>
+            </div>
+            <div class="about-card">
+                <div class="icon-box"><i class="fa fa-rocket"></i></div>
+                <h3>Ce que nous offrons</h3>
+                <p>Un dashboard intelligent, des outils métiers (devis, facturation, QR codes) et une approche orientée vers l'autonomie totale.</p>
+            </div>
+            <div class="about-card">
+                <div class="icon-box"><i class="fa fa-shield-halved"></i></div>
+                <h3>Notre Engagement</h3>
+                <p>Sécurité imprenable, simplicité radicale et un design professionnel qui reflète la qualité de votre propre entreprise.</p>
+            </div>
+        </div>
 
-Notre mission
-
-Aider les professionnels à piloter leur activité avec clarté, grâce à des outils simples, centralisés et pensés pour la prise de décision.
-
-Nous ne cherchons pas à multiplier les fonctionnalités inutiles, mais à proposer l’essentiel qui fait gagner du temps, de la visibilité et de la performance.
-
-Ce que propose Umbrella
-
-Umbrella réunit dans un seul écosystème :
-
-Un dashboard intelligent pour suivre votre activité en temps réel
-
-Des outils métiers (gestion de tâches, devis, facturation, calculs financiers, QR codes, etc.)
-
-Des solutions évolutives, adaptées aussi bien aux indépendants qu’aux structures en croissance
-
-Une approche orientée productivité, autonomie et professionnalisation
-
-Une vision long terme
-
-Umbrella ne se limite pas à un logiciel. C’est une vision :
-celle d’un outil qui accompagne l’évolution de votre entreprise, de ses premiers pas jusqu’à sa maturité.
-
-À terme, Umbrella intégrera des espaces d’apprentissage, de conseil et d’accompagnement, afin de combler le manque de formation et de mentorat que rencontrent de nombreux entrepreneurs.
-
-Pour qui ?
-
-Entrepreneurs et freelances
-
-TPE & PME
-
-Porteurs de projets
-
-Structures en phase de structuration ou de croissance
-
-Notre engagement
-
-Simplicité d’utilisation
-
-Sécurité et fiabilité
-
-Design clair et professionnel
-
-Amélioration continue basée sur les besoins réels des utilisateurs
-
-Umbrella®, c’est moins de complexité, plus de contrôle.</p>
+        <div class="about-story">
+            <div class="story-content">
+                <h3>Une vision long terme</h3>
+                <p>Dans un monde où créer une entreprise est accessible, Umbrella est née du constat que beaucoup avancent sans boussole. Nous accompagnons votre évolution, de vos premiers pas jusqu'à votre pleine maturité.</p>
+                
+                <div class="target-groups">
+                    <div class="group"><strong>Pour qui ?</strong></div>
+                    <div class="tags">
+                        <span>Freelances</span>
+                        <span>TPE & PME</span>
+                        <span>Porteurs de projets</span>
+                    </div>
+                </div>
+            </div>
+            <div class="story-quote">
+                <blockquote>
+                    "Umbrella®, c’est moins de complexité, pour plus de contrôle."
+                </blockquote>
+            </div>
+        </div>
+    </div>
 </section>
 
 <!-- CONTACT -->
@@ -622,6 +869,35 @@ Umbrella®, c’est moins de complexité, plus de contrôle.</p>
     <span>© Umbrella ® – Tous droits réservés</span>
   </div>
 </footer>
+
+<div id="luce-container">
+    <div id="luce-tooltip">Besoin d'aide ?</div>
+    
+    <div id="luce-bubble" title="Luce IA : Votre lumière guide">
+        <i class="fa fa-lightbulb"></i>
+    </div>
+</div>
+
+<div id="luce-chat">
+    <div class="luce-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div class="online-indicator"></div>
+            <span>LUCE IA Copilot</span>
+        </div>
+        <i class="fa fa-times" id="closeLuce" style="cursor:pointer; opacity:0.7;"></i>
+    </div>
+    <div class="luce-body" id="luceContent">
+        <div class="msg luce-msg">
+            Bonjour ! Je suis <b>Luce</b>. Comment puis-je éclairer votre gestion aujourd'hui ?
+        </div>
+    </div>
+    <div class="luce-footer">
+        <input type="text" id="luceInput" class="luce-input" placeholder="Posez votre question...">
+        <button id="sendLuce" class="cta-primary" style="padding: 10px 15px; border-radius: 12px;">
+            <i class="fa fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
 <script type="module">
 /* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -701,6 +977,131 @@ if (user) {
     btn.href = "./dashboard.html";
   });
 }
+/* ================= LUCE IA LOGIC (GEMINI ENGINE) ================= */
+const API_KEY = "AIzaSyAUlfSSievUovulU-XBFWCK8zvU3OzCcFg"; 
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+const luceBubble = document.getElementById("luce-bubble");
+const luceChat = document.getElementById("luce-chat");
+const luceInput = document.getElementById("luceInput");
+const luceContent = document.getElementById("luceContent");
+const sendLuce = document.getElementById("sendLuce");
+
+// Fonction pour ajouter un message avec support du formatage Markdown simple
+function addLuceMsg(text, type) {
+    const div = document.createElement("div");
+    div.className = `msg ${type}-msg`;
+    
+    // Nettoyage et formatage du texte (Gras, Italique, Sauts de ligne)
+    let formattedText = text
+        .replace(/\n/g, '<br>') 
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\*(.*?)\*/g, '<i>$1</i>');
+        
+    div.innerHTML = formattedText;
+    luceContent.appendChild(div);
+    
+    // Scroll automatique vers le bas
+    luceContent.scrollTo({
+        top: luceContent.scrollHeight,
+        behavior: 'smooth'
+    });
+    
+    return div;
+}
+
+// Fonction d'appel à l'API Gemini
+async function callGemini(userPrompt) {
+    const systemPrompt = "Tu es Luce, l'intelligence artificielle d'Umbrella. Ton ton est professionnel, chaleureux et aidant. Tu connais les outils Umbrella (Moniteo, QR Code, Facturation). Réponds de manière concise et directe. N'invente pas d'outils que tu ne connais pas.";
+    
+    try {
+        const response = await fetch(GEMINI_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: systemPrompt + "\n\nUtilisateur: " + userPrompt }]
+                }]
+            })
+        });
+
+        if (!response.ok) throw new Error("Erreur réseau");
+
+        const data = await response.json();
+        
+        // Vérification de la structure de réponse
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+            return data.candidates[0].content.parts[0].text;
+        } else {
+            return "Je reçois bien votre message, mais j'ai du mal à formuler une réponse. Réessayez ?";
+        }
+    } catch (error) {
+        console.error("Erreur Luce:", error);
+        return "Désolée, j'ai une petite coupure de connexion... Vérifiez votre clé API ou votre réseau !";
+    }
+}
+
+// Gestion de l'envoi
+async function handleLuce() {
+    const message = luceInput.value.trim();
+    if (!message) return;
+
+    // 1. Afficher le message utilisateur
+    addLuceMsg(message, "user");
+    luceInput.value = "";
+
+    // 2. Créer la bulle de chargement "réflexion"
+    const typingMsg = addLuceMsg("<i>Luce réfléchit...</i>", "luce");
+    typingMsg.style.opacity = "0.7";
+
+    // 3. Appeler l'IA
+    const aiResponse = await callGemini(message);
+
+    // 4. Mettre à jour la bulle avec la vraie réponse
+    typingMsg.style.opacity = "1";
+    
+    // Formatage final de la réponse IA
+    let finalFormat = aiResponse
+        .replace(/\n/g, '<br>') 
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\*(.*?)\*/g, '<i>$1</i>');
+        
+    typingMsg.innerHTML = finalFormat;
+    
+    // Re-scroll après mise à jour du texte
+    luceContent.scrollTop = luceContent.scrollHeight;
+}
+
+/* ================= EVENEMENTS ================= */
+
+// Ouvrir/Fermer le chat
+luceBubble.onclick = () => {
+    const isVisible = luceChat.style.display === "flex";
+    luceChat.style.display = isVisible ? "none" : "flex";
+    
+    const tooltip = document.getElementById("luce-tooltip");
+    if(tooltip) tooltip.style.display = "none";
+    
+    if(!isVisible) {
+        setTimeout(() => luceInput.focus(), 300);
+    }
+};
+
+// Fermer avec la croix
+document.getElementById("closeLuce").onclick = () => {
+    luceChat.style.display = "none";
+};
+
+// Bouton Envoyer
+sendLuce.onclick = handleLuce;
+
+// Touche Entrée
+luceInput.onkeydown = (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        handleLuce();
+    }
+};
 
 /* ================= HERO SLIDER ================= */
 const slides = document.querySelectorAll(".hero-slide");
@@ -740,15 +1141,6 @@ const cartBtn = document.getElementById("cartBtn");
 if (cartBtn) {
   cartBtn.onclick = () => location.href = "tarification.html";
 }
-</script>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
