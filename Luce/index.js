@@ -35,9 +35,10 @@ app.post("/api/luce", async (req, res) => {
     return res.status(500).json({ error: "Clé Gemini absente" });
   }
 
-  const GEMINI_URL =
-    "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" +
-    process.env.GEMINI_API_KEY;
+ const GEMINI_URL =
+  "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=" +
+  process.env.GEMINI_API_KEY;
+
 
   try {
     const response = await fetch(GEMINI_URL, {
