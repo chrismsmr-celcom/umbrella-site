@@ -35,9 +35,14 @@ app.post("/api/luce", async (req, res) => {
     return res.status(500).json({ error: "Clé Gemini absente" });
   }
 
- const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=" +
-  process.env.GEMINI_API_KEY;
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Initialisez avec la version v1beta
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel(
+  { model: "gemini-1.5-flash" }, 
+  { apiVersion: 'v1beta' } // <--- Ajoutez ceci
+);
 
 
   try {
