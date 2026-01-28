@@ -1038,110 +1038,83 @@ if (storedUser) {
     localStorage.removeItem("umbrellaUser");
   }
 }
-/* ================= LUCE IA FRONTEND ================= */
+ /* ================= CONFIGURATION ================= */
+        const LUCE_API = "https://umbrella-site.onrender.com/chat";
 
-const LUCE_API = "https://umbrella-site.onrender.com/api/luce";
+        const luceBubble = document.getElementById("luce-bubble");
+        const luceChat = document.getElementById("luce-chat");
+        const luceInput = document.getElementById("luceInput");
+        const luceContent = document.getElementById("luceContent");
+        const sendLuce = document.getElementById("sendLuce");
+        const closeLuce = document.getElementById("closeLuce");
 
-const luceBubble = document.getElementById("luce-bubble");
-const luceChat = document.getElementById("luce-chat");
-const luceInput = document.getElementById("luceInput");
-const luceContent = document.getElementById("luceContent");
-const sendLuce = document.getElementById("sendLuce");
-const closeLuce = document.getElementById("closeLuce");
+        /* ================= FORMATAGE TEXTE ================= */
+        function formatLuceText(text = "") {
+            return text
+                .replace(/\n/g, "<br>")
+                .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+                .replace(/\*(.*?)\*/g, "<i>$1</i>");
+        }
 
-/* ================= FORMAT ================= */
-function formatLuceText(text = "") {
-  return text
-    .replace(/\n/g, "<br>")
-    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-    .replace(/\*(.*?)\*/g, "<i>$1</i>");
-}
+        /* ================= UI MESSAGES ================= */
+        function addLuceMsg(text, type) {
+            const div = document.createElement("div");
+            div.className = `msg ${type}-msg`;
+            div.innerHTML = type === "luce" ? formatLuceText(text) : text;
+            luceContent.appendChild(div);
+            luceContent.scrollTop = luceContent.scrollHeight; // Scroll automatique
+            return div;
+        }
 
-/* ================= MESSAGE UI ================= */
-function addLuceMsg(text, type) {
-  const div = document.createElement("div");
-  div.className = `msg ${type}-msg`;
-  div.innerHTML = type === "luce" ? formatLuceText(text) : text;
-  luceContent.appendChild(div);
-  luceContent.scrollTo({
-    top: luceContent.scrollHeight,
-    behavior: "smooth"
-  });
-  return div;
-}
+        /* ================= ENVOI MESSAGE ================= */
+        async function handleLuce() {
+            const message = luceInput.value.trim();
+            if (!message) return;
 
-/* ================= MAIN HANDLER ================= */
-async function handleLuce() {
-  const message = luceInput.value.trim();
-  if (!message) return;
+            addLuceMsg(message, "user");
+            luceInput.value = "";
 
-  addLuceMsg(message, "user");
-  luceInput.value = "";
+            // Affichage de l'état "réflexion"
+            const typing = addLuceMsg("<i>Luce réfléchit…</i>", "luce");
+            typing.style.opacity = "0.7";
 
-  const typing = addLuceMsg("<i>Luce réfléchit…</i>", "luce");
-  typing.style.opacity = "0.7";
+            try {
+                const response = await fetch(LUCE_API, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message })
+                });
 
-  try {
-    const response = await fetch(LUCE_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message })
-    });
+                const data = await response.json();
 
-    const data = await response.json();
+                if (!response.ok) {
+                    typing.innerHTML = "Désolée, le serveur Gemini ne répond pas.";
+                    return;
+                }
 
-    if (!response.ok) {
-      console.error("Erreur backend Luce:", data);
-      typing.innerHTML =
-        "Désolée, je rencontre une difficulté technique côté serveur.";
-      typing.style.opacity = "1";
-      return;
-    }
+                typing.style.opacity = "1";
+                typing.innerHTML = formatLuceText(data.reply || "Je n’ai pas pu formuler de réponse.");
 
-    typing.style.opacity = "1";
-    typing.innerHTML = formatLuceText(
-      data.reply || "Je n’ai pas pu formuler de réponse."
-    );
-  } catch (err) {
-    console.error("Erreur réseau Luce:", err);
-    typing.style.opacity = "1";
-    typing.innerHTML =
-      "Connexion impossible avec Luce. Vérifiez votre connexion internet.";
-  }
-}
+            } catch (err) {
+                console.error("Erreur réseau:", err);
+                typing.innerHTML = "Impossible de contacter Luce. Vérifie ta connexion.";
+            }
+        }
 
-/* ================= EVENTS ================= */
+        /* ================= ÉVÉNEMENTS ================= */
+        luceBubble.onclick = () => {
+            const isHidden = luceChat.style.display === "none" || !luceChat.style.display;
+            luceChat.style.display = isHidden ? "flex" : "none";
+            if (isHidden) luceInput.focus();
+        };
 
-if (luceBubble && luceChat) {
-  luceBubble.onclick = () => {
-    const isOpen = luceChat.style.display === "flex";
-    luceChat.style.display = isOpen ? "none" : "flex";
-    if (!isOpen) {
-      setTimeout(() => luceInput?.focus(), 300);
-    }
-  };
-}
+        closeLuce.onclick = () => luceChat.style.display = "none";
 
-if (closeLuce) {
-  closeLuce.onclick = () => {
-    luceChat.style.display = "none";
-  };
-}
+        sendLuce.onclick = handleLuce;
 
-if (sendLuce) {
-  sendLuce.onclick = handleLuce;
-}
-
-if (luceInput) {
-  luceInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleLuce();
-    }
-  });
-}
+        luceInput.onkeydown = (e) => {
+            if (e.key === "Enter") handleLuce();
+        };
 
 
 /* ================= HERO SLIDER ================= */
@@ -1185,6 +1158,7 @@ if (cartBtn) {
 </script>
 </body>
 </html>
+
 
 
 
