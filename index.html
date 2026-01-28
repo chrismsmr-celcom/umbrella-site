@@ -977,9 +977,10 @@ if (user) {
     btn.href = "./dashboard.html";
   });
 }
-/* ================= LUCE IA LOGIC (GEMINI ENGINE) ================= */
+/* ================= LUCE IA LOGIC (GEMINI V1 PRODUCTION) ================= */
 const API_KEY = "AIzaSyAUlfSSievUovulU-XBFWCK8zvU3OzCcFg"; 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+// Passage en v1 (Stable) au lieu de v1beta pour éviter l'erreur 404
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 const luceBubble = document.getElementById("luce-bubble");
 const luceChat = document.getElementById("luce-chat");
@@ -987,21 +988,20 @@ const luceInput = document.getElementById("luceInput");
 const luceContent = document.getElementById("luceContent");
 const sendLuce = document.getElementById("sendLuce");
 
-// Fonction pour ajouter un message avec support du formatage Markdown simple
-function addLuceMsg(text, type) {
-    const div = document.createElement("div");
-    div.className = `msg ${type}-msg`;
-    
-    // Nettoyage et formatage du texte (Gras, Italique, Sauts de ligne)
-    let formattedText = text
+// Fonction de formatage (Gras, Italique, Sauts de ligne)
+function formatLuceText(text) {
+    return text
         .replace(/\n/g, '<br>') 
         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
         .replace(/\*(.*?)\*/g, '<i>$1</i>');
-        
-    div.innerHTML = formattedText;
+}
+
+function addLuceMsg(text, type) {
+    const div = document.createElement("div");
+    div.className = `msg ${type}-msg`;
+    div.innerHTML = type === "luce" ? formatLuceText(text) : text;
     luceContent.appendChild(div);
     
-    // Scroll automatique vers le bas
     luceContent.scrollTo({
         top: luceContent.scrollHeight,
         behavior: 'smooth'
@@ -1010,9 +1010,8 @@ function addLuceMsg(text, type) {
     return div;
 }
 
-// Fonction d'appel à l'API Gemini
 async function callGemini(userPrompt) {
-    const systemPrompt = "Tu es Luce, l'intelligence artificielle d'Umbrella. Ton ton est professionnel, chaleureux et aidant. Tu connais les outils Umbrella (Moniteo, QR Code, Facturation). Réponds de manière concise et directe. N'invente pas d'outils que tu ne connais pas.";
+    const systemPrompt = "Tu es Luce, l'IA d'Umbrella. Ton ton est pro et chaleureux. Tu connais Moniteo, les QR Codes et la Facturation d'Umbrella. Réponds court.";
     
     try {
         const response = await fetch(GEMINI_URL, {
@@ -1025,77 +1024,53 @@ async function callGemini(userPrompt) {
             })
         });
 
-        if (!response.ok) throw new Error("Erreur réseau");
-
         const data = await response.json();
-        
-        // Vérification de la structure de réponse
+
+        // Si Google renvoie une erreur (Clé API, quota, etc.)
+        if (!response.ok) {
+            console.error("Erreur API Google:", data);
+            return "Désolée, je rencontre une difficulté technique (Erreur " + response.status + "). Mes circuits ont besoin d'une petite maintenance !";
+        }
+
         if (data.candidates && data.candidates[0].content.parts[0].text) {
             return data.candidates[0].content.parts[0].text;
         } else {
-            return "Je reçois bien votre message, mais j'ai du mal à formuler une réponse. Réessayez ?";
+            return "Je ne parviens pas à analyser votre demande. Pouvez-vous reformuler ?";
         }
     } catch (error) {
-        console.error("Erreur Luce:", error);
-        return "Désolée, j'ai une petite coupure de connexion... Vérifiez votre clé API ou votre réseau !";
+        console.error("Erreur Réseau:", error);
+        return "Connexion impossible. Vérifiez votre accès internet ou les restrictions de sécurité de votre navigateur.";
     }
 }
 
-// Gestion de l'envoi
 async function handleLuce() {
     const message = luceInput.value.trim();
     if (!message) return;
 
-    // 1. Afficher le message utilisateur
     addLuceMsg(message, "user");
     luceInput.value = "";
 
-    // 2. Créer la bulle de chargement "réflexion"
     const typingMsg = addLuceMsg("<i>Luce réfléchit...</i>", "luce");
     typingMsg.style.opacity = "0.7";
 
-    // 3. Appeler l'IA
     const aiResponse = await callGemini(message);
 
-    // 4. Mettre à jour la bulle avec la vraie réponse
     typingMsg.style.opacity = "1";
-    
-    // Formatage final de la réponse IA
-    let finalFormat = aiResponse
-        .replace(/\n/g, '<br>') 
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        .replace(/\*(.*?)\*/g, '<i>$1</i>');
-        
-    typingMsg.innerHTML = finalFormat;
-    
-    // Re-scroll après mise à jour du texte
-    luceContent.scrollTop = luceContent.scrollHeight;
+    typingMsg.innerHTML = formatLuceText(aiResponse);
 }
 
 /* ================= EVENEMENTS ================= */
 
-// Ouvrir/Fermer le chat
 luceBubble.onclick = () => {
     const isVisible = luceChat.style.display === "flex";
     luceChat.style.display = isVisible ? "none" : "flex";
-    
     const tooltip = document.getElementById("luce-tooltip");
     if(tooltip) tooltip.style.display = "none";
-    
-    if(!isVisible) {
-        setTimeout(() => luceInput.focus(), 300);
-    }
+    if(!isVisible) setTimeout(() => luceInput.focus(), 300);
 };
 
-// Fermer avec la croix
-document.getElementById("closeLuce").onclick = () => {
-    luceChat.style.display = "none";
-};
-
-// Bouton Envoyer
+document.getElementById("closeLuce").onclick = () => luceChat.style.display = "none";
 sendLuce.onclick = handleLuce;
-
-// Touche Entrée
 luceInput.onkeydown = (e) => {
     if (e.key === "Enter") {
         e.preventDefault();
@@ -1144,3 +1119,4 @@ if (cartBtn) {
 </script>
 </body>
 </html>
+
