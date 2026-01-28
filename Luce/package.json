@@ -1,9 +1,19 @@
 {
-  "name": "umbrella-secure-api",
+  "name": "umbrella-luce-backend",
+  "version": "1.0.0",
+  "description": "Backend sécurisé pour Luce IA (Umbrella)",
+  "main": "index.js",
   "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "@google/generative-ai": "^0.5.0",
-    "cors": "^2.8.5"
+    "node-fetch": "^3.3.2"
   }
 }
