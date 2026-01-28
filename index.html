@@ -1047,23 +1047,30 @@ const luceChat = document.getElementById("luce-chat");
 const luceInput = document.getElementById("luceInput");
 const luceContent = document.getElementById("luceContent");
 const sendLuce = document.getElementById("sendLuce");
+const closeLuce = document.getElementById("closeLuce");
 
-function formatLuceText(text) {
+/* ================= FORMAT ================= */
+function formatLuceText(text = "") {
   return text
     .replace(/\n/g, "<br>")
     .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
     .replace(/\*(.*?)\*/g, "<i>$1</i>");
 }
 
+/* ================= MESSAGE UI ================= */
 function addLuceMsg(text, type) {
   const div = document.createElement("div");
   div.className = `msg ${type}-msg`;
   div.innerHTML = type === "luce" ? formatLuceText(text) : text;
   luceContent.appendChild(div);
-  luceContent.scrollTop = luceContent.scrollHeight;
+  luceContent.scrollTo({
+    top: luceContent.scrollHeight,
+    behavior: "smooth"
+  });
   return div;
 }
 
+/* ================= MAIN HANDLER ================= */
 async function handleLuce() {
   const message = luceInput.value.trim();
   if (!message) return;
@@ -1071,47 +1078,71 @@ async function handleLuce() {
   addLuceMsg(message, "user");
   luceInput.value = "";
 
-  const typing = addLuceMsg("<i>Luce réfléchit...</i>", "luce");
+  const typing = addLuceMsg("<i>Luce réfléchit…</i>", "luce");
+  typing.style.opacity = "0.7";
 
   try {
     const response = await fetch(LUCE_API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ message })
     });
 
     const data = await response.json();
 
+    if (!response.ok) {
+      console.error("Erreur backend Luce:", data);
+      typing.innerHTML =
+        "Désolée, je rencontre une difficulté technique côté serveur.";
+      typing.style.opacity = "1";
+      return;
+    }
+
+    typing.style.opacity = "1";
     typing.innerHTML = formatLuceText(
-      data.reply || "Une erreur est survenue."
+      data.reply || "Je n’ai pas pu formuler de réponse."
     );
   } catch (err) {
-    console.error(err);
+    console.error("Erreur réseau Luce:", err);
+    typing.style.opacity = "1";
     typing.innerHTML =
-      "Connexion impossible avec Luce. Vérifiez votre réseau.";
+      "Connexion impossible avec Luce. Vérifiez votre connexion internet.";
   }
 }
 
 /* ================= EVENTS ================= */
 
-luceBubble.onclick = () => {
-  luceChat.style.display =
-    luceChat.style.display === "flex" ? "none" : "flex";
-  setTimeout(() => luceInput.focus(), 200);
-};
+if (luceBubble && luceChat) {
+  luceBubble.onclick = () => {
+    const isOpen = luceChat.style.display === "flex";
+    luceChat.style.display = isOpen ? "none" : "flex";
+    if (!isOpen) {
+      setTimeout(() => luceInput?.focus(), 300);
+    }
+  };
+}
 
-document.getElementById("closeLuce").onclick = () => {
-  luceChat.style.display = "none";
-};
+if (closeLuce) {
+  closeLuce.onclick = () => {
+    luceChat.style.display = "none";
+  };
+}
 
-sendLuce.onclick = handleLuce;
+if (sendLuce) {
+  sendLuce.onclick = handleLuce;
+}
 
-luceInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    handleLuce();
-  }
-});
+if (luceInput) {
+  luceInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleLuce();
+    }
+  });
+}
+
 
 /* ================= HERO SLIDER ================= */
 const slides = document.querySelectorAll(".hero-slide");
@@ -1154,6 +1185,7 @@ if (cartBtn) {
 </script>
 </body>
 </html>
+
 
 
 
