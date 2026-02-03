@@ -682,33 +682,48 @@ footer a:hover{color:#fff;}
   .hero-content p{font-size:.9rem;}
 }
 /* =========================================================
-   FIX FINAL GITHUB PAGES – STRUCTURE RESPECTÉE
+   FIX FINAL GITHUB - COULEURS EXPLICITES
    ========================================================= */
 
-/* Sécurise TOUS les liens utilisés comme boutons */
-a.cta-primary,
-a.cta-primary:visited,
-a.cta-primary:hover,
-a.cta-primary:active,
-a.cta-secondary,
-a.cta-secondary:visited,
-a.cta-secondary:hover,
-a.cta-secondary:active {
-  color: inherit;
-  text-decoration: none;
+/* 1. Bouton Principal (Jaune) */
+a.cta-primary, 
+a.cta-primary:visited {
+    color: #000 !important; /* Force le texte en noir même après clic */
+    background-color: var(--accent);
 }
 
-/* Force la couleur correcte pour CTA secondaire (lien) */
-a.cta-secondary {
-  color: #fff;
+/* 2. Bouton Secondaire (Transparent/Blanc) */
+a.cta-secondary, 
+a.cta-secondary:visited {
+    color: #fff !important; /* Force le texte en blanc même après clic */
 }
 
-/* Sécurise les liens outils */
-.tool-card a,
-.tool-card a:visited,
-.tool-card a:hover,
-.tool-card a:active {
-  color: var(--secondary);
+/* 3. Liens des Outils (Bleu foncé/Scondary) */
+.tool-card a, 
+.tool-card a:visited {
+    color: var(--secondary) !important;
+}
+
+/* 4. Liens de la Navbar et Menu Mobile */
+.nav-item a, 
+.nav-item a:visited,
+.mobile-menu a, 
+.mobile-menu a:visited {
+    color: var(--muted) !important;
+}
+
+.nav-item a:hover, 
+.mobile-menu a:hover {
+    color: var(--text) !important;
+}
+
+/* 5. Liens du Footer */
+footer a, 
+footer a:visited {
+    color: #cfd3da !important;
+}
+footer a:hover {
+    color: #fff !important;
 }
 
 /* Sécurise menu mobile */
@@ -955,7 +970,8 @@ import {
   La vraie sécurité se fait via les règles Firebase.
 */
 const firebaseConfig = {
-  apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
+  apiKey: "AIzaSyB3vSZcGoixj7
+    -j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
   projectId: "umbrella-projet",
   storageBucket: "umbrella-projet.firebasestorage.app",
@@ -1159,6 +1175,7 @@ if (cartBtn) {
 </script>
 </body>
 </html>
+
 
 
 
