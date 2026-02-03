@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Umbrella scanner Engine v2.2 - Pro</title>
+    <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvReady();"></script>
+    <style>
+        :root { --primary: #311038; --accent: #F0D13C; --bg: #f5f5fa; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 300px; background: #FFF; box-shadow: 2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; z-index: 10; }
+        .logo { width: 140px; margin: 0 auto 20px; display: block; }
+        .sidebar h2 { text-align: center; color: var(--primary); font-size: 0.9rem; margin-bottom: 20px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; letter-spacing: 1px; }
+        
+        .action-group { margin-bottom: 15px; }
+        .action-group label { font-size: 0.7rem; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; display: block; }
+        
+        .btn-action {
+            padding: 10px 12px; width: 100%; border: none; border-radius: 8px;
+            background: #f8f9fa; color: var(--primary); font-size: 13px; font-weight: 600;
+            cursor: pointer; text-align: left; transition: all 0.2s; margin-bottom: 5px;
+            border-left: 0px solid var(--accent);
+        }
+        .btn-action:hover:not(:disabled) { background: #eee; border-left: 4px solid var(--accent); }
+        .btn-action.active { background: var(--primary); color: white; border-left: 4px solid var(--accent); }
+        .btn-action:disabled { opacity: 0.5; cursor: wait; }
+
+        .download-btn {
+            margin-top: auto; padding: 15px; width: 100%; background: var(--primary);
+            color: var(--accent); border: none; border-radius: 8px; cursor: pointer;
+            font-weight: bold; font-size: 16px; transition: opacity 0.3s;
+        }
+        .download-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Workarea */
+        .workarea { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; position: relative; }
+        #editorContainer { position: relative; display: none; box-shadow: 0 20px 50px rgba(0,0,0,0.1); background: white; }
+        #sourceImg { max-width: 100%; max-height: 80vh; display: block; }
+        #lineLayer { position: absolute; top: 0; left: 0; pointer-events: none; }
+        .dot { width: 12px; height: 12px; position: absolute; border-radius: 50%; cursor: move; border: 2px solid white; background: var(--accent); z-index: 100; transform: translate(-50%, -50%); }
+
+        canvas#resultCanvas { max-width: 100%; max-height: 85vh; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; }
+        
+        .placeholder-text { color: #ccc; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" alt="Logo" class="logo">
+    <h2 id="statusTitle">ENGINE v2.2</h2>
+
+    <div class="action-group">
+        <label>1. Entrée</label>
+        <button class="btn-action" onclick="document.getElementById('fileInput').click()">IMPORT DOCUMENT</button>
+        <input type="file" id="fileInput" accept="image/*" style="display:none">
+    </div>
+
+    <div class="action-group">
+        <label>2. Mode de Rendu</label>
+        <button id="mode_orig" class="btn-action active" onclick="setMode('original')">COULEUR ORIGINALE</button>
+        <button id="mode_bw" class="btn-action" onclick="setMode('bw')">NOIR & BLANC (SCAN)</button>
+        <button id="mode_magic" class="btn-action" onclick="setMode('magic')">COULEUR OPTIMISÉE</button>
+    </div>
+
+    <div class="action-group">
+        <label>3. Exécution</label>
+        <button id="scanBtn" class="btn-action" disabled onclick="processImage()">LANCER LE SCAN</button>
+    </div>
+
+    <button id="downloadBtn" class="download-btn" disabled onclick="downloadResult()">TÉLÉCHARGER</button>
+</div>
+
+<div class="workarea" id="mainWorkarea">
+    <div id="placeholder" class="placeholder-text">En attente de fichier...</div>
+    <div id="editorContainer">
+        <img id="sourceImg" src="">
+        <canvas id="lineLayer"></canvas>
+        <div id="dots"></div>
+    </div>
+    <canvas id="resultCanvas"></canvas>
+</div>
+
+<script>
+    let srcMat, currentMode = 'original';
+    const img = document.getElementById('sourceImg');
+    const editor = document.getElementById('editorContainer');
+    const lineLayer = document.getElementById('lineLayer');
+    const resultCanvas = document.getElementById('resultCanvas');
+    const placeholder = document.getElementById('placeholder');
+
+    function onOpenCvReady() {
+        document.getElementById('statusTitle').innerText = "ENGINE v2.2 (READY)";
+        document.getElementById('scanBtn').disabled = false;
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.action-group:nth-child(2) .btn-action').forEach(b => b.classList.remove('active'));
+        document.getElementById('mode_' + mode).classList.add('active');
+        if (resultCanvas.style.display === "block") processImage();
+    }
+
+    document.getElementById('fileInput').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            img.onload = () => {
+                placeholder.style.display = "none";
+                resultCanvas.style.display = "none";
+                editor.style.display = "inline-block";
+                lineLayer.width = img.clientWidth; lineLayer.height = img.clientHeight;
+                initDots();
+                let canvasTemp = document.createElement('canvas');
+                canvasTemp.width = img.naturalWidth; canvasTemp.height = img.naturalHeight;
+                canvasTemp.getContext('2d').drawImage(img, 0, 0);
+                if(srcMat) srcMat.delete();
+                srcMat = cv.imread(canvasTemp);
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    function initDots() {
+        const dotsContainer = document.getElementById('dots');
+        dotsContainer.innerHTML = '';
+        const w = img.clientWidth, h = img.clientHeight;
+        const pts = [{x:w*0.1,y:h*0.1}, {x:w*0.9,y:h*0.1}, {x:w*0.9,y:h*0.9}, {x:w*0.1,y:h*0.9}];
+        pts.forEach((p, i) => {
+            const d = document.createElement('div');
+            d.className = 'dot'; d.style.left = p.x + 'px'; d.style.top = p.y + 'px';
+            d.onmousedown = (e) => {
+                e.preventDefault();
+                document.onmousemove = (m) => {
+                    const rect = editor.getBoundingClientRect();
+                    d.style.left = Math.max(0, Math.min(m.clientX - rect.left, w)) + 'px';
+                    d.style.top = Math.max(0, Math.min(m.clientY - rect.top, h)) + 'px';
+                    updateLines();
+                };
+                document.onmouseup = () => document.onmousemove = null;
+            };
+            dotsContainer.appendChild(d);
+        });
+        updateLines();
+    }
+
+    function updateLines() {
+        const ctx = lineLayer.getContext('2d');
+        ctx.clearRect(0,0,lineLayer.width,lineLayer.height);
+        ctx.beginPath(); ctx.strokeStyle = "#F0D13C"; ctx.lineWidth = 2;
+        document.querySelectorAll('.dot').forEach((d, i) => {
+            if(i===0) ctx.moveTo(parseFloat(d.style.left), parseFloat(d.style.top));
+            else ctx.lineTo(parseFloat(d.style.left), parseFloat(d.style.top));
+        });
+        ctx.closePath(); ctx.stroke();
+    }
+
+    function processImage() {
+        const dots = document.querySelectorAll('.dot');
+        const scaleX = srcMat.cols / img.clientWidth, scaleY = srcMat.rows / img.clientHeight;
+        let coords = [];
+        dots.forEach(d => coords.push(parseFloat(d.style.left)*scaleX, parseFloat(d.style.top)*scaleY));
+
+        const w = Math.max(Math.hypot(coords[2]-coords[0], coords[3]-coords[1]), Math.hypot(coords[4]-coords[6], coords[5]-coords[7]));
+        const h = Math.max(Math.hypot(coords[6]-coords[0], coords[7]-coords[1]), Math.hypot(coords[4]-coords[2], coords[5]-coords[3]));
+
+        let srcPts = cv.matFromArray(4, 1, cv.CV_32FC2, coords);
+        let dstPts = cv.matFromArray(4, 1, cv.CV_32FC2, [0,0, w,0, w,h, 0,h]);
+        let M = cv.getPerspectiveTransform(srcPts, dstPts);
+        let dst = new cv.Mat();
+        cv.warpPerspective(srcMat, dst, M, new cv.Size(w, h), cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
+
+        if (currentMode === 'bw') {
+            cv.cvtColor(dst, dst, cv.COLOR_RGBA2GRAY);
+            cv.adaptiveThreshold(dst, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 21, 15);
+        } else if (currentMode === 'magic') {
+            dst.convertTo(dst, -1, 1.2, 10); 
+        }
+
+        cv.imshow('resultCanvas', dst);
+        resultCanvas.style.display = "block";
+        editor.style.display = "none";
+        document.getElementById('downloadBtn').disabled = false;
+        srcPts.delete(); dstPts.delete(); M.delete(); dst.delete();
+    }
+
+    function downloadResult() {
+        const link = document.createElement('a');
+        link.download = "Scan_" + Date.now() + ".jpg";
+        link.href = resultCanvas.toDataURL('image/jpeg', 0.9);
+        link.click();
+        
+        // --- ACTUALISATION AUTO (RESET) ---
+        setTimeout(() => {
+            location.reload(); 
+        }, 800);
+    }
+</script>
+</body>
+</html>
