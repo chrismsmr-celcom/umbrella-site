@@ -725,7 +725,40 @@ footer a:visited {
 footer a:hover {
     color: #fff !important;
 }
+/* 6. BOUTONS DU HERO (CTA) */
+.hero-content a.cta-primary, 
+.hero-content a.cta-primary:visited {
+    color: #000 !important; /* Force le noir sur le jaune */
+    text-decoration: none;
+}
 
+.hero-content a.cta-secondary, 
+.hero-content a.cta-secondary:visited {
+    color: #fff !important; /* Force le blanc */
+    text-decoration: none;
+}
+
+/* 7. BOUTONS DE LA SECTION ABOUT */
+/* Si tes boutons "About" utilisent des classes similaires */
+.about-premium a, 
+.about-premium a:visited {
+    color: var(--primary) !important;
+    text-decoration: none;
+}
+
+/* 8. L'ICÔNE DE LUCE (L'IA) */
+/* On cible l'icône à l'intérieur du lien pour qu'elle garde son éclat jaune */
+#luce-bubble, 
+#luce-bubble:visited,
+#luce-bubble i {
+    color: var(--accent) !important;
+    text-decoration: none;
+}
+
+/* 9. RESET GLOBAL (Sécurité supplémentaire) */
+a:-webkit-any-link:visited {
+    color: inherit; /* Force le lien visité à ne pas changer de couleur par défaut */
+}
 /* Sécurise menu mobile */
 .mobile-menu a,
 .mobile-menu a:visited,
@@ -1175,6 +1208,7 @@ if (cartBtn) {
 </script>
 </body>
 </html>
+
 
 
 
