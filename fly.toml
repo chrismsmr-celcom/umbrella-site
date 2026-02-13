@@ -1,0 +1,3 @@
+[vm]
+  size = "shared-cpu-2x"
+  memory = "1024mb"
