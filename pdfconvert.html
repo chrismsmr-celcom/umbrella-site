@@ -84,68 +84,67 @@
 </div>
 
 <script>
-let currentRoute = 'convert/pdf-to-word';
-let selectedFiles = [];
+    let currentRoute = 'convert/pdf-to-word';
+    let selectedFiles = [];
 
-function setAction(route, btn) {
-    currentRoute = route;
-    document.querySelectorAll('.action-select button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    
-    const input = document.getElementById('fileInput');
-    if(route.includes('office')) input.accept = ".docx,.xlsx,.pptx";
-    else if(route.includes('images-to-pdf')) input.accept = ".jpg,.jpeg,.png";
-    else input.accept = ".pdf";
-}
-
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('fileInput');
-const fileList = document.getElementById('fileList');
-const downloadBtn = document.getElementById('downloadBtn');
-
-dropzone.onclick = () => fileInput.click();
-fileInput.onchange = (e) => handleFiles(e.target.files);
-
-function handleFiles(files) {
-    selectedFiles = Array.from(files);
-    fileList.innerHTML = selectedFiles.map(f => `<div><i class="fa fa-check"></i> ${f.name}</div>`).join('');
-}
-
-downloadBtn.onclick = async () => {
-    if (selectedFiles.length === 0) return alert("Sélectionnez des fichiers !");
-    
-    downloadBtn.disabled = true;
-    downloadBtn.textContent = "Traitement en cours...";
-
-    const formData = new FormData();
-    selectedFiles.forEach(f => formData.append('files', f));
-
-    try {
-        const response = await fetch(`https://umbrella-site.fly.dev/${currentRoute}`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) throw new Error("Erreur de conversion");
-
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "Umbrella_Converted.zip";
-        a.click();
-        alert("Terminé !");
-    } catch (err) {
-        alert("Erreur serveur : Vérifiez que le Docker est bien déployé.");
-    } finally {
-        downloadBtn.disabled = false;
-        downloadBtn.textContent = "Lancer la conversion";
+    function setAction(route, btn) {
+        currentRoute = route;
+        document.querySelectorAll('.action-select button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Ajuster l'acceptation des fichiers selon la route
+        const input = document.getElementById('fileInput');
+        if(route.includes('office')) input.accept = ".docx,.xlsx,.pptx";
+        else if(route.includes('images-to-pdf')) input.accept = ".jpg,.jpeg,.png";
+        else input.accept = ".pdf";
     }
-};
-</script>
 
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    dropzone.onclick = () => fileInput.click();
+
+    fileInput.onchange = (e) => handleFiles(e.target.files);
+
+    function handleFiles(files) {
+        selectedFiles = Array.from(files);
+        fileList.innerHTML = selectedFiles.map(f => `<div><i class="fa fa-check"></i> ${f.name}</div>`).join('');
+    }
+
+    downloadBtn.onclick = async () => {
+        if (selectedFiles.length === 0) return alert("Sélectionnez des fichiers !");
+        
+        downloadBtn.disabled = true;
+        downloadBtn.textContent = "Traitement en cours...";
+
+        const formData = new FormData();
+        selectedFiles.forEach(f => formData.append('files', f));
+
+        try {
+            const response = await fetch(`https://umbrella-site-qr-code.onrender.com/${currentRoute}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error("Erreur de conversion");
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "Umbrella_Converted.zip";
+            a.click();
+            alert("Terminé !");
+        } catch (err) {
+            alert("Erreur serveur : Vérifiez que le Docker est bien déployé.");
+        } finally {
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = "Lancer la conversion";
+        }
+    };
+</script>
 
 </body>
 </html>
-
-
