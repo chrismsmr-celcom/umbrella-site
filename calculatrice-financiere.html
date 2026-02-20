@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Lab International | Umbrella®</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #f5c400;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+
+        .main-container {
+            width: 100%; max-width: 950px;
+            display: grid; grid-template-columns: 1fr 380px; gap: 30px;
+            background: var(--glass); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 32px; border: 1px solid var(--border);
+        }
+
+        @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
+
+        /* ÉDITION */
+        h1 { font-weight: 800; font-size: 1.8rem; color: var(--accent); margin-bottom: 5px; }
+        .header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+
+        .currency-picker {
+            background:#0f172a; border: 1px solid var(--border);
+            color: #fff; padding: 8px 12px; border-radius: 10px; outline: none; font-weight: 600;
+        }
+
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 5px; }
+        .tab {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            color: #cbd5e1; padding: 10px 18px; border-radius: 12px;
+            cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: 0.3s; white-space: nowrap;
+        }
+        .tab.active { background: var(--accent); color: var(--primary); border-color: var(--accent); }
+
+        .form-group { margin-bottom: 20px; display: none; }
+        .form-group.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        label { display: block; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-field {
+            width: 100%; padding: 14px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border); border-radius: 14px;
+            color: white; font-size: 1.1rem; outline: none; transition: 0.3s;
+        }
+        .input-field:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
+
+        /* RÉSULTATS */
+        .results-side {
+            background: rgba(0,0,0,0.2); border-radius: 24px; padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        .res-card { margin-bottom: 25px; }
+        .res-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
+        .res-value { font-size: 2.2rem; font-weight: 800; color: #fff; }
+        
+        .progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+
+        .btn-action {
+            width: 100%; background: var(--accent); color: var(--primary); border: none;
+            padding: 14px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s;
+        }
+        .btn-action:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(245, 196, 0, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="input-side">
+            <div class="header-flex">
+                <div>
+                    <h1>Finance Lab</h1>
+                    <p style="color:#FFF; font-size: 0.85rem;">Intelligence financière Umbrella®</p>
+                </div>
+                <select id="currency" class="currency-picker" onchange="calc()">
+                    <option value="€">EUR (€)</option>
+                    <option value="$">USD ($)</option>
+                    <option value="£">GBP (£)</option>
+                    <option value="CHF">CHF (Fr.)</option>
+                    <option value="CFA">CFA (FCFA)</option>
+                    <option value="MAD">MAD (Dh)</option>
+                    <option value="DZD">DZD (DA)</option>
+                    <option value="CAD">CAD ($)</option>
+                    <option value="JPY">JPY (¥)</option>
+                    <option value="CNY">CNY (¥)</option>
+                    <option value="BTC">BTC (₿)</option>
+                    <option value="AED">AED (dh)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="BRL">BRL (R$)</option>
+                    <option value="RUB">RUB (₽)</option>
+                    <option value="TRY">TRY (₺)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                    <option value="AUD">AUD ($)</option>
+                    <option value="MXN">MXN ($)</option>
+                    <option value="XOF">XOF (CFA)</option>
+                    <option value="CDF">CDF (CDF)</option>
+                </select>
+            </div>
+
+            <div class="nav-tabs">
+                <div class="tab active" onclick="switchMode('marge', this)">Marge & Profit</div>
+                <div class="tab" onclick="switchMode('seuil', this)">Point Mort</div>
+                <div class="tab" onclick="switchMode('tva', this)">TVA Express</div>
+            </div>
+
+            <div id="marge-group" class="form-group active">
+                <label>Coût d'achat (HT)</label>
+                <input type="number" id="achat" class="input-field" placeholder="0.00" oninput="calc()">
+                <label style="margin-top:20px;">Prix de vente (HT)</label>
+                <input type="number" id="vente" class="input-field" placeholder="0.00" oninput="calc()">
+            </div>
+
+            <div id="seuil-group" class="form-group">
+                <label>Charges Fixes</label>
+                <input type="number" id="fixes" class="input-field" placeholder="Ex: 5000" oninput="calc()">
+                <label style="margin-top:20px;">Taux de Marge (%)</label>
+                <input type="number" id="tauxM" class="input-field" placeholder="Ex: 30" oninput="calc()">
+            </div>
+
+            <div id="tva-group" class="form-group">
+                <label>Base Hors Taxe (HT)</label>
+                <input type="number" id="baseHT" class="input-field" placeholder="0.00" oninput="calc()">
+                <label style="margin-top:20px;">Taux applicable</label>
+                <select id="tauxTVA" class="input-field" onchange="calc()" style="background: #1e293b; color: white;">
+                    <option value="20">Taux Normal (20%)</option>
+                    <option value="10">Intermédiaire (10%)</option>
+                    <option value="5.5">Réduit (5.5%)</option>
+                    <option value="2.1">Super Réduit (2.1%)</option>
+                </select>
+            </div>
+
+            <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:0.75rem; display:block; margin-top:20px;">
+                <i class="fa fa-arrow-left"></i> Retour Dashboard
+            </a>
+        </div>
+
+        <div class="results-side">
+            <div>
+                <div class="res-card">
+                    <p id="label-1" class="res-label">Marge Bénéficiaire</p>
+                    <p id="val-1" class="res-value">0.00 €</p>
+                </div>
+                <div class="res-card">
+                    <p id="label-2" class="res-label">Taux de Profitabilité</p>
+                    <p id="val-2" class="res-value" style="color: var(--accent);">0%</p>
+                    <div class="progress-container"><div id="bar" class="progress-bar"></div></div>
+                </div>
+            </div>
+            
+            <button class="btn-action" onclick="window.print()">Exporter PDF</button>
+        </div>
+    </div>
+
+<script>
+    let currentMode = 'marge';
+
+    function switchMode(mode, el) {
+        currentMode = mode;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.querySelectorAll('.form-group').forEach(g => g.classList.remove('active'));
+        document.getElementById(mode + '-group').classList.add('active');
+        
+        const l1 = document.getElementById('label-1');
+        const l2 = document.getElementById('label-2');
+
+        if(mode === 'marge') { l1.innerText = "Marge Bénéficiaire"; l2.innerText = "Taux de Profitabilité"; }
+        else if(mode === 'seuil') { l1.innerText = "Seuil de Rentabilité"; l2.innerText = "Objectif Mensuel"; }
+        else { l1.innerText = "Montant TVA"; l2.innerText = "Total TTC"; }
+        calc();
+    }
+
+    function calc() {
+        const symbol = document.getElementById('currency').value;
+        let v1 = 0, v2 = 0, percent = 0;
+
+        if(currentMode === 'marge') {
+            const achat = parseFloat(document.getElementById('achat').value) || 0;
+            const vente = parseFloat(document.getElementById('vente').value) || 0;
+            v1 = vente - achat;
+            v2 = vente > 0 ? (v1 / vente) * 100 : 0;
+            percent = v2;
+            document.getElementById('val-1').innerText = v1.toFixed(2) + " " + symbol;
+            document.getElementById('val-2').innerText = v2.toFixed(1) + " %";
+        } 
+        else if(currentMode === 'seuil') {
+            const fixes = parseFloat(document.getElementById('fixes').value) || 0;
+            const taux = parseFloat(document.getElementById('tauxM').value) || 0;
+            v1 = taux > 0 ? (fixes / (taux / 100)) : 0;
+            v2 = v1 / 12;
+            document.getElementById('val-1').innerText = v1.toLocaleString() + " " + symbol;
+            document.getElementById('val-2').innerText = v2.toFixed(0) + " " + symbol;
+            percent = 100;
+        }
+        else {
+            const ht = parseFloat(document.getElementById('baseHT').value) || 0;
+            const taux = parseFloat(document.getElementById('tauxTVA').value) || 0;
+            v1 = ht * (taux / 100);
+            v2 = ht + v1;
+            document.getElementById('val-1').innerText = v1.toFixed(2) + " " + symbol;
+            document.getElementById('val-2').innerText = v2.toFixed(2) + " " + symbol;
+            percent = (v1 / v2) * 100;
+        }
+
+        document.getElementById('bar').style.width = Math.min(percent, 100) + "%";
+    }
+</script>
+</body>
+</html>

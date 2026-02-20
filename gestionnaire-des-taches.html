@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Productivity | Umbrella®</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #f5c400;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --urgent: #ff4757;
+            --normal: #3498db;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+
+        .todo-card {
+            width: 100%; max-width: 600px;
+            background: var(--glass); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 32px; border: 1px solid var(--border);
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        h1 { font-weight: 800; font-size: 1.5rem; color: var(--accent); }
+        
+        /* BARRE DE PROGRESSION (SCORE) */
+        .progress-wrapper { background: rgba(255,255,255,0.05); height: 10px; border-radius: 20px; margin-bottom: 30px; overflow: hidden; border: 1px solid var(--border); }
+        #progressBar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), #2ed573); transition: 0.5s; }
+
+        /* INPUT AREA COMPLEXE */
+        .input-box { display: grid; grid-template-columns: 1fr 100px 50px; gap: 10px; margin-bottom: 30px; }
+        input, select {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            padding: 12px 15px; border-radius: 12px; color: white; outline: none; font-size: 0.9rem;
+        }
+        select { cursor: pointer; color: var(--accent); font-weight: 600; }
+        .add-btn { background: var(--accent); border: none; border-radius: 12px; color: var(--primary); cursor: pointer; font-weight: 800; }
+
+        /* LISTE */
+        .task-item {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            padding: 15px; border-radius: 16px; display: flex; align-items: center; 
+            margin-bottom: 12px; transition: 0.3s;
+        }
+        .task-item:hover { transform: translateX(5px); background: rgba(255,255,255,0.05); }
+        
+        .priority-dot { width: 4px; height: 30px; border-radius: 10px; margin-right: 15px; }
+        .p-high { background: var(--urgent); box-shadow: 0 0 10px var(--urgent); }
+        .p-low { background: var(--normal); }
+
+        .task-info { flex: 1; }
+        .task-info h3 { font-size: 0.95rem; font-weight: 600; }
+        .task-info span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
+
+        .check-btn { width: 25px; height: 25px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; margin-right: 15px; display: flex; align-items: center; justify-content: center; }
+        .completed .check-btn { background: var(--accent); border-color: var(--accent); }
+        .completed .task-info h3 { text-decoration: line-through; opacity: 0.4; }
+
+        .del-btn { background: none; border: none; color: #334155; cursor: pointer; padding: 5px; }
+        .del-btn:hover { color: var(--urgent); }
+    </style>
+</head>
+<body>
+
+    <div class="todo-card">
+        <div class="header">
+            <div>
+                <h1>Focus Lab Pro</h1>
+                <p style="color: #64748b; font-size: 0.8rem;">Quête de productivité Umbrella®</p>
+            </div>
+            <div id="scoreText" style="text-align: right; font-weight: 800; color: var(--accent);">0%</div>
+        </div>
+
+        <div class="progress-wrapper"><div id="progressBar"></div></div>
+
+        <div class="input-box">
+            <input type="text" id="tInput" placeholder="Action à mener...">
+            <select id="pInput">
+                <option value="high">URGENT</option>
+                <option value="low">NORMAL</option>
+            </select>
+            <button class="add-btn" onclick="addTask()"><i class="fa fa-plus"></i></button>
+        </div>
+
+        <div id="taskContainer"></div>
+
+        <a href="index.html" style="display:block; text-align:center; margin-top:30px; color:#475569; text-decoration:none; font-size:0.8rem;">
+            <i class="fa fa-arrow-left"></i> Quitter le mode focus
+        </a>
+    </div>
+
+<script>
+    let tasks = JSON.parse(localStorage.getItem('umbrella_pro_tasks')) || [];
+
+    function addTask() {
+        const text = document.getElementById('tInput').value;
+        const priority = document.getElementById('pInput').value;
+        if(!text) return;
+
+        tasks.push({ id: Date.now(), text, priority, done: false });
+        document.getElementById('tInput').value = "";
+        save();
+    }
+
+    function toggle(id) {
+        tasks = tasks.map(t => t.id === id ? {...t, done: !t.done} : t);
+        save();
+    }
+
+    function remove(id) {
+        tasks = tasks.filter(t => t.id !== id);
+        save();
+    }
+
+    function save() {
+        localStorage.setItem('umbrella_pro_tasks', JSON.stringify(tasks));
+        render();
+    }
+
+    function render() {
+        const container = document.getElementById('taskContainer');
+        container.innerHTML = "";
+        
+        let completed = 0;
+        // Trier : Urgents en premier
+        tasks.sort((a, b) => (a.priority === 'high' ? -1 : 1));
+
+        tasks.forEach(t => {
+            if(t.done) completed++;
+            const div = document.createElement('div');
+            div.className = `task-item ${t.done ? 'completed' : ''}`;
+            div.innerHTML = `
+                <div class="check-btn" onclick="toggle(${t.id})">${t.done ? '<i class="fa fa-check" style="color:#000; font-size:0.7rem;"></i>' : ''}</div>
+                <div class="priority-dot ${t.priority === 'high' ? 'p-high' : 'p-low'}"></div>
+                <div class="task-info">
+                    <h3>${t.text}</h3>
+                    <span>${t.priority === 'high' ? 'Priorité Critique' : 'Tâche Standard'}</span>
+                </div>
+                <button class="del-btn" onclick="remove(${t.id})"><i class="fa fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+        });
+
+        // Mise à jour du score
+        const percent = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+        document.getElementById('progressBar').style.width = percent + "%";
+        document.getElementById('scoreText').innerText = percent + "% COMPLÉTÉ";
+    }
+
+    render();
+</script>
+</body>
+</html>

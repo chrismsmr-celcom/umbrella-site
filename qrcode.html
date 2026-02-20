@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Studio | Umbrella®</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #f5c400;
+            --accent-soft: rgba(245, 196, 0, 0.15);
+            --bg: #0f172a; /* Fond sombre pour faire ressortir le QR */
+            --card: rgba(255, 255, 255, 0.03);
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: #fff; 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        @media (max-width: 800px) {
+            .main-container { grid-template-columns: 1fr; padding: 25px; }
+        }
+
+        /* GAUCHE : ÉDITION */
+        .editor-side h1 { font-weight: 800; font-size: 1.8rem; margin-bottom: 5px; color: var(--accent); }
+        .editor-side p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 30px; }
+
+        .type-tabs { display: flex; gap: 8px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; }
+        .tab {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #cbd5e1;
+            padding: 10px 18px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: 0.3s;
+        }
+        .tab.active { background: var(--accent); color: var(--primary); border-color: var(--accent); }
+
+        .input-area { min-height: 180px; }
+        .group { display: none; }
+        .group.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        label { display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
+
+        /* DROITE : PREVIEW */
+        .preview-side {
+            background: rgba(0,0,0,0.2);
+            border-radius: 24px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .qr-wrapper {
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+        #qrImage { width: 220px; height: 220px; display: block; border-radius: 10px; }
+
+        .btn-dl {
+            width: 100%;
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .btn-dl:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(245, 196, 0, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="editor-side">
+            <h1>QR Studio Pro</h1>
+            <p>Créez des QR codes intelligents pour votre business.</p>
+
+            <div class="type-tabs" id="tabs">
+                <div class="tab active" onclick="setMode('url', this)"><i class="fa fa-link"></i> Lien</div>
+                <div class="tab" onclick="setMode('prod', this)"><i class="fa fa-tag"></i> Produit</div>
+                <div class="tab" onclick="setMode('wifi', this)"><i class="fa fa-wifi"></i> WiFi</div>
+                <div class="tab" onclick="setMode('vcard', this)"><i class="fa fa-user"></i> Contact</div>
+            </div>
+
+            <div class="input-area">
+                <div id="url-group" class="group active">
+                    <label>Lien Web / PDF / Vidéo</label>
+                    <input type="text" id="url" placeholder="https://votre-destination.com" oninput="gen()">
+                </div>
+
+                <div id="prod-group" class="group">
+                    <label>Désignation Produit</label>
+                    <input type="text" id="pName" placeholder="Ex: Casquette Umbrella" oninput="gen()">
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1">
+                            <label>Prix (€)</label>
+                            <input type="text" id="pPrice" placeholder="29.99" oninput="gen()">
+                        </div>
+                        <div style="flex:1">
+                            <label>Référence</label>
+                            <input type="text" id="pRef" placeholder="REF-01" oninput="gen()">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wifi-group" class="group">
+                    <label>Nom du réseau (SSID)</label>
+                    <input type="text" id="ssid" placeholder="Mon Réseau WiFi" oninput="gen()">
+                    <label>Clé de sécurité</label>
+                    <input type="password" id="pass" placeholder="••••••••" oninput="gen()">
+                </div>
+
+                <div id="vcard-group" class="group">
+                    <label>Nom & Prénom</label>
+                    <input type="text" id="vName" placeholder="John Doe" oninput="gen()">
+                    <label>Téléphone professionnel</label>
+                    <input type="text" id="vTel" placeholder="+33 6..." oninput="gen()">
+                </div>
+            </div>
+
+            <a href="index.html" style="color:#64748b; text-decoration:none; font-size:0.8rem;"><i class="fa fa-arrow-left"></i> Retour Dashboard</a>
+        </div>
+
+        <div class="preview-side">
+            <div id="qrPlaceholder" style="margin-bottom:20px; opacity:0.3; display:none;">
+                <i class="fa fa-qrcode fa-5x"></i>
+            </div>
+            <div class="qr-wrapper" id="qrFrame">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Umbrella" id="qrImage">
+            </div>
+            <button class="btn-dl" onclick="download()"><i class="fa fa-download"></i> Télécharger PNG</button>
+            <p style="margin-top:15px; font-size:0.7rem; color:#64748b;">Généré instantanément par Umbrella®</p>
+        </div>
+    </div>
+
+<script>
+    let mode = 'url';
+
+    function setMode(newMode, el) {
+        mode = newMode;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        
+        document.querySelectorAll('.group').forEach(g => g.classList.remove('active'));
+        document.getElementById(newMode + '-group').classList.add('active');
+        gen();
+    }
+
+    function gen() {
+        let val = "";
+        if(mode === 'url') val = document.getElementById('url').value;
+        else if(mode === 'prod') val = `PRODUIT: ${document.getElementById('pName').value}\nPRIX: ${document.getElementById('pPrice').value}€\nREF: ${document.getElementById('pRef').value}`;
+        else if(mode === 'wifi') val = `WIFI:S:${document.getElementById('ssid').value};T:WPA;P:${document.getElementById('pass').value};;`;
+        else if(mode === 'vcard') val = `BEGIN:VCARD\nVERSION:3.0\nFN:${document.getElementById('vName').value}\nTEL:${document.getElementById('vTel').value}\nEND:VCARD`;
+
+        const api = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(val || "Umbrella")}`;
+        document.getElementById('qrImage').src = api;
+    }
+
+    function download() {
+        const link = document.createElement('a');
+        link.href = document.getElementById('qrImage').src;
+        link.download = "QR_Umbrella.png";
+        link.click();
+    }
+</script>
+</body>
+</html>
