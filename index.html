@@ -75,22 +75,7 @@ a{text-decoration:none;}
   cursor:pointer;
 }
 .navbar-icons i:hover{color:var(--text);}
-.nav-item a{
-  font-size:.95rem;
-  font-weight:500;
-  color:var(--muted);
-  cursor:pointer;
-  text-decoration:none;
-}
 
-.nav-item a:hover{
-  color:var(--text);
-}
-
-/* Empêche le violet après clic */
-.nav-item a:visited{
-  color:var(--muted);
-}
 /* ACCOUNT */
 .account{position:relative;}
 .account img{
@@ -287,126 +272,7 @@ a{text-decoration:none;}
   font-size:1.2rem;
   cursor:pointer;
 }
-/* ================= LUCE IA STYLES ================= */
-#luce-container {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 5000;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 12px;
-}
 
-#luce-tooltip {
-    background: white;
-    padding: 8px 15px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    border: 1px solid #eee;
-    color: var(--primary);
-    animation: bounce 2s infinite;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-#luce-bubble {
-    width: 60px;
-    height: 60px;
-    background: rgba(11, 19, 32, 0.75);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-#luce-bubble i {
-    color: var(--accent);
-    font-size: 26px;
-    filter: drop-shadow(0 0 5px rgba(245, 196, 0, 0.5));
-}
-
-#luce-chat {
-    display:none;
-    position: fixed;
-    bottom: 105px;
-    right: 30px;
-    width: 350px;
-    height: 480px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    z-index: 5000;
-    flex-direction: column;
-    overflow: hidden;
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-.luce-header {
-    background: var(--primary);
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.online-indicator {
-    width: 10px;
-    height: 10px;
-    background: #4ade80;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #4ade80;
-}
-
-.luce-body {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    background: #f8f9fa;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.msg {
-    max-width: 85%;
-    padding: 10px 14px;
-    border-radius: 15px;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.luce-msg { background: white; border: 1px solid #eee; align-self: flex-start; border-bottom-left-radius: 2px; }
-.user-msg { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-
-.luce-footer {
-    padding: 15px;
-    border-top: 1px solid #eee;
-    display: flex;
-    gap: 8px;
-}
-
-.luce-input {
-    flex: 1;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 10px;
-    outline: none;
-}
-
-@keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-5px);} }
 /* ================= SECTIONS ================= */
 .section{padding:70px 20px;max-width:1200px;margin:auto;}
 .section h2{text-align:center;font-size:2rem;margin-bottom:40px;}
@@ -432,142 +298,56 @@ a{text-decoration:none;}
 .tool-card p{font-size:.9rem;opacity:.85;}
 .tool-card a{display:inline-block;margin-top:12px;font-weight:600;color:var(--secondary);}
 
-/* ================= ABOUT PREMIUM CSS ================= */
-.about-premium {
-    padding: 100px 20px;
-    background: #fff;
-}
-
-.container {
-    max-width: 1100px;
-    margin: 0 auto;
-}
-
+.about{text-align:center;max-width:900px;margin:auto;}
+/* Style amélioré pour la section About */
 .about-header {
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto 60px;
+  text-align: center;
+  margin-bottom: 50px;
 }
 
-.badge {
-    background: rgba(245, 196, 0, 0.1);
-    color: #b89300;
-    padding: 6px 15px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: inline-block;
-    margin-bottom: 20px;
+.subtitle {
+  max-width: 700px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 1.1rem;
 }
 
-.about-header h2 {
-    font-size: 2.8rem;
-    color: var(--primary);
-    margin-bottom: 20px;
-    font-weight: 800;
-}
-
-.about-header .lead {
-    font-size: 1.2rem;
-    color: var(--muted);
-}
-
-/* Grille de cartes */
 .about-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin-bottom: 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
 }
 
 .about-card {
-    padding: 40px;
-    background: var(--bg);
-    border-radius: 24px;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px; /* Coins moins arrondis pour un aspect plus pro */
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s ease;
 }
 
 .about-card:hover {
-    background: #fff;
-    border-color: #eee;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-    transform: translateY(-10px);
+  border-color: var(--accent);
 }
 
-.icon-box {
-    width: 50px;
-    height: 50px;
-    background: var(--primary);
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    font-size: 1.5rem;
-    margin-bottom: 25px;
+.about-card i {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 15px;
+  display: block;
 }
 
-.about-card h3 {
-    margin-bottom: 15px;
-    color: var(--primary);
+.about-card h4 {
+  margin-bottom: 10px;
+  font-size: 1.1rem;
 }
 
-/* Story section */
-.about-story {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 50px;
-    align-items: center;
-    background: var(--secondary);
-    padding: 60px;
-    border-radius: 30px;
-    color: #fff;
+.about-card p {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.5;
 }
-
-.story-content h3 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: var(--accent);
-}
-
-.target-groups {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.tags {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    flex-wrap: wrap;
-}
-
-.tags span {
-    background: rgba(255,255,255,0.1);
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-}
-
-.story-quote blockquote {
-    font-size: 1.5rem;
-    font-style: italic;
-    font-weight: 300;
-    line-height: 1.4;
-    position: relative;
-    padding-left: 20px;
-    border-left: 4px solid var(--accent);
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-    .about-story { grid-template-columns: 1fr; padding: 40px; }
-    .about-header h2 { font-size: 2.2rem; }
-}.contact{background:var(--bg);border-radius:20px;padding:40px;text-align:center;}
+.contact{background:var(--bg);border-radius:20px;padding:40px;text-align:center;}
 .contact{
   background:var(--bg);
   border-radius:20px;
@@ -669,6 +449,7 @@ footer a:hover{color:#fff;}
   flex-wrap:wrap;
   font-size:.8rem;
 }
+
 /* ================= RESPONSIVE ================= */
 @media(max-width:900px){
   .nav-links{display:none;}
@@ -681,92 +462,6 @@ footer a:hover{color:#fff;}
   .hero-content h1{font-size:1.6rem;}
   .hero-content p{font-size:.9rem;}
 }
-/* =========================================================
-   FIX FINAL GITHUB - COULEURS EXPLICITES
-   ========================================================= */
-
-/* 1. Bouton Principal (Jaune) */
-a.cta-primary, 
-a.cta-primary:visited {
-    color: #000 !important; /* Force le texte en noir même après clic */
-    background-color: var(--accent);
-}
-
-/* 2. Bouton Secondaire (Transparent/Blanc) */
-a.cta-secondary, 
-a.cta-secondary:visited {
-    color: #fff !important; /* Force le texte en blanc même après clic */
-}
-
-/* 3. Liens des Outils (Bleu foncé/Scondary) */
-.tool-card a, 
-.tool-card a:visited {
-    color: var(--secondary) !important;
-}
-
-/* 4. Liens de la Navbar et Menu Mobile */
-.nav-item a, 
-.nav-item a:visited,
-.mobile-menu a, 
-.mobile-menu a:visited {
-    color: var(--muted) !important;
-}
-
-.nav-item a:hover, 
-.mobile-menu a:hover {
-    color: var(--text) !important;
-}
-
-/* 5. Liens du Footer */
-footer a, 
-footer a:visited {
-    color: #cfd3da !important;
-}
-footer a:hover {
-    color: #fff !important;
-}
-/* 6. BOUTONS DU HERO (CTA) */
-.hero-content a.cta-primary, 
-.hero-content a.cta-primary:visited {
-    color: #000 !important; /* Force le noir sur le jaune */
-    text-decoration: none;
-}
-
-.hero-content a.cta-secondary, 
-.hero-content a.cta-secondary:visited {
-    color: #fff !important; /* Force le blanc */
-    text-decoration: none;
-}
-
-/* 7. BOUTONS DE LA SECTION ABOUT */
-/* Si tes boutons "About" utilisent des classes similaires */
-.about-premium a, 
-.about-premium a:visited {
-    color: var(--primary) !important;
-    text-decoration: none;
-}
-
-/* 8. L'ICÔNE DE LUCE (L'IA) */
-/* On cible l'icône à l'intérieur du lien pour qu'elle garde son éclat jaune */
-#luce-bubble, 
-#luce-bubble:visited,
-#luce-bubble i {
-    color: var(--accent) !important;
-    text-decoration: none;
-}
-
-/* 9. RESET GLOBAL (Sécurité supplémentaire) */
-a:-webkit-any-link:visited {
-    color: inherit; /* Force le lien visité à ne pas changer de couleur par défaut */
-}
-/* Sécurise menu mobile */
-.mobile-menu a,
-.mobile-menu a:visited,
-.mobile-menu a:hover,
-.mobile-menu a:active {
-  color: #333;
-}
-
 </style>
 </head>
 <body>
@@ -775,13 +470,13 @@ a:-webkit-any-link:visited {
 <nav class="navbar">
   <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" class="logo">
 
- <div class="nav-links">
-  <div class="nav-item"><a href="suitpro.html">Umbrella Suit Pro</a></div>
-  <div class="nav-item"><a href="advice.html">Umbrella Advice</a></div>
-  <div class="nav-item"><a href="express.html">Umbrella Express</a></div>
-  <div class="nav-item"><a href="tarification.html">tarification</a></div>
-  <div class="nav-item"><a href="support.html">Support</a></div>
-</div>
+  <div class="nav-links">
+    <div class="nav-item"><span>Umbrella Suit Pro</span></div>
+    <div class="nav-item"><span>Umbrella Advice</span></div>
+    <div class="nav-item"><span>Umbrella Express</span></div>
+    <div class="nav-item"><span>Offres TPE & PME</span></div>
+    <div class="nav-item"><span>Support</span></div>
+  </div>
 
 <div class="navbar-icons">
   <!-- Recherche -->
@@ -803,14 +498,12 @@ a:-webkit-any-link:visited {
   </div>
 
   <div class="mobile-menu" id="mobileMenu">
-  <a href="suitpro.html">Umbrella Suit Pro</a>
-  <a href="advice.html">Umbrella Advice</a>
-  <a href="express.html">Umbrella Express</a>
-  <a href="tarification.html">tarification</a>
-  <a href="support.html">Support technique</a>
+    <a>Umbrella Suit Pro</a>
+    <a>Umbrella Advice</a>
+    <a>Umbrella Express</a>
+    <a>Offres TPE & PME</a>
+    <a>Support technique</a>
     <a href="tarification.html" class="cta-primary">Souscrire Umbrella Pro</a>
-    <button id="googleLogin" class="cta-primary">
-        <i class="fa-brands fa-google"></i>Se connecter avec Google</button>
   </div>
 </nav>
 <div class="modal" id="searchModal">
@@ -822,7 +515,7 @@ a:-webkit-any-link:visited {
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-slide active" style="background-image:url('https://images.unsplash.com/photo-1767788115794-0e93fb905016?q=80&w=1752&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
+  <div class="hero-slide active" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1767788115794-0e93fb905016?q=80&w=1752&auto=format&fit=crop');">
     <div class="hero-content">
       <h1>Dashboard Moniteo</h1>
       <p>Surveillez et gérez votre activité en temps réel.</p>
@@ -830,29 +523,24 @@ a:-webkit-any-link:visited {
     </div>
   </div>
 
-  <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?q=80&w=868&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
+  <div class="hero-slide" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?q=80&w=868&auto=format&fit=crop');">
     <div class="hero-content">
       <h1>Outils Umbrella</h1>
       <p>Gestionnaire de tâches, QR code, devis et factures pour vos projets.</p>
       <a href="#outils" class="cta-secondary">Découvrir les outils</a>
     </div>
   </div>
-  
-<div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
+
+  <div class="hero-slide" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=870&auto=format&fit=crop');">
     <div class="hero-content">
       <h1>Connectez-vous à Umbrella</h1>
-      <p>Accédez facilement à vos outils et à votre dashboard personnalisé et relier votre quipe en un clic</p>
-     <p>Connectez-vous avec Google pour accéder à Umbrella.</p>
-      <button id="googleLogin" class="cta-primary">
-        <i class="fa-brands fa-google"></i> Se connecter avec Google</button>
-      </div>
+      <p>Accédez facilement à vos outils et reliez votre équipe en un clic.</p>
+      <button id="googleLogin" class="cta-primary"><i class="fa-brands fa-google"></i> Se connecter</button>
     </div>
+  </div>
+
   <div class="hero-dots">
-    <span class="active"></span>
-    <span></span>
-  </div>  <div class="dots">
     <span class="dot active"></span>
-    <span class="dot"></span>
     <span class="dot"></span>
     <span class="dot"></span>
   </div>
@@ -863,7 +551,7 @@ a:-webkit-any-link:visited {
   <h2>Les outils Umbrella</h2>
   <div class="tools">
     <div class="tool-card"><i class="fa fa-list-check"></i><h3>Gestionnaire de tâches</h3><p>Organisation et suivi efficaces.</p><a href="gestionnaire-des-taches.html">Accéder →</a></div>
-    <div class="tool-card"><i class="fa fa-qrcode"></i><h3>Générateur QR Code</h3><p>QR codes professionnels pour vos documents et produits.</p><a href="public/qrcode.html">Accéder →</a></div>
+    <div class="tool-card"><i class="fa fa-qrcode"></i><h3>Générateur QR Code</h3><p>QR codes professionnels pour vos documents et produits.</p><a href="qrcode.html">Accéder →</a></div>
     <div class="tool-card"><i class="fa fa-expand"></i><h3>Umbrella Scanner</h3><p>Numérisation rapide et intelligente de vos documents.</p><a href="scan.html">Accéder →</a></div>
     <div class="tool-card"><i class="fa fa-file-pdf"></i><h3>Conversion PDF</h3><p>Convertissez facilement vos fichiers entre PDF, Word et images.</p><a href="pdfconvert.html">Accéder →</a></div>
     <div class="tool-card"><i class="fa fa-calculator"></i><h3>Calculatrice financière</h3><p>Analyse de coûts, marges et projections financières en quelques clics.</p><a href="calculatrice-financiere.html">Accéder →</a></div>
@@ -871,53 +559,39 @@ a:-webkit-any-link:visited {
   </div>
 </section>
 
-<section class="section about-premium" id="a-propos">
-    <div class="container">
-        <div class="about-header">
-            <span class="badge">Notre Vision</span>
-            <h2>Pourquoi choisir Umbrella ?</h2>
-            <p class="lead">Umbrella® est bien plus qu'une plateforme. C'est l'écosystème conçu pour transformer la complexité entrepreneuriale en une clarté absolue.</p>
-        </div>
+<section class="section" id="a-propos">
+  <div style="text-align: center; margin-bottom: 40px;">
+    <h2>L'écosystème Umbrella</h2>
+    <p style="color: var(--muted); max-width: 700px; margin: auto;">
+      Une plateforme centralisée pour structurer votre gestion quotidienne et piloter votre croissance.
+    </p>
+  </div>
 
-        <div class="about-grid">
-            <div class="about-card">
-                <div class="icon-box"><i class="fa fa-bullseye"></i></div>
-                <h3>Notre Mission</h3>
-                <p>Aider les professionnels à piloter leur activité avec clarté, grâce à des outils centralisés pensés pour la prise de décision stratégique.</p>
-            </div>
-            <div class="about-card">
-                <div class="icon-box"><i class="fa fa-rocket"></i></div>
-                <h3>Ce que nous offrons</h3>
-                <p>Un dashboard intelligent, des outils métiers (devis, facturation, QR codes) et une approche orientée vers l'autonomie totale.</p>
-            </div>
-            <div class="about-card">
-                <div class="icon-box"><i class="fa fa-shield-halved"></i></div>
-                <h3>Notre Engagement</h3>
-                <p>Sécurité imprenable, simplicité radicale et un design professionnel qui reflète la qualité de votre propre entreprise.</p>
-            </div>
-        </div>
-
-        <div class="about-story">
-            <div class="story-content">
-                <h3>Une vision long terme</h3>
-                <p>Dans un monde où créer une entreprise est accessible, Umbrella est née du constat que beaucoup avancent sans boussole. Nous accompagnons votre évolution, de vos premiers pas jusqu'à votre pleine maturité.</p>
-                
-                <div class="target-groups">
-                    <div class="group"><strong>Pour qui ?</strong></div>
-                    <div class="tags">
-                        <span>Freelances</span>
-                        <span>TPE & PME</span>
-                        <span>Porteurs de projets</span>
-                    </div>
-                </div>
-            </div>
-            <div class="story-quote">
-                <blockquote>
-                    "Umbrella®, c’est moins de complexité, pour plus de contrôle."
-                </blockquote>
-            </div>
-        </div>
+  <div class="about-grid">
+    <div class="about-card">
+      <i class="fa-solid fa-rocket"></i>
+      <h4>Mission</h4>
+      <p>Centraliser vos outils pour gagner en clarté et en temps de décision.</p>
     </div>
+
+    <div class="about-card">
+      <i class="fa-solid fa-shield-halved"></i>
+      <h4>Fiabilité</h4>
+      <p>Sécurité de vos données et outils conformes aux besoins des entrepreneurs.</p>
+    </div>
+
+    <div class="about-card">
+      <i class="fa-solid fa-users"></i>
+      <h4>Cible</h4>
+      <p>Conçu spécifiquement pour les indépendants, les TPE et les PME.</p>
+    </div>
+
+    <div class="about-card">
+      <i class="fa-solid fa-chart-line"></i>
+      <h4>Évolution</h4>
+      <p>Un outil qui grandit avec vous, de la création à la maturité de l'entreprise.</p>
+    </div>
+  </div>
 </section>
 
 <!-- CONTACT -->
@@ -926,11 +600,14 @@ a:-webkit-any-link:visited {
   <p>Vous avez une question, besoin d’un support ou souhaitez en savoir plus sur nos solutions ?</p>
   
   <form id="contactForm">
-    <input type="text" name="name" placeholder="Votre nom" required>
-    <input type="email" name="email" placeholder="Votre email" required>
-    <textarea name="message" placeholder="Votre message" rows="5" required></textarea>
-    <button type="submit" class="cta-primary">Envoyer</button>
+    <input type="text" id="contactName" name="name" placeholder="Votre nom" required>
+    <input type="email" id="contactEmail" name="email" placeholder="Votre email" required>
+    <textarea id="contactMessage" name="message" placeholder="Votre message" rows="5" required></textarea>
+    
+    <button type="submit" id="submitBtn" class="cta-primary">Envoyer le message</button>
   </form>
+
+  <div id="formStatus" style="display:none; margin-top:20px; padding:15px; border-radius:10px; font-weight:500;"></div>
 
   <div class="socials">
     <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
@@ -956,55 +633,15 @@ a:-webkit-any-link:visited {
   </div>
 </footer>
 
-<div id="luce-container">
-    <div id="luce-tooltip">Besoin d'aide ?</div>
-    
-    <div id="luce-bubble" title="Luce IA : Votre lumière guide">
-        <i class="fa fa-lightbulb"></i>
-    </div>
-</div>
-
-<div id="luce-chat">
-    <div class="luce-header">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div class="online-indicator"></div>
-            <span>LUCE IA Copilot</span>
-        </div>
-        <i class="fa fa-times" id="closeLuce" style="cursor:pointer; opacity:0.7;"></i>
-    </div>
-    <div class="luce-body" id="luceContent">
-        <div class="msg luce-msg">
-            Bonjour ! Je suis <b>Luce</b>. Comment puis-je éclairer votre gestion aujourd'hui ?
-        </div>
-    </div>
-    <div class="luce-footer">
-        <input type="text" id="luceInput" class="luce-input" placeholder="Posez votre question...">
-        <button id="sendLuce" class="cta-primary" style="padding: 10px 15px; border-radius: 12px;">
-            <i class="fa fa-paper-plane"></i>
-        </button>
-    </div>
-</div>
 <script type="module">
-/* ================= FIREBASE ================= */
+/* ================= CONFIGURATION & IMPORTS ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
-  signOut
-} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-/* ================= CONFIG ================= */
-/*
-  ⚠️ IMPORTANT
-  La clé Firebase n’est PAS secrète (clé publique).
-  La vraie sécurité se fait via les règles Firebase.
-*/
 const firebaseConfig = {
-  apiKey: "AIzaSyB3vSZcGoixj7
-    -j9HcC-G5cKXvEoDI9tcAw",
+  apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
   projectId: "umbrella-projet",
   storageBucket: "umbrella-projet.firebasestorage.app",
@@ -1013,207 +650,107 @@ const firebaseConfig = {
   measurementId: "G-YCYQ7L30WY"
 };
 
-/* ================= INIT ================= */
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
 getAnalytics(app);
 
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+/* ================= GESTION UTILISATEUR (AUTH) ================= */
+const userAvatar = document.getElementById("userAvatar");
+const userName = document.getElementById("userName");
+const userEmail = document.getElementById("userEmail");
 
-/* ================= HANDLE REDIRECT RESULT ================= */
-getRedirectResult(auth)
-  .then(result => {
-    if (!result || !result.user) return;
-
-    const u = result.user;
-
-    localStorage.setItem(
-      "umbrellaUser",
-      JSON.stringify({
-        uid: u.uid,
-        name: u.displayName || "Utilisateur",
-        email: u.email || "",
-        avatar: u.photoURL || ""
-      })
-    );
-
-    // Nettoyage URL après redirect
-    window.history.replaceState({}, document.title, window.location.pathname);
-    location.reload();
-  })
-  .catch(error => {
-    console.error("Google redirect error:", error.code, error.message);
-  });
-
-/* ================= GOOGLE LOGIN ================= */
-const googleBtn = document.getElementById("googleLogin");
-if (googleBtn) {
-  googleBtn.addEventListener("click", () => {
-    signInWithRedirect(auth, provider);
-  });
-}
-
-/* ================= LOGOUT ================= */
-window.logout = function () {
-  signOut(auth)
-    .then(() => {
-      localStorage.removeItem("umbrellaUser");
-      location.reload();
-    })
-    .catch(err => {
-      console.error("Logout error:", err);
-    });
-};
-
-/* ================= USER UI ================= */
-const storedUser = localStorage.getItem("umbrellaUser");
-if (storedUser) {
-  try {
-    const user = JSON.parse(storedUser);
-
-    const avatar = document.getElementById("userAvatar");
-    const name = document.getElementById("userName");
-    const email = document.getElementById("userEmail");
-
-    if (avatar && user.avatar) avatar.src = user.avatar;
-    if (name) name.textContent = user.name;
-    if (email) email.textContent = user.email;
-
-    document.querySelectorAll(".go-dashboard").forEach(btn => {
-      btn.setAttribute("href", "./dashboard.html");
-    });
-
-  } catch (e) {
-    console.error("Invalid user storage:", e);
+// Synchronisation en temps réel de l'état de connexion
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    if(userAvatar) userAvatar.src = user.photoURL || "https://www.gravatar.com/avatar/?d=mp";
+    if(userName) userName.textContent = user.displayName;
+    if(userEmail) userEmail.textContent = user.email;
+    localStorage.setItem("umbrellaUser", JSON.stringify({ name: user.displayName, email: user.email, avatar: user.photoURL }));
+  } else {
     localStorage.removeItem("umbrellaUser");
   }
-}
- /* ================= CONFIGURATION ================= */
-        const LUCE_API = "https://umbrella-site.onrender.com/chat";
+});
 
-        const luceBubble = document.getElementById("luce-bubble");
-        const luceChat = document.getElementById("luce-chat");
-        const luceInput = document.getElementById("luceInput");
-        const luceContent = document.getElementById("luceContent");
-        const sendLuce = document.getElementById("sendLuce");
-        const closeLuce = document.getElementById("closeLuce");
-
-        /* ================= FORMATAGE TEXTE ================= */
-        function formatLuceText(text = "") {
-            return text
-                .replace(/\n/g, "<br>")
-                .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-                .replace(/\*(.*?)\*/g, "<i>$1</i>");
-        }
-
-        /* ================= UI MESSAGES ================= */
-        function addLuceMsg(text, type) {
-            const div = document.createElement("div");
-            div.className = `msg ${type}-msg`;
-            div.innerHTML = type === "luce" ? formatLuceText(text) : text;
-            luceContent.appendChild(div);
-            luceContent.scrollTop = luceContent.scrollHeight; // Scroll automatique
-            return div;
-        }
-
-        /* ================= ENVOI MESSAGE ================= */
-        async function handleLuce() {
-            const message = luceInput.value.trim();
-            if (!message) return;
-
-            addLuceMsg(message, "user");
-            luceInput.value = "";
-
-            // Affichage de l'état "réflexion"
-            const typing = addLuceMsg("<i>Luce réfléchit…</i>", "luce");
-            typing.style.opacity = "0.7";
-
-            try {
-                const response = await fetch(LUCE_API, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    typing.innerHTML = "Désolée, le serveur Gemini ne répond pas.";
-                    return;
-                }
-
-                typing.style.opacity = "1";
-                typing.innerHTML = formatLuceText(data.reply || "Je n’ai pas pu formuler de réponse.");
-
-            } catch (err) {
-                console.error("Erreur réseau:", err);
-                typing.innerHTML = "Impossible de contacter Luce. Vérifie ta connexion.";
-            }
-        }
-
-        /* ================= ÉVÉNEMENTS ================= */
-        luceBubble.onclick = () => {
-            const isHidden = luceChat.style.display === "none" || !luceChat.style.display;
-            luceChat.style.display = isHidden ? "flex" : "none";
-            if (isHidden) luceInput.focus();
-        };
-
-        closeLuce.onclick = () => luceChat.style.display = "none";
-
-        sendLuce.onclick = handleLuce;
-
-        luceInput.onkeydown = (e) => {
-            if (e.key === "Enter") handleLuce();
-        };
-
-
-/* ================= HERO SLIDER ================= */
-const slides = document.querySelectorAll(".hero-slide");
-const dots = document.querySelectorAll(".hero-dots span");
-let current = 0;
-
-function showSlide(n) {
-  slides.forEach((s, i) => s.classList.toggle("active", i === n));
-  dots.forEach((d, i) => d.classList.toggle("active", i === n));
-  current = n;
-}
-
-if (slides.length > 0) {
-  setInterval(() => showSlide((current + 1) % slides.length), 5000);
-  dots.forEach((d, i) => d.addEventListener("click", () => showSlide(i)));
-}
-
-/* ================= MENU MOBILE ================= */
-const menuToggle = document.getElementById("menuToggle");
-const mobileMenu = document.getElementById("mobileMenu");
-if (menuToggle && mobileMenu) {
-  menuToggle.onclick = () => mobileMenu.classList.toggle("active");
-}
-
-/* ================= SEARCH ================= */
-const searchBtn = document.getElementById("searchBtn");
-const searchModal = document.getElementById("searchModal");
-if (searchBtn && searchModal) {
-  searchBtn.onclick = () => searchModal.classList.add("active");
-  searchModal.onclick = e => {
-    if (e.target === searchModal) searchModal.classList.remove("active");
+const googleBtn = document.getElementById("googleLogin");
+if (googleBtn) {
+  googleBtn.onclick = () => {
+    signInWithPopup(auth, provider).then(() => location.reload()).catch(err => console.error(err));
   };
 }
 
-/* ================= CART ================= */
-const cartBtn = document.getElementById("cartBtn");
-if (cartBtn) {
-  cartBtn.onclick = () => location.href = "tarification.html";
+window.logout = () => {
+  signOut(auth).then(() => {
+    localStorage.removeItem("umbrellaUser");
+    location.reload();
+  });
+};
+
+/* ================= CONTACT FONCTIONNEL (FIRESTORE) ================= */
+const contactForm = document.getElementById('contactForm');
+const formStatus = document.getElementById('formStatus');
+
+if (contactForm) {
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = contactForm.querySelector('button');
+    const originalText = btn.innerText;
+
+    btn.innerText = "Envoi...";
+    btn.disabled = true;
+
+    try {
+      await addDoc(collection(db, "messages"), {
+        nom: document.getElementById('contactName').value,
+        email: document.getElementById('contactEmail').value,
+        message: document.getElementById('contactMessage').value,
+        date: serverTimestamp()
+      });
+
+      formStatus.style.display = "block";
+      formStatus.style.cssText = "background:#dcfce7; color:#166534; padding:10px; border-radius:8px; margin-top:10px;";
+      formStatus.innerText = "Message envoyé avec succès !";
+      contactForm.reset();
+    } catch (err) {
+      formStatus.innerText = "Erreur lors de l'envoi.";
+      console.error(err);
+    } finally {
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
+  });
+}
+
+/* ================= UI & NAVIGATION ================= */
+// Slider
+const slides = document.querySelectorAll(".hero-slide");
+const dots = document.querySelectorAll(".hero-dots .dot");
+let current = 0;
+
+const showSlide = (n) => {
+  slides.forEach((s, i) => s.classList.toggle("active", i === n));
+  dots.forEach((d, i) => d.classList.toggle("active", i === n));
+  current = n;
+};
+
+if (slides.length > 0) {
+  setInterval(() => showSlide((current + 1) % slides.length), 5000);
+  dots.forEach((d, i) => d.onclick = () => showSlide(i));
+}
+
+// Menu Mobile
+const menuToggle = document.getElementById("menuToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+if (menuToggle) menuToggle.onclick = () => mobileMenu.classList.toggle("active");
+
+// Recherche
+const searchBtn = document.getElementById("searchBtn");
+const searchModal = document.getElementById("searchModal");
+if (searchBtn) {
+  searchBtn.onclick = () => searchModal.classList.add("active");
+  searchModal.onclick = (e) => { if (e.target === searchModal) searchModal.classList.remove("active"); };
 }
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
