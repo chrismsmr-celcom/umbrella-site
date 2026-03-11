@@ -1,64 +1,80 @@
- import requests
+import requests
+import os
 
 # ========================
-# CONFIG
+# CONFIGURATION
 # ========================
+# Ton URL de déploiement sur Render
 BASE_URL = "https://umbrella-site-qr-code.onrender.com"
 
 # ========================
-# PDF → Word
+# FONCTION PDF → WORD
 # ========================
-def process_pdf_to_word(pdf_path, docx_path):
+def pdf_to_word(pdf_paths):
+    """Envoie des PDF au moteur Umbrella pour conversion Word (avec OCR auto)"""
+    url = f"{BASE_URL}/convert/pdf-to-word"
+    
+    files = []
+    opened_files = []
+    
     try:
-        # 1. Tentative normale avec pdf2docx
-        cv = Converter(pdf_path)
-        cv.convert(docx_path)
-        cv.close()
+        for pdf in pdf_paths:
+            if os.path.exists(pdf):
+                f = open(pdf, "rb")
+                opened_files.append(f)
+                files.append(("files", (os.path.basename(pdf), f, "application/pdf")))
         
-        # 2. Vérification : si le fichier est tout petit (moins de 5ko), c'est probablement un scan
-        # Ou si tu veux forcer l'OCR sur les scans, on peut faire une vérification de contenu
-        if os.path.getsize(docx_path) < 5000:
-            print(f"Détection de scan pour {pdf_path}, passage en mode OCR...")
-            doc = Document()
-            images = convert_from_path(pdf_path)
+        if not files:
+            print("⚠️ Aucun fichier valide trouvé.")
+            return
+
+        print(f"🚀 Envoi de {len(files)} fichier(s) vers Umbrella Engine...")
+        response = requests.post(url, files=files)
+        
+        if response.status_code == 200:
+            output_zip = "umbrella_word_results.zip"
+            with open(output_zip, "wb") as out:
+                out.write(response.content)
+            print(f"✅ Conversion terminée ! Fichiers sauvegardés dans : {output_zip}")
+        else:
+            print(f"❌ Erreur Serveur ({response.status_code}) : {response.text}")
             
-            for img in images:
-                # Extraction du texte (langue française)
-                text = pytesseract.image_to_string(img, lang='fra')
-                doc.add_paragraph(text)
-                doc.add_page_break()
-            
-            doc.save(docx_path)
-            
-        return docx_path
-    except Exception as e:
-        print(f"Erreur conversion: {e}")
-        return None
+    finally:
+        # Toujours fermer les fichiers ouverts
+        for f in opened_files:
+            f.close()
+
 # ========================
-# PDF → Images
+# FONCTION PDF → IMAGES
 # ========================
 def pdf_to_images(pdf_paths):
+    """Envoie des PDF pour extraction d'images"""
     url = f"{BASE_URL}/convert/pdf-to-images"
-    files = [("files", (pdf, open(pdf, "rb"), "application/pdf")) for pdf in pdf_paths]
+    files = [("files", (os.path.basename(p), open(p, "rb"), "application/pdf")) for p in pdf_paths if os.path.exists(p)]
+
+    if not files: return
 
     response = requests.post(url, files=files)
     if response.status_code == 200:
-        output_file = "pdf_images.zip"
-        with open(output_file, "wb") as f:
+        output_zip = "umbrella_images.zip"
+        with open(output_zip, "wb") as f:
             f.write(response.content)
-        print(f"✅ PDF → Images terminé : {output_file}")
+        print(f"✅ PDF → Images terminé : {output_zip}")
     else:
         print("❌ Erreur PDF → Images :", response.text)
 
 # ========================
-# TEST
+# ZONE DE TEST
 # ========================
 if __name__ == "__main__":
-    # Mettez ici vos fichiers PDF à convertir
-    pdf_files = ["test.pdf", "example.pdf"]
+    # Liste de tes fichiers locaux à tester (ex: ta police d'assurance)
+    # Assure-toi que ces fichiers sont dans le même dossier que ce script
+    mes_fichiers = ["insurance_policy.pdf"] 
 
-    # Conversion PDF → Word
-    pdf_to_word(pdf_files)
+    print("--- DÉMARRAGE DES TESTS UMBRELLA ENGINE ---")
+    
+    # Test de la conversion Word (qui déclenchera l'OCR sur le serveur si besoin)
+    pdf_to_word(mes_fichiers)
 
-    # Conversion PDF → Images
-    pdf_to_images(pdf_files)
+    # Test de l'extraction d'images
+    # pdf_to_images(mes_fichiers)
