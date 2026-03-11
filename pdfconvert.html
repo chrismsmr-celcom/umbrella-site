@@ -11,6 +11,7 @@
             --accent: #F0D13C;
             --bg: #f5f5fa;
             --success: #27ae60;
+            --text-muted: #888;
         }
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
 
@@ -35,33 +36,40 @@
         .download-btn {
             margin-top: auto; padding: 18px; width: 100%; background: var(--primary);
             color: var(--accent); border: none; border-radius: 12px; cursor: pointer;
-            font-weight: 500; font-size: 15px; text-transform: uppercase; letter-spacing: 2px;
-            transition: all 0.3s;
+            font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.3s ease;
         }
-        .download-btn:hover:not(:disabled) { filter: brightness(2); transform: translateY(2px); }
+        .download-btn:hover:not(:disabled) { filter: contrast(1.1); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(49, 16, 56, 0.3); }
         .download-btn:disabled { opacity: 0.6; cursor: wait; filter: grayscale(0.5); }
 
         /* Main Area */
         .workarea { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; position: relative; }
         
         .dropzone {
-            width: 100%; max-width: 300px; padding: 100px 60px; border: 3px dashed #d1d1e0;
+            width: 100%; max-width: 300px; min-height: 400px; padding: 40px; border: 3px dashed #d1d1e0;
             border-radius: 30px; text-align: center; background: #fff; cursor: pointer;
-            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center;
+            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .dropzone:hover { border-color: var(--primary); background: #fafafa; }
         .dropzone.dragover { background: #f0ebf2; border-color: var(--primary); transform: scale(1.02); }
-        
+               
         #fileInput { display: none; }
         
-        .file-list { margin-top: 30px; width: 100%; max-width: 500px; max-height: 200px; overflow-y: auto; }
+        /* Aperçu PDF "Beauty" */
+        .preview-container {
+            width: 100%; height: 350px; margin-bottom: 20px; border-radius: 15px;
+            overflow: hidden; border: 1px solid #eee; display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); animation: slideIn 0.4s ease-out;
+        }
+        .preview-container iframe { width: 100%; height: 100%; border: none; }
+
+        .file-list { width: 100%; max-width: 500px; margin-top: 15px; }
         .file-item { 
-            background: #f8f9fa; margin-bottom: 8px; padding: 10px 15px; border-radius: 8px; 
+            background: #f8f9fa; border: 1px solid #eee; margin-bottom: 8px; padding: 12px 15px; border-radius: 10px; 
             display: flex; align-items: center; font-size: 0.9rem; animation: slideIn 0.3s ease-out;
         }
-        .file-item i { color: var(--success); margin-right: 10px; }
+        .file-item i { color: var(--success); margin-right: 12px; }
 
-        /* Loader */
         .loader {
             display: none; width: 40px; height: 40px; border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary); border-radius: 50%;
@@ -101,10 +109,15 @@
 <div class="workarea">
     <div class="dropzone" id="dropzone">
         <div id="dropzone-content">
-            <i class="fa fa-cloud-upload-alt" style="font-size: 60px; color: var(--primary); margin-bottom: 20px; opacity: 0.8;"></i>
-            <p style="font-size: 1.2rem; font-weight: 600; color: #444;">Glissez vos fichiers ici</p>
-            <p style="color: #888; font-size: 0.9rem;">ou cliquez pour parcourir</p>
+            <i class="fa fa-cloud-upload-alt" style="font-size: 70px; color: var(--primary); margin-bottom: 20px; opacity: 0.6;"></i>
+            <p style="font-size: 1.25rem; font-weight: 600; color: #333; margin: 0;">Glissez vos fichiers ici</p>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 10px;">ou cliquez pour parcourir</p>
         </div>
+        
+        <div id="previewContainer" class="preview-container">
+            <iframe id="pdfPreview"></iframe>
+        </div>
+
         <input type="file" id="fileInput" multiple accept=".pdf" />
         <div class="file-list" id="fileList"></div>
         <div class="loader" id="loader"></div>
@@ -115,19 +128,15 @@
     let currentRoute = 'convert/pdf-to-word';
     let selectedFiles = [];
 
-    // Initialisation
     function setAction(route, btn, accept) {
         currentRoute = route;
         document.querySelectorAll('.action-select button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('fileInput').accept = accept;
         
-        // Reset file list if changing mode
         if(selectedFiles.length > 0) {
-            if(confirm("Changer de mode effacera la sélection actuelle. Continuer ?")) {
-                selectedFiles = [];
-                renderFiles();
-            }
+            selectedFiles = [];
+            renderFiles();
         }
     }
 
@@ -136,8 +145,11 @@
     const fileList = document.getElementById('fileList');
     const downloadBtn = document.getElementById('downloadBtn');
     const loader = document.getElementById('loader');
+    const previewContainer = document.getElementById('previewContainer');
+    const pdfPreview = document.getElementById('pdfPreview');
+    const dropContent = document.getElementById('dropzone-content');
 
-    // Drag and Drop Logic
+    // Events
     dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
     dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
     dropzone.addEventListener('drop', (e) => {
@@ -146,7 +158,7 @@
         handleFiles(e.dataTransfer.files);
     });
 
-    dropzone.onclick = (e) => { if(e.target.id !== 'fileList') fileInput.click(); };
+    dropzone.onclick = (e) => { if(!e.target.closest('.file-item') && !e.target.closest('.preview-container')) fileInput.click(); };
     fileInput.onchange = (e) => handleFiles(e.target.files);
 
     function handleFiles(files) {
@@ -156,13 +168,26 @@
 
     function renderFiles() {
         if(selectedFiles.length === 0) {
-            document.getElementById('dropzone-content').style.display = 'block';
+            dropContent.style.display = 'block';
+            previewContainer.style.display = 'none';
             fileList.innerHTML = '';
+            pdfPreview.src = '';
             return;
         }
-        document.getElementById('dropzone-content').style.display = 'none';
+
+        dropContent.style.display = 'none';
+        
+        // Si 1 seul fichier PDF, on affiche l'aperçu
+        if(selectedFiles.length === 1 && selectedFiles[0].type === "application/pdf") {
+            const fileURL = URL.createObjectURL(selectedFiles[0]);
+            pdfPreview.src = fileURL;
+            previewContainer.style.display = 'block';
+        } else {
+            previewContainer.style.display = 'none';
+        }
+
         fileList.innerHTML = selectedFiles.map(f => `
-            <div class="file-item"><i class="fa fa-file-alt"></i> ${f.name}</div>
+            <div class="file-item"><i class="fa fa-check-circle"></i> <span>${f.name}</span></div>
         `).join('');
     }
 
@@ -170,14 +195,13 @@
         if (selectedFiles.length === 0) return alert("Veuillez sélectionner au moins un fichier.");
         
         downloadBtn.disabled = true;
-        downloadBtn.textContent = "Conversion en cours...";
+        downloadBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Traitement...';
         loader.style.display = 'block';
 
         const formData = new FormData();
         selectedFiles.forEach(f => formData.append('files', f));
 
         try {
-            // Utilisation de l'URL absolue de ton backend
             const response = await fetch(`https://umbrella-site-qr-code.onrender.com/${currentRoute}`, {
                 method: 'POST',
                 body: formData
@@ -192,14 +216,13 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Umbrella_${Date.now()}.zip`;
+            a.download = `Umbrella_Output_${Date.now()}.zip`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             
             alert("✨ Conversion réussie !");
         } catch (err) {
-            console.error(err);
             alert("❌ Erreur : " + err.message);
         } finally {
             downloadBtn.disabled = false;
