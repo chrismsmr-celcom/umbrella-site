@@ -7,3 +7,5 @@ python-pptx
 pillow
 camelot-py[cv]
 opencv-python-headless
+pytesseract
+python-docx
