@@ -160,15 +160,22 @@ async def protect_pdf(file: UploadFile = File(...), password: str = Form("umbrel
 
 # --- IMAGES ---
 
-@app.post("/convert/images-to-pdf")
-async def images_to_pdf(files: List[UploadFile] = File(...)):
+@app.post("/convert/pdf-to-jpg")
+async def pdf_to_jpg(file: UploadFile = File(...)):
     temp_dir = tempfile.mkdtemp()
-    output_pdf = os.path.join(temp_dir, "images_merged.pdf")
-    image_list = []
-    for file in files:
-        img_p = os.path.join(temp_dir, file.filename)
-        with open(img_p, "wb") as f: shutil.copyfileobj(file.file, f)
-        image_list.append(Image.open(img_p).convert("RGB"))
-    if image_list:
-        image_list[0].save(output_pdf, save_all=True, append_images=image_list[1:])
-    return FileResponse(output_pdf, filename="umbrella_images.pdf")
+    p = os.path.join(temp_dir, file.filename)
+    with open(p, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    
+    # Conversion du PDF en liste d'images PIL
+    images = convert_from_path(p)
+    zip_path = os.path.join(temp_dir, "umbrella_images.zip")
+    
+    with zipfile.ZipFile(zip_path, "w") as z:
+        for i, img in enumerate(images):
+            img_name = f"page_{i+1}.jpg"
+            img_path = os.path.join(temp_dir, img_name)
+            img.save(img_path, "JPEG")
+            z.write(img_path, img_name)
+            
+    return FileResponse(zip_path, filename="umbrella_pdf_to_jpg.zip")
