@@ -4,77 +4,97 @@ import os
 # ========================
 # CONFIGURATION
 # ========================
-# Ton URL de déploiement sur Render
 BASE_URL = "https://umbrella-site-qr-code.onrender.com"
 
 # ========================
-# FONCTION PDF → WORD
+# UTILITAIRES DE GESTION DE FICHIERS
 # ========================
-def pdf_to_word(pdf_paths):
-    """Envoie des PDF au moteur Umbrella pour conversion Word (avec OCR auto)"""
-    url = f"{BASE_URL}/convert/pdf-to-word"
-    
-    files = []
-    opened_files = []
-    
+def send_request(endpoint, files, data=None, output_name="result.zip"):
+    """Fonction générique pour envoyer des fichiers à Umbrella"""
+    url = f"{BASE_URL}/{endpoint}"
     try:
-        for pdf in pdf_paths:
-            if os.path.exists(pdf):
-                f = open(pdf, "rb")
-                opened_files.append(f)
-                files.append(("files", (os.path.basename(pdf), f, "application/pdf")))
-        
-        if not files:
-            print("⚠️ Aucun fichier valide trouvé.")
-            return
-
-        print(f"🚀 Envoi de {len(files)} fichier(s) vers Umbrella Engine...")
-        response = requests.post(url, files=files)
+        print(f"🚀 Opération [{endpoint}] en cours...")
+        response = requests.post(url, files=files, data=data)
         
         if response.status_code == 200:
-            output_zip = "umbrella_word_results.zip"
-            with open(output_zip, "wb") as out:
+            with open(output_name, "wb") as out:
                 out.write(response.content)
-            print(f"✅ Conversion terminée ! Fichiers sauvegardés dans : {output_zip}")
+            print(f"✅ Succès ! Fichier sauvegardé : {output_name}")
         else:
             print(f"❌ Erreur Serveur ({response.status_code}) : {response.text}")
-            
-    finally:
-        # Toujours fermer les fichiers ouverts
-        for f in opened_files:
-            f.close()
+    except Exception as e:
+        print(f"❌ Erreur de connexion : {e}")
 
 # ========================
-# FONCTION PDF → IMAGES
+# FONCTIONS ORGANIZE
 # ========================
-def pdf_to_images(pdf_paths):
-    """Envoie des PDF pour extraction d'images"""
-    url = f"{BASE_URL}/convert/pdf-to-images"
-    files = [("files", (os.path.basename(p), open(p, "rb"), "application/pdf")) for p in pdf_paths if os.path.exists(p)]
 
+def umbrella_merge(pdf_paths, output_name="merged_umbrella.pdf"):
+    """Fusionne plusieurs PDF en un seul"""
+    opened_files = [open(p, "rb") for p in pdf_paths if os.path.exists(p)]
+    files = [("files", (os.path.basename(f.name), f, "application/pdf")) for f in opened_files]
+    
     if not files: return
+    send_request("organize/merge", files, output_name=output_name)
+    for f in opened_files: f.close()
 
-    response = requests.post(url, files=files)
-    if response.status_code == 200:
-        output_zip = "umbrella_images.zip"
-        with open(output_zip, "wb") as f:
-            f.write(response.content)
-        print(f"✅ PDF → Images terminé : {output_zip}")
-    else:
-        print("❌ Erreur PDF → Images :", response.text)
+def umbrella_split(pdf_path, output_name="split_pages.zip"):
+    """Sépare chaque page d'un PDF"""
+    if not os.path.exists(pdf_path): return
+    with open(pdf_path, "rb") as f:
+        files = [("file", (os.path.basename(pdf_path), f, "application/pdf"))]
+        send_request("organize/split", files, output_name=output_name)
 
 # ========================
-# ZONE DE TEST
+# FONCTIONS CONVERT
+# ========================
+
+def umbrella_pdf_to_word(pdf_paths, output_name="converted_word.zip"):
+    """Conversion PDF -> Word avec détection OCR auto"""
+    opened_files = [open(p, "rb") for p in pdf_paths if os.path.exists(p)]
+    files = [("files", (os.path.basename(f.name), f, "application/pdf")) for f in opened_files]
+    
+    if not files: return
+    send_request("convert/pdf-to-word", files, output_name=output_name)
+    for f in opened_files: f.close()
+
+def umbrella_office_to_pdf(doc_paths, output_name="converted_from_office.zip"):
+    """Conversion Word/Excel/PPT -> PDF (via LibreOffice Headless)"""
+    opened_files = [open(p, "rb") for p in doc_paths if os.path.exists(p)]
+    # On laisse le serveur gérer le MIME type selon l'extension
+    files = [("files", (os.path.basename(f.name), f, "application/octet-stream")) for f in opened_files]
+    
+    if not files: return
+    send_request("convert/office-to-pdf", files, output_name=output_name)
+    for f in opened_files: f.close()
+
+# ========================
+# FONCTION SECURITY
+# ========================
+
+def umbrella_protect(pdf_path, password, output_name="protected_doc.pdf"):
+    """Ajoute un mot de passe à un PDF"""
+    if not os.path.exists(pdf_path): return
+    with open(pdf_path, "rb") as f:
+        files = [("file", (os.path.basename(pdf_path), f, "application/pdf"))]
+        data = {"password": password}
+        send_request("security/protect", files, data=data, output_name=output_name)
+
+# ========================
+# ZONE DE TEST (MAIN)
 # ========================
 if __name__ == "__main__":
-    # Liste de tes fichiers locaux à tester (ex: ta police d'assurance)
-    # Assure-toi que ces fichiers sont dans le même dossier que ce script
-    mes_fichiers = ["insurance_policy.pdf"] 
-
-    print("--- DÉMARRAGE DES TESTS UMBRELLA ENGINE ---")
+    print("--- STARTING UMBRELLA ENGINE CLIENT TEST ---")
     
-    # Test de la conversion Word (qui déclenchera l'OCR sur le serveur si besoin)
-    pdf_to_word(mes_fichiers)
-
-    # Test de l'extraction d'images
-    # pdf_to_images(mes_fichiers)
+    # 1. Test Fusion (Merge)
+    # umbrella_merge(["doc1.pdf", "doc2.pdf"], "final_fusion.pdf")
+    
+    # 2. Test Word avec OCR (Idéal pour tes polices d'assurance scannées)
+    mes_scans = ["insurance_policy.pdf"]
+    umbrella_pdf_to_word(mes_scans, "resultats_ocr.zip")
+    
+    # 3. Test Protection (Mot de passe)
+    # umbrella_protect("secret.pdf", "mon_code_123", "secret_locked.pdf")
+    
+    # 4. Test Conversion Office
+    # umbrella_office_to_pdf(["devis.docx", "data.xlsx"], "archive_pdf.zip")
