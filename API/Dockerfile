@@ -11,26 +11,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     tesseract-ocr-fra \
     tesseract-ocr-eng \
-    # --- Conversion Office (Word, PPT, Excel) ---
-    libreoffice \
-    libreoffice-java-common \
-    # --- Manipulation PDF & Image ---
+    # --- Conversion Office (Version minimale sans UI pour économiser 200MB) ---
+    libreoffice-writer \
+    libreoffice-calc \
+    libreoffice-impress \
+    # --- Manipulation PDF, Image & Tableaux (Camelot) ---
     ghostscript \
     poppler-utils \
     libvips-dev \
     libgl1-mesa-glx \
-    # --- Support des polices pour le rendu PDF ---
+    libglib2.0-0 \
+    # --- Support des polices ---
     fonts-liberation \
     fontconfig \
     # --- Outils de build ---
     gcc \
     python3-dev \
+    # Indispensable pour Camelot/OpenCV
+    libsm6 libxext6 libxrender-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-
-# Gestion des polices (Indispensable pour "Add Watermark" ou "Add page numbers")
-RUN fc-cache -f -v
 
 # Installation des dépendances Python
 COPY requirements.txt .
@@ -43,6 +44,6 @@ COPY . .
 # Port Render
 EXPOSE 10000
 
-# Lancement avec Uvicorn
-# On utilise un worker unique pour économiser la RAM sur Render à cause de LibreOffice
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000", "--workers", "1"]
+# Lancement
+# Ajout du paramètre --timeout-keep-alive pour les gros fichiers PDF
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000", "--workers", "1", "--timeout-keep-alive", "120"]
