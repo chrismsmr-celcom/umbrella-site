@@ -9,7 +9,8 @@ from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import tempfile, os, shutil, zipfile, subprocess
 import camelot
-
+import pytesseract
+from docx import Document
 app = FastAPI(title="Umbrella PDF Engine")
 
 # Configuration CORS pour ton Frontend
