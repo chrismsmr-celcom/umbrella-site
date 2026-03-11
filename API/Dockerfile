@@ -1,7 +1,9 @@
 FROM python:3.10-slim
 
-# Installation de LibreOffice, Java (pour Camelot), Ghostscript et Poppler
+# Installation des dépendances système + Tesseract OCR
 RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-fra \
     libreoffice \
     libreoffice-java-common \
     ghostscript \
@@ -16,6 +18,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Port Render
 EXPOSE 10000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
