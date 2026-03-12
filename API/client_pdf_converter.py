@@ -27,8 +27,9 @@ def send_request(endpoint, files, data=None, output_name="result.zip"):
         duration = round(time.time() - start_time, 2)
 
         if response.status_code == 200:
-            with open(output_name, "wb") as out:
-                out.write(response.content)
+           with open(output_name, "wb") as out:
+    for chunk in response.iter_content(chunk_size=8192):
+        out.write(chunk)
             print(f"✅ Succès ({duration}s) ! Fichier sauvegardé : {output_name}")
         else:
             print(f"❌ Erreur Serveur ({response.status_code}) après {duration}s")
