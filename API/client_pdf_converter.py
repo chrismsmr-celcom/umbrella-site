@@ -7,7 +7,7 @@ from contextlib import ExitStack
 # CONFIGURATION
 # ========================
 # Vérifie que l'URL ne finit pas par un slash
-BASE_URL = "https://umbrella-site-1pdf-covert.onrender.com"
+BASE_URL = "https://umbrella-site-qr-code.onrender.com"
 
 # ========================
 # UTILITAIRES DE GESTION DE FICHIERS
