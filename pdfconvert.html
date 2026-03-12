@@ -347,7 +347,8 @@
     function toggleMenu() {
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
-        menuToggle.innerHTML = sidebar.classList.contains('open') ? '<i class="fa fa-times"></i>' : '<i class="fa fa-bars"></i>';
+        const icon = sidebar.classList.contains('open') ? 'fa-times' : 'fa-bars';
+        menuToggle.innerHTML = `<i class="fa ${icon}"></i>`;
     }
     menuToggle.onclick = toggleMenu;
     overlay.onclick = toggleMenu;
@@ -373,6 +374,7 @@
             const page = await pdf.getPage(1);
             const viewport = page.getViewport({scale: 1.5}); 
             const canvas = document.getElementById('pdfCanvas');
+            if(!canvas) return;
             const context = canvas.getContext('2d');
             canvas.height = viewport.height;
             canvas.width = viewport.width;
@@ -386,11 +388,13 @@
         const dropzone = document.getElementById('dropzone');
         const btn = document.getElementById('downloadBtn');
         const wrapper = document.querySelector('.pdf-wrapper');
+        const content = document.getElementById('dropzone-content');
         
         if(selectedFiles.length === 0) {
             preview.style.display = 'none';
             dropzone.style.display = 'flex';
             btn.classList.remove('show-mobile');
+            if(content) content.style.display = 'block';
             return;
         }
 
@@ -405,12 +409,10 @@
             if(file.type === "application/pdf") {
                 wrapper.innerHTML = '<canvas id="pdfCanvas"></canvas>';
                 renderPDFPreview(file);
-            } 
-            else if(file.type.startsWith('image/')) {
+            } else if(file.type.startsWith('image/')) {
                 const imgUrl = URL.createObjectURL(file);
                 wrapper.innerHTML = `<img src="${imgUrl}" style="max-width:95%; height:auto; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.1);">`;
-            } 
-            else {
+            } else {
                 wrapper.innerHTML = `
                     <div style="text-align:center; padding-top:50px;">
                         <i class="fa fa-file-alt" style="font-size:80px; color:var(--primary); opacity:0.2;"></i>
@@ -418,22 +420,27 @@
                         <span style="font-size:0.8rem; color:#888;">Prévisualisation non disponible</span>
                     </div>`;
             }
-        } 
-        else {
+        } else {
             preview.style.display = 'none';
             dropzone.style.display = 'block';
-            let gridHTML = '<div class="file-grid">';
+            if(content) content.style.display = 'none';
+            
+            let gridHTML = '<div class="file-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:15px; padding:20px; width:100%;">';
             selectedFiles.forEach((file, index) => {
                 const isImg = file.type.startsWith('image/');
                 gridHTML += `
-                    <div class="pdf-card">
-                        <button class="remove-file" onclick="removeOneFile(${index}, event)"><i class="fa fa-times"></i></button>
-                        <i class="fa ${isImg ? 'fa-image' : 'fa-file-pdf'} file-icon" style="color:${isImg ? '#3498db' : '#e74c3c'}"></i>
-                        <span class="file-name">${file.name}</span>
+                    <div class="pdf-card" style="background:#f9f9fb; padding:15px; border-radius:15px; text-align:center; position:relative; border:1px solid #eee;">
+                        <button class="remove-file" onclick="removeOneFile(${index}, event)" style="position:absolute; top:5px; right:5px; border:none; background:none; color:#ff4444; cursor:pointer;"><i class="fa fa-times"></i></button>
+                        <i class="fa ${isImg ? 'fa-image' : 'fa-file-pdf'}" style="font-size:2rem; color:${isImg ? '#3498db' : '#e74c3c'}"></i>
+                        <span style="display:block; font-size:0.7rem; margin-top:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${file.name}</span>
                     </div>`;
             });
             gridHTML += '</div>';
-            dropzone.innerHTML = gridHTML;
+            
+            // On remplace le contenu de la dropzone par la grille, sans casser l'élément racine
+            const existingGrid = dropzone.querySelector('.file-grid');
+            if(existingGrid) existingGrid.remove();
+            dropzone.insertAdjacentHTML('beforeend', gridHTML);
         }
     }
 
@@ -446,10 +453,14 @@
     function resetUpload() {
         selectedFiles = [];
         fileInput.value = '';
+        const content = document.getElementById('dropzone-content');
+        if(content) content.style.display = 'block';
+        const grid = dropzone.querySelector('.file-grid');
+        if(grid) grid.remove();
         renderFiles();
     }
 
-    // --- ACTION : ENVOI AU SERVEUR (LOGIQUE MISE À JOUR) ---
+    // --- ACTION : ENVOI AU SERVEUR ---
     document.getElementById('downloadBtn').onclick = async function() {
         if (!currentRoute) return alert("Sélectionnez une action dans le menu.");
         if (selectedFiles.length === 0) return alert("Veuillez ajouter des fichiers.");
@@ -457,10 +468,9 @@
         const btn = this;
         const originalText = btn.textContent;
         btn.disabled = true;
-        btn.textContent = "Traitement en cours...";
+        btn.textContent = "Traitement...";
 
-        // 1. TRADUCTION DES ROUTES (Front -> Back)
-        // Cela règle les erreurs 404
+        // Correction des routes pour correspondre au backend Python
         let finalRoute = currentRoute
             .replace('edit/merge', 'organize/merge')
             .replace('edit/split', 'organize/split')
@@ -471,10 +481,9 @@
 
         const formData = new FormData();
         
-        // 2. GESTION DU CHAMP (file vs files)
-        // Cela règle les erreurs 422
-        const singleFileEndpoints = ['organize/split', 'security/protect', 'convert/pdf-to-jpg'];
-        const isSingle = singleFileEndpoints.some(endpoint => finalRoute.includes(endpoint));
+        // Détection du mode (Single vs Multi) pour éviter l'erreur 422
+        const singleFileEndpoints = ['split', 'protect', 'pdf-to-jpg', 'unlock', 'sign'];
+        const isSingle = singleFileEndpoints.some(e => finalRoute.includes(e));
 
         if (isSingle) {
             formData.append('file', selectedFiles[0]);
@@ -482,19 +491,13 @@
             selectedFiles.forEach(f => formData.append('files', f));
         }
 
-        // Cas spécifique du mot de passe
         if (finalRoute.includes('protect')) {
-            const pass = prompt("Définissez un mot de passe :", "umbrella123");
-            if (!pass) {
-                btn.disabled = false;
-                btn.textContent = originalText;
-                return;
-            }
+            const pass = prompt("Mot de passe de protection :", "umbrella123");
+            if (!pass) { btn.disabled = false; btn.textContent = originalText; return; }
             formData.append('password', pass);
         }
 
         try {
-            console.log(`🚀 Appel API : ${BASE_URL}/${finalRoute}`);
             const response = await fetch(`${BASE_URL}/${finalRoute}`, {
                 method: 'POST',
                 body: formData
@@ -506,24 +509,19 @@
                 const a = document.createElement('a');
                 a.href = url;
                 
-                // Détection de l'extension de sortie
-                const isZip = blob.type === "application/zip" || 
-                              finalRoute.includes('split') || 
-                              finalRoute.includes('pdf-to-jpg') || 
-                              selectedFiles.length > 1;
-                
+                const isZip = blob.type === "application/zip" || finalRoute.includes('split') || selectedFiles.length > 1;
                 a.download = `umbrella_result.${isZip ? 'zip' : 'pdf'}`;
+                
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
                 window.URL.revokeObjectURL(url);
             } else {
                 const errorText = await response.text();
-                alert(`Erreur Serveur : ${errorText}`);
+                alert(`Erreur : ${errorText}`);
             }
         } catch (error) {
-            alert("Erreur de connexion au moteur Umbrella. Vérifiez votre connexion ou l'état du serveur.");
-            console.error(error);
+            alert("Erreur de connexion au serveur Umbrella.");
         } finally {
             btn.disabled = false;
             btn.textContent = originalText;
