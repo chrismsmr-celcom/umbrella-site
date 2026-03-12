@@ -1,60 +1,52 @@
 FROM python:3.10-slim
 
-# Configuration environnement
+# 1. Configuration des variables d'environnement critiques
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive \
+    # LibreOffice écrit souvent dans $HOME, on le force sur /tmp (seul dossier inscriptible sur Render)
+    HOME=/tmp \
     JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
-# Installation des dépendances système critiques
+WORKDIR /app
+
+# 2. Installation groupée pour réduire le nombre de couches et la taille
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # --- Moteur OCR ---
+    # --- Moteur OCR (Léger) ---
     tesseract-ocr \
     tesseract-ocr-fra \
-    tesseract-ocr-eng \
-    # --- LibreOffice & Moteur de Rendu (headless) ---
+    # --- LibreOffice Headless (Version minimale sans GUI) ---
     libreoffice-nogui \
     libreoffice-writer \
     libreoffice-calc \
-    libreoffice-java-common \
     openjdk-17-jre-headless \
-    # --- Dépendances graphiques critiques pour LibreOffice (même sans UI) ---
-    libxinerama1 \
-    libdbus-glib-1-2 \
-    libcups2 \
-    libglu1-mesa \
-    # --- Manipulation PDF, Image & Tableaux ---
-    ghostscript \
-    poppler-utils \
-    libvips-dev \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    # --- Support des polices (Vital pour éviter les carrés à la place du texte) ---
-    fonts-liberation \
-    fonts-dejavu \
-    fontconfig \
-    # --- Outils de build ---
-    gcc \
-    python3-dev \
-    libsm6 libxext6 libxrender-dev \
+    # --- Dépendances de rendu graphique (Essentiels pour éviter les crashes) ---
+    libxinerama1 libdbus-glib-1-2 libcups2 libglu1-mesa libsm6 libxrender1 libfontconfig1 \
+    # --- Utilitaires PDF & Image ---
+    ghostscript poppler-utils \
+    # --- Polices de caractères (Évite les carrés/disparition de texte) ---
+    fonts-liberation fonts-dejavu \
+    # --- Outils de build temporaires ---
+    gcc python3-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Fix pour s'assurer que l'appel 'libreoffice' pointe au bon endroit
-RUN ln -s /usr/bin/libreoffice /usr/bin/soffice || true
-
-# Autoriser Ghostscript
+# 3. Sécurité Ghostscript (nécessaire pour la manipulation PDF sécurisée)
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml || true
 
-ENV HOME=/tmp
-USER root
-
-# Installation Python
+# 4. Installation des dépendances Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -r requirements.txt
 
+# 5. Copie du code
 COPY . .
 
+# 6. Configuration des permissions (Render tourne souvent en mode non-root)
+RUN chmod -R 777 /tmp
+
+# 7. Port par défaut Render
 EXPOSE 10000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000", "--timeout-keep-alive", "75"]
+# 8. Commande de lancement optimisée pour la stabilité
+# On limite les workers à 1 ou 2 si tu as moins de 2Go de RAM pour éviter le crash (OOM)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000", "--workers", "1", "--timeout-keep-alive", "75"]
