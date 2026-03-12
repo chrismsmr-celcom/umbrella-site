@@ -36,10 +36,11 @@ def process_pdf_to_word(pdf_path, docx_path):
         cv.convert(docx_path, start=0, end=None)
         cv.close()
 
-        # Si le fichier est vide (Scan), on force l'OCR
+        # Si le fichier est vide ou mal converti (Scan), on force l'OCR
         if os.path.exists(docx_path) and os.path.getsize(docx_path) < 5000:
             doc = Document()
-           pages = convert_from_path(pdf_path, thread_count=1, dpi=200)
+            # CORRECTION : Indentation alignée ici
+            pages = convert_from_path(pdf_path, thread_count=1, dpi=200)
             for i, page in enumerate(pages):
                 text = pytesseract.image_to_string(page, lang='fra+eng')
                 doc.add_paragraph(text)
@@ -117,6 +118,7 @@ async def office_to_pdf(background_tasks: BackgroundTasks, files: List[UploadFil
             in_p = os.path.join(temp_dir, file.filename)
             with open(in_p, "wb") as f: 
                 shutil.copyfileobj(file.file, f)
+            # Utilise LIBREOFFICE_BIN configuré plus haut
             subprocess.run([LIBREOFFICE_BIN, "--headless", "--convert-to", "pdf", in_p, "--outdir", temp_dir], check=True)
 
         zip_path = os.path.join(temp_dir, "umbrella_office.zip")
@@ -239,7 +241,7 @@ async def split_pdf(background_tasks: BackgroundTasks, file: UploadFile = File(.
 async def protect_pdf(
     background_tasks: BackgroundTasks, 
     file: UploadFile = File(...), 
-    password: str = Form(...) # Form(...) force le front à envoyer la valeur
+    password: str = Form(...)
 ):
     temp_dir = tempfile.mkdtemp()
     background_tasks.add_task(cleanup, temp_dir)
