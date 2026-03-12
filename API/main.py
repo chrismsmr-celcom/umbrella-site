@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-LIBREOFFICE_BIN = "soffice"
+LIBREOFFICE_BIN = "libreoffice"
 
 # --- UTILITAIRES ---
 
@@ -39,7 +39,7 @@ def process_pdf_to_word(pdf_path, docx_path):
         # Si le fichier est vide (Scan), on force l'OCR
         if os.path.exists(docx_path) and os.path.getsize(docx_path) < 5000:
             doc = Document()
-            pages = convert_from_path(pdf_path)
+           pages = convert_from_path(pdf_path, thread_count=1, dpi=200)
             for i, page in enumerate(pages):
                 text = pytesseract.image_to_string(page, lang='fra+eng')
                 doc.add_paragraph(text)
@@ -68,7 +68,7 @@ async def ocr_pdf(background_tasks: BackgroundTasks, files: List[UploadFile] = F
                 with open(p, "wb") as f:
                     shutil.copyfileobj(file.file, f)
                 
-                pages = convert_from_path(p)
+                pages = convert_from_path(p, thread_count=1, dpi=200)
                 doc = Document()
                 for page in pages:
                     text = pytesseract.image_to_string(page, lang='fra+eng')
@@ -157,7 +157,7 @@ async def pdf_to_jpg(background_tasks: BackgroundTasks, file: UploadFile = File(
         with open(p, "wb") as f:
             shutil.copyfileobj(file.file, f)
         
-        images = convert_from_path(p)
+        images = convert_from_path(p, thread_count=1, dpi=200)
         zip_path = os.path.join(temp_dir, "umbrella_images.zip")
         
         with zipfile.ZipFile(zip_path, "w") as z:
