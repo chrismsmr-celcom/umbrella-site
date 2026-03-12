@@ -20,34 +20,50 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-LIBREOFFICE_BIN = "libreoffice"
+# Sur Render avec le Dockerfile nogui, 'soffice' est l'exécutable standard 
+# qui pointe vers le binaire sans interface graphique.
+LIBREOFFICE_BIN = "soffice"
 
 # --- UTILITAIRES ---
 
 def cleanup(temp_dir: str):
-    """Supprime le dossier temporaire en toute sécurité"""
-    if os.path.exists(temp_dir):
-        shutil.rmtree(temp_dir)
+    """Supprime le dossier temporaire avec gestion d'erreurs (fichiers verrouillés)"""
+    try:
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir, ignore_errors=True)
+    except Exception as e:
+        print(f"Erreur lors du nettoyage : {e}")
 
 def process_pdf_to_word(pdf_path, docx_path):
-    """Logique PDF -> Word avec fallback OCR"""
+    """Logique PDF -> Word avec fallback OCR et gestion de mémoire"""
     try:
+        # 1. Tentative de conversion native (PDF textuel)
         cv = Converter(pdf_path)
         cv.convert(docx_path, start=0, end=None)
         cv.close()
 
-        # Si le fichier est vide (Scan), on force l'OCR
-        if os.path.exists(docx_path) and os.path.getsize(docx_path) < 5000:
+        # 2. Détection de PDF scanné (Fallback OCR)
+        # Si le fichier Word fait moins de 5KB, il est probablement vide ou contient juste des images sans texte
+        if not os.path.exists(docx_path) or os.path.getsize(docx_path) < 5000:
             doc = Document()
-            pages = convert_from_path(pdf_path, thread_count=1, dpi=200)
+            # On limite le DPI à 150 pour Render (512MB RAM) afin d'éviter le crash
+            pages = convert_from_path(pdf_path, thread_count=1, dpi=150) 
+            
             for i, page in enumerate(pages):
+                # Utilisation de Tesseract pour extraire le texte
                 text = pytesseract.image_to_string(page, lang='fra+eng')
                 doc.add_paragraph(text)
                 if i < len(pages) - 1:
                     doc.add_page_break()
+                
+                # Libération explicite de la mémoire de l'image pour Render
+                page.close() 
+            
             doc.save(docx_path)
+            
         return docx_path
-    except Exception:
+    except Exception as e:
+        print(f"Erreur process_pdf_to_word: {e}")
         return None
 
 @app.get("/")
@@ -69,11 +85,13 @@ async def ocr_pdf(background_tasks: BackgroundTasks, files: List[UploadFile] = F
                     shutil.copyfileobj(file.file, f)
                 await file.close()
 
-                pages = convert_from_path(p, thread_count=1, dpi=200)
+                # DPI=150 pour préserver la RAM sur Render
+                pages = convert_from_path(p, thread_count=1, dpi=150)
                 doc = Document()
                 for page in pages:
                     text = pytesseract.image_to_string(page, lang='fra+eng')
                     doc.add_paragraph(text)
+                    page.close() # CRITIQUE : Libère la mémoire !
                 
                 out_docx = p.replace(".pdf", "_ocr.docx")
                 doc.save(out_docx)
@@ -117,6 +135,8 @@ async def pdf_to_word(background_tasks: BackgroundTasks, files: List[UploadFile]
 @app.post("/convert/office-to-pdf")
 async def office_to_pdf(background_tasks: BackgroundTasks, files: List[UploadFile] = File(...)):
     temp_dir = tempfile.mkdtemp()
+    # On crée un dossier spécifique pour le profil LibreOffice pour éviter les conflits
+    user_profile = os.path.join(temp_dir, "profile")
     try:
         for file in files:
             safe_name = f"{uuid.uuid4()}_{os.path.basename(file.filename)}"
@@ -124,7 +144,18 @@ async def office_to_pdf(background_tasks: BackgroundTasks, files: List[UploadFil
             with open(in_p, "wb") as f: 
                 shutil.copyfileobj(file.file, f)
             await file.close()
-            subprocess.run([LIBREOFFICE_BIN, "--headless", "--convert-to", "pdf", in_p, "--outdir", temp_dir], check=True)
+            
+            # Commande blindée pour serveur headless
+            subprocess.run([
+                LIBREOFFICE_BIN, 
+                "--headless", 
+                "--nodefault",
+                "--nofirststartwizard",
+                f"-env:UserInstallation=file://{user_profile}",
+                "--convert-to", "pdf", 
+                in_p, 
+                "--outdir", temp_dir
+            ], check=True, timeout=60)
 
         zip_path = os.path.join(temp_dir, "umbrella_office.zip")
         with zipfile.ZipFile(zip_path, "w") as z:
@@ -137,7 +168,6 @@ async def office_to_pdf(background_tasks: BackgroundTasks, files: List[UploadFil
     except Exception as e:
         cleanup(temp_dir)
         raise HTTPException(status_code=500, detail=str(e))
-
 @app.post("/convert/pdf-to-excel")
 async def pdf_to_excel(background_tasks: BackgroundTasks, files: List[UploadFile] = File(...)):
     temp_dir = tempfile.mkdtemp()
@@ -151,7 +181,7 @@ async def pdf_to_excel(background_tasks: BackgroundTasks, files: List[UploadFile
                     shutil.copyfileobj(file.file, f)
                 await file.close()
                 out_xlsx = p.replace(".pdf", ".xlsx")
-                tables = camelot.read_pdf(p, pages="all")
+                tables = camelot.read_pdf(p, pages="all", flavor='stream') # 'stream' est souvent plus stable sur serveur
                 tables.export(out_xlsx, f="excel")
                 if os.path.exists(out_xlsx): 
                     z.write(out_xlsx, os.path.basename(out_xlsx))
