@@ -309,3 +309,9 @@ async def unlock_pdf(background_tasks: BackgroundTasks, file: UploadFile = File(
     except Exception as e:
         cleanup(temp_dir)
         raise HTTPException(status_code=500, detail="Erreur de décryptage.")
+        if __name__ == "__main__":
+    import uvicorn
+    # Récupère le port de Render, sinon utilise 8000 pour tes tests locaux
+    port = int(os.environ.get("PORT", 8000))
+    # Important : host="0.0.0.0" pour être accessible depuis l'extérieur
+    uvicorn.run(app, host="0.0.0.0", port=port)
