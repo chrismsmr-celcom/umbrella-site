@@ -46,7 +46,7 @@ RUN ln -s /usr/bin/libreoffice /usr/bin/soffice || true
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml || true
 
 ENV HOME=/tmp
-WORKDIR /app
+USER root
 
 # Installation Python
 COPY requirements.txt .
