@@ -36,10 +36,10 @@ def process_pdf_to_word(pdf_path, docx_path):
         cv.convert(docx_path, start=0, end=None)
         cv.close()
 
-        # Si le fichier est vide ou mal converti (Scan), on force l'OCR
+        # Si le fichier est vide (Scan), on force l'OCR
         if os.path.exists(docx_path) and os.path.getsize(docx_path) < 5000:
             doc = Document()
-            # CORRECTION : Indentation alignée ici
+            # ICI : La ligne était mal alignée, voici la version corrigée :
             pages = convert_from_path(pdf_path, thread_count=1, dpi=200)
             for i, page in enumerate(pages):
                 text = pytesseract.image_to_string(page, lang='fra+eng')
