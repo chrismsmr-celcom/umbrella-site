@@ -3,7 +3,8 @@ FROM python:3.10-slim
 # Configuration environnement
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 # Installation des dépendances système critiques
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -11,41 +12,49 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     tesseract-ocr-fra \
     tesseract-ocr-eng \
-    # --- Conversion Office (Version minimale sans UI pour économiser 200MB) ---
+    # --- LibreOffice & Moteur de Rendu (headless) ---
+    libreoffice-nogui \
     libreoffice-writer \
     libreoffice-calc \
-    libreoffice-impress \
-    # --- Manipulation PDF, Image & Tableaux (Camelot) ---
+    libreoffice-java-common \
+    openjdk-17-jre-headless \
+    # --- Dépendances graphiques critiques pour LibreOffice (même sans UI) ---
+    libxinerama1 \
+    libdbus-glib-1-2 \
+    libcups2 \
+    libglu1-mesa \
+    # --- Manipulation PDF, Image & Tableaux ---
     ghostscript \
     poppler-utils \
     libvips-dev \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    # --- Support des polices ---
+    # --- Support des polices (Vital pour éviter les carrés à la place du texte) ---
     fonts-liberation \
+    fonts-dejavu \
     fontconfig \
     # --- Outils de build ---
     gcc \
     python3-dev \
-    # Indispensable pour Camelot/OpenCV
     libsm6 libxext6 libxrender-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-# Autoriser Ghostscript à traiter les PDF sans restrictions de sécurité trop strictes
+
+# Fix pour s'assurer que l'appel 'libreoffice' pointe au bon endroit
+RUN ln -s /usr/bin/libreoffice /usr/bin/soffice || true
+
+# Autoriser Ghostscript
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml || true
+
 ENV HOME=/tmp
 WORKDIR /app
 
-# Installation des dépendances Python
+# Installation Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copie du code source
 COPY . .
 
-# Port Render
 EXPOSE 10000
 
-# Lancement
-# Ajout du paramètre --timeout-keep-alive pour les gros fichiers PDF
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000", "--timeout-keep-alive", "75", "--limit-concurrency", "10"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000", "--timeout-keep-alive", "75"]
