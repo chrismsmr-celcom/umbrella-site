@@ -2,36 +2,34 @@
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
 python-multipart==0.0.9
+aiofiles==23.2.1
+requests==2.31.0
 
-# --- MANQUANT : Manipulation de base (Merge, Split, Rotate, Password) ---
+# Manipulation PDF (Merge, Split, Security)
 pypdf==4.0.1
-# --- MANQUANT : Manipulation avancée (Watermark, Page Numbers, Layout) ---
 reportlab==4.0.9
+pdfplumber==0.10.3
 
-# Conversion et Traitement PDF
+# Conversion
 pdf2docx==0.5.8
 pdf2image==1.17.0
-pdfplumber==0.10.3
-# Note : Camelot nécessite ghostscript (déjà dans ton Dockerfile, donc OK)
-camelot-py[cv]==0.11.0
+
+# Extraction de données et Tableaux
+# On installe camelot sans ses dépendances cv pour laisser headless gérer
+camelot-py==0.11.0
 pandas==2.2.0
+
 # Manipulation de documents Office
 python-docx==1.1.0
 python-pptx==0.6.21
 openpyxl==3.1.2
-ghostscript==0.7
+
 # Image et OCR
 Pillow==10.2.0
 pytesseract==0.3.10
 opencv-python-headless==4.9.0.80
+ghostscript==0.7
 
-# --- MANQUANT : PDF Intelligence & Traduction (Le "Cerveau") ---
-# Pour l'extraction de texte propre et l'IA
+# Intelligence et Traduction
 langdetect==1.0.9
 openai==1.12.0
-# Ou alternativement pour l'IA locale si tu ne veux pas d'API payante
-# transformers==4.37.2
-
-# Utilitaires
-requests==2.31.0
-aiofiles==23.2.1
