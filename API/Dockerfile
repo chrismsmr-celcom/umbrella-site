@@ -30,7 +30,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Indispensable pour Camelot/OpenCV
     libsm6 libxext6 libxrender-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
+# Autoriser Ghostscript à traiter les PDF sans restrictions de sécurité trop strictes
+RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml || true
+ENV HOME=/tmp
 WORKDIR /app
 
 # Installation des dépendances Python
@@ -46,4 +48,4 @@ EXPOSE 10000
 
 # Lancement
 # Ajout du paramètre --timeout-keep-alive pour les gros fichiers PDF
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000", "--workers", "1", "--timeout-keep-alive", "120"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000", "--timeout-keep-alive", "75", "--limit-concurrency", "10"]
