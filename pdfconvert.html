@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Umbrella PDF Engine v3.0 | Pro Ecosystem</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="manifest" href="assets/manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Umbrella">
+    <meta name="theme-color" content="#ffffff">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
         :root {
             --primary: #311038;
             --accent: #F0D13C;
@@ -337,7 +346,7 @@
     <input type="file" id="fileInput" multiple hidden>
 </div>
 <script>
-    const BASE_URL = "https://umbrella-site-qr-code.onrender.com";
+    const BASE_URL = "https://umbrella-site-1pdf-covert.onrender.com";
     let currentRoute = '';
     let selectedFiles = [];
 
@@ -587,7 +596,13 @@
             btn.textContent = originalText;
         }
     };
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Umbrella PWA Ready !'))
+            .catch(err => console.log('PWA Error:', err));
+    });
+}
 </script>
 </body>
 </html>
-
