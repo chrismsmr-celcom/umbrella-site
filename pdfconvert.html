@@ -202,6 +202,40 @@
     max-width: 100%;
     height: auto !important;
 }
+@media (max-width: 720px) {
+    .preview-container {
+        height: 50vh; /* Un peu plus petit sur mobile pour laisser voir le bouton */
+        padding: 15px;
+    }
+}
+.download-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px); /* Caché en bas */
+    width: 90%;
+    max-width: 400px;
+    padding: 18px;
+    background: var(--primary);
+    color: var(--accent);
+    border: none;
+    border-radius: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* Classe qui sera ajoutée en JS pour montrer le bouton */
+.download-btn.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
   </style>
 </head>
 <body>
@@ -220,58 +254,58 @@
         <input type="text" id="toolSearch" class="search-bar" placeholder="Rechercher un outil...">
     </div>
     <div class="nav-container" id="accordion">
-        <div class="accordion-item active">
-            <button class="accordion-header">1. Organize <i class="fa fa-chevron-down chevron"></i></button>
-            <div class="accordion-content">
-                <button class="action-btn" onclick="setMode('edit/merge', this)"><i class="fa fa-layer-group"></i> Merge PDF</button>
-                <button class="action-btn" onclick="setMode('edit/split', this)"><i class="fa fa-scissors"></i> Split PDF</button>
-                <button class="action-btn" onclick="setMode('edit/remove', this)"><i class="fa fa-trash-alt"></i> Remove pages</button>
-                <button class="action-btn" onclick="setMode('edit/extract', this)"><i class="fa fa-file-export"></i> Extract pages</button>
-                <button class="action-btn" onclick="setMode('edit/organize', this)"><i class="fa fa-th-large"></i> Organize PDF</button>
-                <button class="action-btn" onclick="setMode('convert/scan', this)"><i class="fa fa-print"></i> Scan to PDF</button>
-            </div>
+    <div class="accordion-item active">
+        <button class="accordion-header">1. Organize <i class="fa fa-chevron-down chevron"></i></button>
+        <div class="accordion-content">
+            <button class="action-btn" onclick="setMode('organize/merge', this)"><i class="fa fa-layer-group"></i> Merge PDF</button>
+            <button class="action-btn" onclick="setMode('organize/split', this)"><i class="fa fa-scissors"></i> Split PDF</button>
+            <button class="action-btn" onclick="setMode('edit/remove', this)"><i class="fa fa-trash-alt"></i> Remove pages</button>
+            <button class="action-btn" onclick="setMode('edit/extract', this)"><i class="fa fa-file-export"></i> Extract pages</button>
+            <button class="action-btn" onclick="setMode('edit/organize', this)"><i class="fa fa-th-large"></i> Organize PDF</button>
+            <button class="action-btn" onclick="setMode('convert/images-to-pdf', this)"><i class="fa fa-print"></i> Scan to PDF</button>
         </div>
-        <div class="accordion-item">
-            <button class="accordion-header">2. Optimize <i class="fa fa-chevron-down chevron"></i></button>
-            <div class="accordion-content">
-                <button class="action-btn" onclick="setMode('edit/compress', this)"><i class="fa fa-compress-arrows-alt"></i> Compress PDF</button>
-                <button class="action-btn" onclick="setMode('edit/repair', this)"><i class="fa fa-tools"></i> Repair PDF</button>
-                <button class="action-btn" onclick="setMode('convert/ocr', this)"><i class="fa fa-search"></i> OCR PDF</button>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <button class="accordion-header">3. Convert to PDF <i class="fa fa-chevron-down chevron"></i></button>
-            <div class="accordion-content">
-                <button class="action-btn" onclick="setMode('convert/jpg-to-pdf', this)"><i class="fa fa-image"></i> JPG to PDF</button>
-                <button class="action-btn" onclick="setMode('convert/word-to-pdf', this)"><i class="fa fa-file-word"></i> WORD to PDF</button>
-                <button class="action-btn" onclick="setMode('convert/pptx-to-pdf', this)"><i class="fa fa-file-powerpoint"></i> PPT to PDF</button>
-                <button class="action-btn" onclick="setMode('convert/excel-to-pdf', this)"><i class="fa fa-file-excel"></i> EXCEL to PDF</button>
-                <button class="action-btn" onclick="setMode('convert/html-to-pdf', this)"><i class="fa fa-code"></i> HTML to PDF</button>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <button class="accordion-header">4. Convert from PDF <i class="fa fa-chevron-down chevron"></i></button>
-            <div class="accordion-content">
-                <button class="action-btn" onclick="setMode('convert/pdf-to-jpg', this)"><i class="fa fa-file-image"></i> PDF to JPG</button>
-                <button class="action-btn" onclick="setMode('convert/pdf-to-word', this)"><i class="fa fa-file-word"></i> PDF to WORD</button>
-                <button class="action-btn" onclick="setMode('convert/pdf-to-pptx', this)"><i class="fa fa-file-powerpoint"></i> PDF to PPT</button>
-                <button class="action-btn" onclick="setMode('convert/pdf-to-excel', this)"><i class="fa fa-file-excel"></i> PDF to EXCEL</button>
-                <button class="action-btn" onclick="setMode('edit/pdf-to-pdfa', this)"><i class="fa fa-archive"></i> PDF to PDF/A</button>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <button class="accordion-header">5. Security & Intelligence <i class="fa fa-chevron-down chevron"></i></button>
-            <div class="accordion-content">
-                <button class="action-btn" onclick="setMode('edit/lock', this)"><i class="fa fa-lock"></i> Protect PDF</button>
-                <button class="action-btn" onclick="setMode('edit/unlock', this)"><i class="fa fa-unlock"></i> Unlock PDF</button>
-                <button class="action-btn" onclick="setMode('edit/sign', this)"><i class="fa fa-signature"></i> Sign PDF</button>
-                <button class="action-btn" onclick="setMode('edit/translate', this)"><i class="fa fa-language"></i> Translate PDF</button>
-                <button class="action-btn" onclick="setMode('edit/intelligence', this)"><i class="fa fa-brain"></i> PDF Intelligence</button>
-            </div>
-        </div>
-        <div id="noResults" class="no-results" style="display:none; text-align:center; padding:20px; font-size:0.8rem; color:#999;">Aucun outil trouvé...</div>
     </div>
-    <button id="downloadBtn" class="download-btn">Lancer l'opération</button>
+    <div class="accordion-item">
+        <button class="accordion-header">2. Optimize <i class="fa fa-chevron-down chevron"></i></button>
+        <div class="accordion-content">
+            <button class="action-btn" onclick="setMode('edit/compress', this)"><i class="fa fa-compress-arrows-alt"></i> Compress PDF</button>
+            <button class="action-btn" onclick="setMode('edit/repair', this)"><i class="fa fa-tools"></i> Repair PDF</button>
+            <button class="action-btn" onclick="setMode('convert/ocr', this)"><i class="fa fa-search"></i> OCR PDF</button>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <button class="accordion-header">3. Convert to PDF <i class="fa fa-chevron-down chevron"></i></button>
+        <div class="accordion-content">
+            <button class="action-btn" onclick="setMode('convert/images-to-pdf', this)"><i class="fa fa-image"></i> JPG to PDF</button>
+            <button class="action-btn" onclick="setMode('convert/office-to-pdf', this)"><i class="fa fa-file-word"></i> WORD to PDF</button>
+            <button class="action-btn" onclick="setMode('convert/office-to-pdf', this)"><i class="fa fa-file-powerpoint"></i> PPT to PDF</button>
+            <button class="action-btn" onclick="setMode('convert/office-to-pdf', this)"><i class="fa fa-file-excel"></i> EXCEL to PDF</button>
+            <button class="action-btn" onclick="setMode('convert/html-to-pdf', this)"><i class="fa fa-code"></i> HTML to PDF</button>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <button class="accordion-header">4. Convert from PDF <i class="fa fa-chevron-down chevron"></i></button>
+        <div class="accordion-content">
+            <button class="action-btn" onclick="setMode('convert/pdf-to-jpg', this)"><i class="fa fa-file-image"></i> PDF to JPG</button>
+            <button class="action-btn" onclick="setMode('convert/pdf-to-word', this)"><i class="fa fa-file-word"></i> PDF to WORD</button>
+            <button class="action-btn" onclick="setMode('convert/pdf-to-pptx', this)"><i class="fa fa-file-powerpoint"></i> PDF to PPT</button>
+            <button class="action-btn" onclick="setMode('convert/pdf-to-excel', this)"><i class="fa fa-file-excel"></i> PDF to EXCEL</button>
+            <button class="action-btn" onclick="setMode('edit/pdf-to-pdfa', this)"><i class="fa fa-archive"></i> PDF to PDF/A</button>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <button class="accordion-header">5. Security & Intelligence <i class="fa fa-chevron-down chevron"></i></button>
+        <div class="accordion-content">
+            <button class="action-btn" onclick="setMode('security/protect', this)"><i class="fa fa-lock"></i> Protect PDF</button>
+            <button class="action-btn" onclick="setMode('edit/unlock', this)"><i class="fa fa-unlock"></i> Unlock PDF</button>
+            <button class="action-btn" onclick="setMode('edit/sign', this)"><i class="fa fa-signature"></i> Sign PDF</button>
+            <button class="action-btn" onclick="setMode('edit/translate', this)"><i class="fa fa-language"></i> Translate PDF</button>
+            <button class="action-btn" onclick="setMode('edit/intelligence', this)"><i class="fa fa-brain"></i> PDF Intelligence</button>
+        </div>
+    </div>
+    <div id="noResults" class="no-results" style="display:none; text-align:center; padding:20px; font-size:0.8rem; color:#999;">Aucun outil trouvé...</div>
+</div>
+<button id="downloadBtn" class="download-btn">Lancer l'opération</button>
 </div>
 
 <div class="workarea">
@@ -288,18 +322,22 @@
         </button>
     </div>
     
-    <div class="dropzone" id="dropzone">
-        <div id="dropzone-content">
-            <i class="fa fa-cloud-upload-alt" style="font-size: 60px; color: var(--primary); opacity: 0.3; margin-bottom: 15px;"></i>
-            <p style="font-weight: 700; font-size: 1.2rem; margin: 0;">Déposez vos fichiers ici</p>
-            <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">PDF, Word, Excel, Images</p>
+<div class="dropzone" id="dropzone">
+    <div id="dropzone-content" style="transition: all 0.3s ease;">
+        <i class="fa fa-cloud-upload-alt" style="font-size: 60px; color: var(--primary); opacity: 0.3; margin-bottom: 15px;"></i>
+        <p style="font-weight: 700; font-size: 1.2rem; margin: 0;">Déposez vos fichiers ici</p>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">PDF, Word, Excel, Images</p>
+        
+        <div style="margin-top: 20px; padding: 10px 20px; background: #eee; border-radius: 30px; display: inline-block; font-size: 0.8rem; font-weight: 600; color: var(--primary);">
+            Parcourir les fichiers
         </div>
     </div>
-
+    
+    </div>
     <input type="file" id="fileInput" multiple hidden>
 </div>
 <script>
-    const BASE_URL = "https://umbrella-site-qr-code.onrender.com";
+    const BASE_URL = "https://umbrella-site-1pdf-covert.onrender.com";
     let currentRoute = '';
     let selectedFiles = [];
 
@@ -307,27 +345,44 @@
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    // --- NAVIGATION & RECHERCHE ---
+    // --- MAPPING BACKEND ---
+    const routeMapping = {
+        'organize/merge': 'organize/merge',
+        'organize/split': 'organize/split',
+        'convert/ocr': 'convert/ocr',
+        'convert/office-to-pdf': 'convert/office-to-pdf',
+        'convert/images-to-pdf': 'convert/images-to-pdf',
+        'convert/pdf-to-word': 'convert/pdf-to-word',
+        'convert/pdf-to-excel': 'convert/pdf-to-excel',
+        'convert/pdf-to-jpg': 'convert/pdf-to-jpg',
+        'security/protect': 'security/protect',
+        'edit/repair': 'edit/repair',
+        'edit/unlock': 'edit/unlock'
+    };
+
+    // --- NAVIGATION & UI ---
     const searchInput = document.getElementById('toolSearch');
     const accordionItems = document.querySelectorAll('.accordion-item');
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('overlay');
 
-    searchInput.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase().trim();
-        accordionItems.forEach(item => {
-            const btns = item.querySelectorAll('.action-btn');
-            let hasMatch = false;
-            btns.forEach(btn => {
-                const match = btn.textContent.toLowerCase().includes(term);
-                btn.style.display = match ? 'flex' : 'none';
-                if(match) hasMatch = true;
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            accordionItems.forEach(item => {
+                const btns = item.querySelectorAll('.action-btn');
+                let hasMatch = false;
+                btns.forEach(btn => {
+                    const match = btn.textContent.toLowerCase().includes(term);
+                    btn.style.display = match ? 'flex' : 'none';
+                    if(match) hasMatch = true;
+                });
+                item.style.display = (term === '' || hasMatch) ? 'block' : 'none';
+                if(term !== '' && hasMatch) item.classList.add('active');
             });
-            item.style.display = (term === '' || hasMatch) ? 'block' : 'none';
-            if(term !== '' && hasMatch) item.classList.add('active');
         });
-    });
+    }
 
     document.querySelectorAll('.accordion-header').forEach(h => h.addEventListener('click', () => {
         const item = h.parentElement;
@@ -348,23 +403,25 @@
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
         const icon = sidebar.classList.contains('open') ? 'fa-times' : 'fa-bars';
-        menuToggle.innerHTML = `<i class="fa ${icon}"></i>`;
+        if(menuToggle) menuToggle.innerHTML = `<i class="fa ${icon}"></i>`;
     }
-    menuToggle.onclick = toggleMenu;
-    overlay.onclick = toggleMenu;
+    if(menuToggle) menuToggle.onclick = toggleMenu;
+    if(overlay) overlay.onclick = toggleMenu;
 
     // --- GESTION DES FICHIERS ---
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     
-    dropzone.onclick = (e) => { 
-        if(!e.target.closest('.pdf-card')) fileInput.click(); 
-    };
+    if(dropzone) {
+        dropzone.onclick = (e) => { if(!e.target.closest('.pdf-card')) fileInput.click(); };
+    }
 
-    fileInput.onchange = (e) => {
-        selectedFiles = Array.from(e.target.files);
-        renderFiles();
-    };
+    if(fileInput) {
+        fileInput.onchange = (e) => {
+            selectedFiles = Array.from(e.target.files);
+            renderFiles();
+        };
+    }
 
     async function renderPDFPreview(file) {
         const reader = new FileReader();
@@ -389,57 +446,52 @@
         const btn = document.getElementById('downloadBtn');
         const wrapper = document.querySelector('.pdf-wrapper');
         const content = document.getElementById('dropzone-content');
-        
-        if(selectedFiles.length === 0) {
-            preview.style.display = 'none';
-            dropzone.style.display = 'flex';
-            btn.classList.remove('show-mobile');
+
+        if (selectedFiles.length > 0) {
+            btn.classList.add('visible');
+        } else {
+            btn.classList.remove('visible');
+            if(preview) preview.style.display = 'none';
+            if(dropzone) dropzone.style.display = 'flex';
             if(content) content.style.display = 'block';
+            const grid = dropzone?.querySelector('.file-grid');
+            if (grid) grid.remove();
             return;
         }
 
-        btn.classList.add('show-mobile');
-
-        if(selectedFiles.length === 1) {
+        if (selectedFiles.length === 1) {
             const file = selectedFiles[0];
             dropzone.style.display = 'none';
             preview.style.display = 'block';
             wrapper.innerHTML = ''; 
 
-            if(file.type === "application/pdf") {
+            if (file.type === "application/pdf") {
                 wrapper.innerHTML = '<canvas id="pdfCanvas"></canvas>';
                 renderPDFPreview(file);
-            } else if(file.type.startsWith('image/')) {
+            } else if (file.type.startsWith('image/')) {
                 const imgUrl = URL.createObjectURL(file);
                 wrapper.innerHTML = `<img src="${imgUrl}" style="max-width:95%; height:auto; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.1);">`;
             } else {
-                wrapper.innerHTML = `
-                    <div style="text-align:center; padding-top:50px;">
-                        <i class="fa fa-file-alt" style="font-size:80px; color:var(--primary); opacity:0.2;"></i>
-                        <p style="margin-top:20px; font-weight:600; color:var(--primary);">${file.name}</p>
-                        <span style="font-size:0.8rem; color:#888;">Prévisualisation non disponible</span>
-                    </div>`;
+                wrapper.innerHTML = `<div style="text-align:center; padding-top:50px;"><i class="fa fa-file-alt" style="font-size:80px; color:var(--primary); opacity:0.2;"></i><p style="margin-top:20px; font-weight:600;">${file.name}</p></div>`;
             }
         } else {
             preview.style.display = 'none';
             dropzone.style.display = 'block';
-            if(content) content.style.display = 'none';
+            if (content) content.style.display = 'none';
             
             let gridHTML = '<div class="file-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:15px; padding:20px; width:100%;">';
             selectedFiles.forEach((file, index) => {
                 const isImg = file.type.startsWith('image/');
-                gridHTML += `
-                    <div class="pdf-card" style="background:#f9f9fb; padding:15px; border-radius:15px; text-align:center; position:relative; border:1px solid #eee;">
-                        <button class="remove-file" onclick="removeOneFile(${index}, event)" style="position:absolute; top:5px; right:5px; border:none; background:none; color:#ff4444; cursor:pointer;"><i class="fa fa-times"></i></button>
-                        <i class="fa ${isImg ? 'fa-image' : 'fa-file-pdf'}" style="font-size:2rem; color:${isImg ? '#3498db' : '#e74c3c'}"></i>
-                        <span style="display:block; font-size:0.7rem; margin-top:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${file.name}</span>
-                    </div>`;
+                gridHTML += `<div class="pdf-card" style="background:#f9f9fb; padding:15px; border-radius:15px; text-align:center; position:relative; border:1px solid #eee;">
+                                <button class="remove-file" onclick="removeOneFile(${index}, event)" style="position:absolute; top:5px; right:5px; border:none; background:none; color:#ff4444; cursor:pointer;"><i class="fa fa-times"></i></button>
+                                <i class="fa ${isImg ? 'fa-image' : 'fa-file-pdf'}" style="font-size:2rem; color:${isImg ? '#3498db' : '#e74c3c'}"></i>
+                                <span style="display:block; font-size:0.7rem; margin-top:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${file.name}</span>
+                             </div>`;
             });
             gridHTML += '</div>';
             
-            // On remplace le contenu de la dropzone par la grille, sans casser l'élément racine
             const existingGrid = dropzone.querySelector('.file-grid');
-            if(existingGrid) existingGrid.remove();
+            if (existingGrid) existingGrid.remove();
             dropzone.insertAdjacentHTML('beforeend', gridHTML);
         }
     }
@@ -452,13 +504,25 @@
 
     function resetUpload() {
         selectedFiles = [];
-        fileInput.value = '';
-        const content = document.getElementById('dropzone-content');
-        if(content) content.style.display = 'block';
-        const grid = dropzone.querySelector('.file-grid');
-        if(grid) grid.remove();
+        if(fileInput) fileInput.value = '';
         renderFiles();
     }
+
+    // --- ANIMATION BOUTON SCROLL ---
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+        const btn = document.getElementById('downloadBtn');
+        if (!btn || selectedFiles.length === 0) return;
+        let st = window.pageYOffset || document.documentElement.scrollTop;
+        if (st > lastScrollTop) {
+            btn.style.transform = "translateX(-50%) translateY(150%)";
+            btn.style.opacity = "0.5";
+        } else {
+            btn.style.transform = "translateX(-50%) translateY(0)";
+            btn.style.opacity = "1";
+        }
+        lastScrollTop = st <= 0 ? 0 : st;
+    }, false);
 
     // --- ACTION : ENVOI AU SERVEUR ---
     document.getElementById('downloadBtn').onclick = async function() {
@@ -468,21 +532,13 @@
         const btn = this;
         const originalText = btn.textContent;
         btn.disabled = true;
-        btn.textContent = "Traitement...";
+        btn.textContent = "Traitement en cours...";
 
-        // Correction des routes pour correspondre au backend Python
-        let finalRoute = currentRoute
-            .replace('edit/merge', 'organize/merge')
-            .replace('edit/split', 'organize/split')
-            .replace('edit/lock', 'security/protect')
-            .replace('convert/word-to-pdf', 'convert/office-to-pdf')
-            .replace('convert/excel-to-pdf', 'convert/office-to-pdf')
-            .replace('convert/pptx-to-pdf', 'convert/office-to-pdf');
-
+        const finalRoute = routeMapping[currentRoute] || currentRoute;
         const formData = new FormData();
         
-        // Détection du mode (Single vs Multi) pour éviter l'erreur 422
-        const singleFileEndpoints = ['split', 'protect', 'pdf-to-jpg', 'unlock', 'sign'];
+        // Détection auto du mode (file vs files) selon ton backend
+        const singleFileEndpoints = ['split', 'protect', 'pdf-to-jpg', 'unlock', 'repair'];
         const isSingle = singleFileEndpoints.some(e => finalRoute.includes(e));
 
         if (isSingle) {
@@ -492,7 +548,7 @@
         }
 
         if (finalRoute.includes('protect')) {
-            const pass = prompt("Mot de passe de protection :", "umbrella123");
+            const pass = prompt("Définissez un mot de passe :", "umbrella123");
             if (!pass) { btn.disabled = false; btn.textContent = originalText; return; }
             formData.append('password', pass);
         }
@@ -509,19 +565,23 @@
                 const a = document.createElement('a');
                 a.href = url;
                 
-                const isZip = blob.type === "application/zip" || finalRoute.includes('split') || selectedFiles.length > 1;
-                a.download = `umbrella_result.${isZip ? 'zip' : 'pdf'}`;
-                
+                // Déduction intelligente de l'extension
+                let extension = 'pdf';
+                if (blob.type === "application/zip") extension = 'zip';
+                else if (finalRoute.includes('to-word')) extension = 'docx';
+                else if (finalRoute.includes('to-excel')) extension = 'xlsx';
+
+                a.download = `umbrella_${Date.now()}.${extension}`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-                window.URL.revokeObjectURL(url);
+                resetUpload();
             } else {
-                const errorText = await response.text();
-                alert(`Erreur : ${errorText}`);
+                const error = await response.text();
+                alert(`Erreur Serveur: ${error}`);
             }
         } catch (error) {
-            alert("Erreur de connexion au serveur Umbrella.");
+            alert("Connexion impossible avec le serveur Umbrella.");
         } finally {
             btn.disabled = false;
             btn.textContent = originalText;
