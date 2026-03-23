@@ -2,138 +2,205 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Umbrella scanner Engine v2.2 - Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umbrella Scanner Engine v3.0 | Pro Ecosystem</title>
+    
     <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvReady();"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        :root { --primary: #311038; --accent: #F0D13C; --bg: #f5f5fa; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
+        :root {
+            --primary: #311038;
+            --accent: #F0D13C;
+            --bg: #f5f5fa;
+            --sidebar-bg: #FFFFFF;
+            --text-muted: #888;
+        }
+
+        body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
 
         /* Sidebar */
-        .sidebar { width: 300px; background: #FFF; box-shadow: 2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; z-index: 10; }
-        .logo { width: 140px; margin: 0 auto 20px; display: block; }
-        .sidebar h2 { text-align: center; color: var(--primary); font-size: 0.9rem; margin-bottom: 20px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; letter-spacing: 1px; }
-        
-        .action-group { margin-bottom: 15px; }
-        .action-group label { font-size: 0.7rem; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; display: block; }
-        
-        .btn-action {
-            padding: 10px 12px; width: 100%; border: none; border-radius: 8px;
-            background: #f8f9fa; color: var(--primary); font-size: 13px; font-weight: 600;
-            cursor: pointer; text-align: left; transition: all 0.2s; margin-bottom: 5px;
-            border-left: 0px solid var(--accent);
-        }
-        .btn-action:hover:not(:disabled) { background: #eee; border-left: 4px solid var(--accent); }
-        .btn-action.active { background: var(--primary); color: white; border-left: 4px solid var(--accent); }
-        .btn-action:disabled { opacity: 0.5; cursor: wait; }
+        .sidebar { width: 340px; background: var(--sidebar-bg); box-shadow: 2px 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex-shrink: 0; z-index: 110; }
+        .sidebar-header { padding: 25px 25px 15px; text-align: center; }
+        .logo { width: 130px; margin-bottom: 10px; }
+        .sidebar h2 { color: var(--primary); font-size: 0.75rem; letter-spacing: 2px; margin: 0; opacity: 0.6; font-weight: 800; text-transform: uppercase; }
 
-        .download-btn {
-            margin-top: auto; padding: 15px; width: 100%; background: var(--primary);
-            color: var(--accent); border: none; border-radius: 8px; cursor: pointer;
-            font-weight: bold; font-size: 16px; transition: opacity 0.3s;
-        }
-        .download-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .nav-container { flex: 1; overflow-y: auto; padding: 10px; }
+        .accordion-item { border-radius: 12px; margin-bottom: 8px; background: #fafafa; border: 1px solid #f0f0f0; padding-bottom: 5px; }
+        .accordion-header { width: 100%; padding: 14px 15px; background: none; border: none; display: flex; align-items: center; justify-content: space-between; color: var(--primary); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        .action-btn { width: 92%; margin-left: 4%; padding: 10px 12px; border: none; background: transparent; text-align: left; color: #555; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 8px; display: flex; align-items: center; transition: 0.2s; margin-bottom: 4px; }
+        .action-btn:hover { background: var(--primary); color: white; }
+        .action-btn i { width: 22px; margin-right: 10px; font-size: 1.1rem; opacity: 0.7; }
+        .action-btn.active { background: var(--primary); color: var(--accent); }
+        .action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         /* Workarea */
-        .workarea { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; position: relative; }
-        #editorContainer { position: relative; display: none; box-shadow: 0 20px 50px rgba(0,0,0,0.1); background: white; }
-        #sourceImg { max-width: 100%; max-height: 80vh; display: block; }
-        #lineLayer { position: absolute; top: 0; left: 0; pointer-events: none; }
-        .dot { width: 12px; height: 12px; position: absolute; border-radius: 50%; cursor: move; border: 2px solid white; background: var(--accent); z-index: 100; transform: translate(-50%, -50%); }
-
-        canvas#resultCanvas { max-width: 100%; max-height: 85vh; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; }
+        .workarea { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; position: relative; }
         
-        .placeholder-text { color: #ccc; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        /* Dropzone */
+        .dropzone { 
+            width: 100%; max-width: 750px; min-height: 450px; background: #fff; 
+            border: 3px dashed #d1d1e0; border-radius: 40px; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            cursor: pointer; transition: all 0.3s ease; 
+        }
+        .dropzone.dragover { border-color: var(--primary); background: #f0f0f5; transform: scale(1.02); }
+        
+        #editorContainer { position: relative; display: none; background: white; padding: 10px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        #sourceImg { max-width: 100%; max-height: 60vh; border-radius: 10px; display: block; transition: transform 0.3s ease; }
+        #lineLayer { position: absolute; top: 10px; left: 10px; pointer-events: none; }
+        
+        .dot { width: 22px; height: 22px; position: absolute; border-radius: 50%; cursor: move; border: 3px solid white; background: var(--accent); z-index: 100; transform: translate(-50%, -50%); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        canvas#resultCanvas { max-width: 100%; max-height: 65vh; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: none; background: white; }
+
+        /* Buttons Floating */
+        .btn-group-floating {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(150px);
+            display: flex; gap: 15px; width: 90%; max-width: 500px; z-index: 1000;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
+        }
+        .btn-group-floating.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .download-btn { flex: 2; padding: 18px; background: var(--primary); color: var(--accent); border: none; border-radius: 20px; font-weight: 800; text-transform: uppercase; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .edit-back-btn { flex: 1; padding: 18px; background: #fff; color: var(--primary); border: 2px solid var(--primary); border-radius: 20px; font-weight: 700; cursor: pointer; }
+
+        .status-badge { position: absolute; top: 20px; right: 20px; background: white; padding: 8px 15px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.05); color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" alt="Logo" class="logo">
-    <h2 id="statusTitle">ENGINE v2.2</h2>
-
-    <div class="action-group">
-        <label>1. Entrée</label>
-        <button class="btn-action" onclick="document.getElementById('fileInput').click()">IMPORT DOCUMENT</button>
-        <input type="file" id="fileInput" accept="image/*" style="display:none">
+    <div class="sidebar-header">
+        <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" alt="Logo" class="logo">
+        <h2>Scanner Engine v3.0</h2>
     </div>
 
-    <div class="action-group">
-        <label>2. Mode de Rendu</label>
-        <button id="mode_orig" class="btn-action active" onclick="setMode('original')">COULEUR ORIGINALE</button>
-        <button id="mode_bw" class="btn-action" onclick="setMode('bw')">NOIR & BLANC (SCAN)</button>
-        <button id="mode_magic" class="btn-action" onclick="setMode('magic')">COULEUR OPTIMISÉE</button>
-    </div>
+    <div class="nav-container">
+        <div class="accordion-item">
+            <div class="accordion-header">1. TOOLS & HISTORY</div>
+            <div class="accordion-content">
+                <button class="action-btn" onclick="undo()" id="undoBtn" disabled><i class="fa fa-undo"></i> Annuler (Undo)</button>
+                <button class="action-btn" onclick="redo()" id="redoBtn" disabled><i class="fa fa-redo"></i> Rétablir (Redo)</button>
+                <button class="action-btn" onclick="rotateImage()"><i class="fa fa-rotate-right"></i> Pivoter 90°</button>
+            </div>
+        </div>
 
-    <div class="action-group">
-        <label>3. Exécution</label>
-        <button id="scanBtn" class="btn-action" disabled onclick="processImage()">LANCER LE SCAN</button>
-    </div>
+        <div class="accordion-item">
+            <div class="accordion-header">2. RENDERING MODE</div>
+            <div class="accordion-content">
+                <button id="mode_original" class="action-btn active" onclick="setMode('original')"><i class="fa fa-image"></i> Original</button>
+                <button id="mode_bw" class="action-btn" onclick="setMode('bw')"><i class="fa fa-file-lines"></i> Noir & Blanc (Scan)</button>
+                <button id="mode_magic" class="action-btn" onclick="setMode('magic')"><i class="fa fa-wand-magic-sparkles"></i> Magic Color</button>
+            </div>
+        </div>
 
-    <button id="downloadBtn" class="download-btn" disabled onclick="downloadResult()">TÉLÉCHARGER</button>
+        <div class="accordion-item">
+            <div class="accordion-header">3. FINALIZE</div>
+            <div class="accordion-content">
+                <button id="scanBtn" class="action-btn" disabled onclick="processImage()" style="color: var(--primary); font-weight: 800;">
+                    <i class="fa fa-bolt-lightning"></i> APPLIQUER LE SCAN
+                </button>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" hidden>
 </div>
 
-<div class="workarea" id="mainWorkarea">
-    <div id="placeholder" class="placeholder-text">En attente de fichier...</div>
+<div class="workarea">
+    <div class="status-badge" id="engineStatus"><i class="fa fa-circle-notch fa-spin"></i> Initialisation...</div>
+
+    <div class="dropzone" id="dropzone">
+        <i class="fa fa-plus-circle" style="font-size: 50px; color: var(--primary); opacity: 0.2; margin-bottom: 20px;"></i>
+        <p style="font-weight: 800; color: var(--primary); margin: 0;">DÉPOSEZ OU CLIQUEZ</p>
+    </div>
+
     <div id="editorContainer">
         <img id="sourceImg" src="">
         <canvas id="lineLayer"></canvas>
         <div id="dots"></div>
     </div>
+
     <canvas id="resultCanvas"></canvas>
 </div>
 
+<div class="btn-group-floating" id="floatingGroup">
+    <button class="edit-back-btn" onclick="backToEdit()">AJUSTER</button>
+    <button class="download-btn" onclick="downloadResult()">Télécharger JPG</button>
+</div>
+
 <script>
-    let srcMat, currentMode = 'original';
+    let srcMat, currentMode = 'original', rotation = 0;
+    let history = [], redoStack = [];
     const img = document.getElementById('sourceImg');
     const editor = document.getElementById('editorContainer');
     const lineLayer = document.getElementById('lineLayer');
     const resultCanvas = document.getElementById('resultCanvas');
-    const placeholder = document.getElementById('placeholder');
+    const dropzone = document.getElementById('dropzone');
+    const floatingGroup = document.getElementById('floatingGroup');
 
     function onOpenCvReady() {
-        document.getElementById('statusTitle').innerText = "ENGINE v2.2 (READY)";
+        document.getElementById('engineStatus').innerHTML = '<i class="fa fa-check-circle" style="color: #27ae60"></i> Engine Active';
         document.getElementById('scanBtn').disabled = false;
     }
 
-    function setMode(mode) {
-        currentMode = mode;
-        document.querySelectorAll('.action-group:nth-child(2) .btn-action').forEach(b => b.classList.remove('active'));
-        document.getElementById('mode_' + mode).classList.add('active');
-        if (resultCanvas.style.display === "block") processImage();
-    }
+    // Drag & Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
+        dropzone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
+    });
+    dropzone.addEventListener('dragover', () => dropzone.classList.add('dragover'));
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+        dropzone.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+    dropzone.addEventListener('click', () => document.getElementById('fileInput').click());
+    document.getElementById('fileInput').onchange = (e) => handleFiles(e.target.files);
 
-    document.getElementById('fileInput').onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    function handleFiles(files) {
+        const file = files[0];
+        if (!file || !file.type.startsWith('image/')) return;
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = (e) => {
             img.onload = () => {
-                placeholder.style.display = "none";
+                dropzone.style.display = "none";
                 resultCanvas.style.display = "none";
+                floatingGroup.classList.remove('visible');
                 editor.style.display = "inline-block";
-                lineLayer.width = img.clientWidth; lineLayer.height = img.clientHeight;
-                initDots();
-                let canvasTemp = document.createElement('canvas');
-                canvasTemp.width = img.naturalWidth; canvasTemp.height = img.naturalHeight;
-                canvasTemp.getContext('2d').drawImage(img, 0, 0);
+                resetCanvasSize();
                 if(srcMat) srcMat.delete();
-                srcMat = cv.imread(canvasTemp);
+                srcMat = cv.imread(img);
+                initDots();
+                saveState();
             };
-            img.src = event.target.result;
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
-    };
+    }
+
+    function resetCanvasSize() {
+        lineLayer.width = img.clientWidth; 
+        lineLayer.height = img.clientHeight;
+    }
+
+    function rotateImage() {
+        rotation = (rotation + 90) % 360;
+        img.style.transform = `rotate(${rotation}deg)`;
+        // Recalcul simple pour la démo - En prod complexe, on pivoterait le Mat
+        setTimeout(initDots, 350); 
+    }
 
     function initDots() {
-        const dotsContainer = document.getElementById('dots');
-        dotsContainer.innerHTML = '';
+        const container = document.getElementById('dots');
+        container.innerHTML = '';
         const w = img.clientWidth, h = img.clientHeight;
         const pts = [{x:w*0.1,y:h*0.1}, {x:w*0.9,y:h*0.1}, {x:w*0.9,y:h*0.9}, {x:w*0.1,y:h*0.9}];
         pts.forEach((p, i) => {
             const d = document.createElement('div');
             d.className = 'dot'; d.style.left = p.x + 'px'; d.style.top = p.y + 'px';
             d.onmousedown = (e) => {
-                e.preventDefault();
+                saveState();
                 document.onmousemove = (m) => {
                     const rect = editor.getBoundingClientRect();
                     d.style.left = Math.max(0, Math.min(m.clientX - rect.left, w)) + 'px';
@@ -142,7 +209,7 @@
                 };
                 document.onmouseup = () => document.onmousemove = null;
             };
-            dotsContainer.appendChild(d);
+            container.appendChild(d);
         });
         updateLines();
     }
@@ -150,7 +217,7 @@
     function updateLines() {
         const ctx = lineLayer.getContext('2d');
         ctx.clearRect(0,0,lineLayer.width,lineLayer.height);
-        ctx.beginPath(); ctx.strokeStyle = "#F0D13C"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.strokeStyle = "#F0D13C"; ctx.lineWidth = 3;
         document.querySelectorAll('.dot').forEach((d, i) => {
             if(i===0) ctx.moveTo(parseFloat(d.style.left), parseFloat(d.style.top));
             else ctx.lineTo(parseFloat(d.style.left), parseFloat(d.style.top));
@@ -158,24 +225,68 @@
         ctx.closePath(); ctx.stroke();
     }
 
+    // Historique Undo/Redo
+    function saveState() {
+        const currentDots = Array.from(document.querySelectorAll('.dot')).map(d => ({x: d.style.left, y: d.style.top}));
+        if(currentDots.length > 0) history.push(JSON.stringify(currentDots));
+        redoStack = [];
+        updateUndoButtons();
+    }
+
+    function undo() {
+        if (history.length <= 1) return;
+        redoStack.push(history.pop());
+        applyState(history[history.length - 1]);
+    }
+
+    function redo() {
+        if (redoStack.length === 0) return;
+        const state = redoStack.pop();
+        history.push(state);
+        applyState(state);
+    }
+
+    function applyState(stateStr) {
+        const pts = JSON.parse(stateStr);
+        const dots = document.querySelectorAll('.dot');
+        pts.forEach((p, i) => {
+            dots[i].style.left = p.x;
+            dots[i].style.top = p.y;
+        });
+        updateLines();
+        updateUndoButtons();
+    }
+
+    function updateUndoButtons() {
+        document.getElementById('undoBtn').disabled = history.length <= 1;
+        document.getElementById('redoBtn').disabled = redoStack.length === 0;
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('mode_' + mode).classList.add('active');
+        if (resultCanvas.style.display === "block") processImage();
+    }
+
     function processImage() {
         const dots = document.querySelectorAll('.dot');
-        const scaleX = srcMat.cols / img.clientWidth, scaleY = srcMat.rows / img.clientHeight;
+        const sX = srcMat.cols / img.clientWidth, sY = srcMat.rows / img.clientHeight;
         let coords = [];
-        dots.forEach(d => coords.push(parseFloat(d.style.left)*scaleX, parseFloat(d.style.top)*scaleY));
+        dots.forEach(d => coords.push(parseFloat(d.style.left)*sX, parseFloat(d.style.top)*sY));
 
         const w = Math.max(Math.hypot(coords[2]-coords[0], coords[3]-coords[1]), Math.hypot(coords[4]-coords[6], coords[5]-coords[7]));
         const h = Math.max(Math.hypot(coords[6]-coords[0], coords[7]-coords[1]), Math.hypot(coords[4]-coords[2], coords[5]-coords[3]));
 
+        let dst = new cv.Mat();
         let srcPts = cv.matFromArray(4, 1, cv.CV_32FC2, coords);
         let dstPts = cv.matFromArray(4, 1, cv.CV_32FC2, [0,0, w,0, w,h, 0,h]);
         let M = cv.getPerspectiveTransform(srcPts, dstPts);
-        let dst = new cv.Mat();
         cv.warpPerspective(srcMat, dst, M, new cv.Size(w, h), cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
 
         if (currentMode === 'bw') {
             cv.cvtColor(dst, dst, cv.COLOR_RGBA2GRAY);
-            cv.adaptiveThreshold(dst, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 21, 15);
+            cv.adaptiveThreshold(dst, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 15);
         } else if (currentMode === 'magic') {
             dst.convertTo(dst, -1, 1.2, 10); 
         }
@@ -183,20 +294,22 @@
         cv.imshow('resultCanvas', dst);
         resultCanvas.style.display = "block";
         editor.style.display = "none";
-        document.getElementById('downloadBtn').disabled = false;
-        srcPts.delete(); dstPts.delete(); M.delete(); dst.delete();
+        floatingGroup.classList.add('visible');
+        dst.delete(); srcPts.delete(); dstPts.delete(); M.delete();
+    }
+
+    function backToEdit() {
+        resultCanvas.style.display = "none";
+        editor.style.display = "inline-block";
+        floatingGroup.classList.remove('visible');
+        resetCanvasSize();
     }
 
     function downloadResult() {
         const link = document.createElement('a');
-        link.download = "Scan_" + Date.now() + ".jpg";
-        link.href = resultCanvas.toDataURL('image/jpeg', 0.9);
+        link.download = `Umbrella_Scan_${Date.now()}.jpg`;
+        link.href = resultCanvas.toDataURL('image/jpeg', 0.92);
         link.click();
-        
-        // --- ACTUALISATION AUTO (RESET) ---
-        setTimeout(() => {
-            location.reload(); 
-        }, 800);
     }
 </script>
 </body>
