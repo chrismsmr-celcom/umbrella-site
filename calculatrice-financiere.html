@@ -10,6 +10,8 @@
         :root {
             --primary: #0f172a;
             --accent: #f5c400;
+            --success: #4ade80;
+            --danger: #f87171;
             --bg: #0f172a;
             --glass: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
@@ -28,11 +30,11 @@
             display: grid; grid-template-columns: 1fr 380px; gap: 30px;
             background: var(--glass); backdrop-filter: blur(20px);
             padding: 40px; border-radius: 32px; border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
 
-        /* ÉDITION */
         h1 { font-weight: 800; font-size: 1.8rem; color: var(--accent); margin-bottom: 5px; }
         .header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
 
@@ -61,7 +63,6 @@
         }
         .input-field:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
 
-        /* RÉSULTATS */
         .results-side {
             background: rgba(0,0,0,0.2); border-radius: 24px; padding: 30px;
             border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between;
@@ -69,14 +70,14 @@
 
         .res-card { margin-bottom: 25px; }
         .res-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
-        .res-value { font-size: 2.2rem; font-weight: 800; color: #fff; }
+        .res-value { font-size: 2.2rem; font-weight: 800; color: #fff; transition: 0.3s; }
         
-        .progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 15px; overflow: hidden; }
-        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        .progress-container { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
 
         .btn-action {
             width: 100%; background: var(--accent); color: var(--primary); border: none;
-            padding: 14px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s;
+            padding: 14px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 20px;
         }
         .btn-action:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(245, 196, 0, 0.2); }
     </style>
@@ -88,30 +89,15 @@
             <div class="header-flex">
                 <div>
                     <h1>Finance Lab</h1>
-                    <p style="color:#FFF; font-size: 0.85rem;">Intelligence financière Umbrella®</p>
+                    <p style="color:#FFF; font-size: 0.85rem; opacity: 0.8;">Intelligence financière Umbrella®</p>
                 </div>
                 <select id="currency" class="currency-picker" onchange="calc()">
                     <option value="€">EUR (€)</option>
                     <option value="$">USD ($)</option>
                     <option value="£">GBP (£)</option>
-                    <option value="CHF">CHF (Fr.)</option>
                     <option value="CFA">CFA (FCFA)</option>
+                    <option value="CDF">CDF (FC)</option>
                     <option value="MAD">MAD (Dh)</option>
-                    <option value="DZD">DZD (DA)</option>
-                    <option value="CAD">CAD ($)</option>
-                    <option value="JPY">JPY (¥)</option>
-                    <option value="CNY">CNY (¥)</option>
-                    <option value="BTC">BTC (₿)</option>
-                    <option value="AED">AED (dh)</option>
-                    <option value="INR">INR (₹)</option>
-                    <option value="BRL">BRL (R$)</option>
-                    <option value="RUB">RUB (₽)</option>
-                    <option value="TRY">TRY (₺)</option>
-                    <option value="ZAR">ZAR (R)</option>
-                    <option value="AUD">AUD ($)</option>
-                    <option value="MXN">MXN ($)</option>
-                    <option value="XOF">XOF (CFA)</option>
-                    <option value="CDF">CDF (CDF)</option>
                 </select>
             </div>
 
@@ -129,10 +115,12 @@
             </div>
 
             <div id="seuil-group" class="form-group">
-                <label>Charges Fixes</label>
-                <input type="number" id="fixes" class="input-field" placeholder="Ex: 5000" oninput="calc()">
-                <label style="margin-top:20px;">Taux de Marge (%)</label>
+                <label>Charges Fixes Annuelles</label>
+                <input type="number" id="fixes" class="input-field" placeholder="Ex: 50000" oninput="calc()">
+                <label style="margin-top:20px;">Taux de Marge / Variable (%)</label>
                 <input type="number" id="tauxM" class="input-field" placeholder="Ex: 30" oninput="calc()">
+                <label style="margin-top:20px;">Chiffre d'Affaires Actuel</label>
+                <input type="number" id="ca_actuel" class="input-field" placeholder="Progression vers le seuil" oninput="calc()">
             </div>
 
             <div id="tva-group" class="form-group">
@@ -143,11 +131,11 @@
                     <option value="20">Taux Normal (20%)</option>
                     <option value="10">Intermédiaire (10%)</option>
                     <option value="5.5">Réduit (5.5%)</option>
-                    <option value="2.1">Super Réduit (2.1%)</option>
+                    <option value="16">Standard RDC (16%)</option>
                 </select>
             </div>
 
-            <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:0.75rem; display:block; margin-top:20px;">
+            <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:0.75rem; display:inline-block; margin-top:30px;">
                 <i class="fa fa-arrow-left"></i> Retour Dashboard
             </a>
         </div>
@@ -165,7 +153,9 @@
                 </div>
             </div>
             
-            <button class="btn-action" onclick="window.print()">Exporter PDF</button>
+            <button class="btn-action" onclick="window.print()">
+                <i class="fa fa-file-pdf"></i> Exporter l'Analyse
+            </button>
         </div>
     </div>
 
@@ -183,13 +173,17 @@
         const l2 = document.getElementById('label-2');
 
         if(mode === 'marge') { l1.innerText = "Marge Bénéficiaire"; l2.innerText = "Taux de Profitabilité"; }
-        else if(mode === 'seuil') { l1.innerText = "Seuil de Rentabilité"; l2.innerText = "Objectif Mensuel"; }
-        else { l1.innerText = "Montant TVA"; l2.innerText = "Total TTC"; }
+        else if(mode === 'seuil') { l1.innerText = "Point Mort (Seuil)"; l2.innerText = "Progression Rentabilité"; }
+        else { l1.innerText = "Montant de la TVA"; l2.innerText = "Total TTC"; }
         calc();
     }
 
     function calc() {
         const symbol = document.getElementById('currency').value;
+        const val1Disp = document.getElementById('val-1');
+        const val2Disp = document.getElementById('val-2');
+        const bar = document.getElementById('bar');
+        
         let v1 = 0, v2 = 0, percent = 0;
 
         if(currentMode === 'marge') {
@@ -198,29 +192,39 @@
             v1 = vente - achat;
             v2 = vente > 0 ? (v1 / vente) * 100 : 0;
             percent = v2;
-            document.getElementById('val-1').innerText = v1.toFixed(2) + " " + symbol;
-            document.getElementById('val-2').innerText = v2.toFixed(1) + " %";
+            
+            val1Disp.innerText = v1.toFixed(2) + " " + symbol;
+            val1Disp.style.color = v1 >= 0 ? "var(--success)" : "var(--danger)";
+            val2Disp.innerText = v2.toFixed(1) + " %";
+            bar.style.background = v2 < 15 ? "var(--danger)" : "var(--accent)";
         } 
         else if(currentMode === 'seuil') {
             const fixes = parseFloat(document.getElementById('fixes').value) || 0;
             const taux = parseFloat(document.getElementById('tauxM').value) || 0;
+            const caActuel = parseFloat(document.getElementById('ca_actuel').value) || 0;
+            
             v1 = taux > 0 ? (fixes / (taux / 100)) : 0;
-            v2 = v1 / 12;
-            document.getElementById('val-1').innerText = v1.toLocaleString() + " " + symbol;
-            document.getElementById('val-2').innerText = v2.toFixed(0) + " " + symbol;
-            percent = 100;
+            percent = v1 > 0 ? (caActuel / v1) * 100 : 0;
+            
+            val1Disp.innerText = v1.toLocaleString() + " " + symbol;
+            val1Disp.style.color = "#fff";
+            val2Disp.innerText = Math.min(percent, 100).toFixed(1) + " %";
+            bar.style.background = percent >= 100 ? "var(--success)" : "var(--accent)";
         }
         else {
             const ht = parseFloat(document.getElementById('baseHT').value) || 0;
             const taux = parseFloat(document.getElementById('tauxTVA').value) || 0;
             v1 = ht * (taux / 100);
             v2 = ht + v1;
-            document.getElementById('val-1').innerText = v1.toFixed(2) + " " + symbol;
-            document.getElementById('val-2').innerText = v2.toFixed(2) + " " + symbol;
-            percent = (v1 / v2) * 100;
+            percent = 100;
+            
+            val1Disp.innerText = v1.toFixed(2) + " " + symbol;
+            val1Disp.style.color = "var(--accent)";
+            val2Disp.innerText = v2.toFixed(2) + " " + symbol;
+            bar.style.background = "var(--accent)";
         }
 
-        document.getElementById('bar').style.width = Math.min(percent, 100) + "%";
+        bar.style.width = Math.min(Math.max(percent, 0), 100) + "%";
     }
 </script>
 </body>
