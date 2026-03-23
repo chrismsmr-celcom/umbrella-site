@@ -632,7 +632,7 @@ footer a:hover{color:#fff;}
     <div class="tool-card"><i class="fa fa-list-check"></i><h3>Gestionnaire de tâches</h3><p>Organisation et suivi efficaces.</p><a href="gestionnaire-des-taches.html">Accéder →</a></div>
     <div class="tool-card"><i class="fa fa-qrcode"></i><h3>Générateur QR Code</h3><p>QR codes professionnels pour vos documents et produits.</p><a href="qrcode.html">Accéder →</a></div>
     <div class="tool-card"><i class="fa fa-expand"></i><h3>Umbrella Scanner</h3><p>Numérisation rapide et intelligente de vos documents.</p><a href="scan.html">Accéder →</a></div>
-    <div class="tool-card"><i class="fa fa-file-pdf"></i><h3>Conversion PDF</h3><p>Convertissez facilement vos fichiers entre PDF, Word et images.</p><a href="pdfconvert.html">Accéder →</a></div>
+    <div class="tool-card"><i class="fa fa-file-pdf"></i><h3>Conversion PDF</h3><p>Convertissez facilement vos fichiers entre PDF, Word et images.</p><a href="https://umbrella-free-pdf.onrender.com/">Accéder →</a></div>
     <div class="tool-card"><i class="fa fa-calculator"></i><h3>Calculatrice financière</h3><p>Analyse de coûts, marges et projections financières en quelques clics.</p><a href="calculatrice-financiere.html">Accéder →</a></div>
     <div class="tool-card"><i class="fa fa-file-invoice"></i><h3>Devis & Facturation</h3><p>Générez des devis et factures claires, conformes et prêtes à l’envoi.</p><a href="generateur-devis-facture.html">Accéder →</a></div>
   </div>
@@ -741,12 +741,22 @@ footer a:hover{color:#fff;}
 <div id="luce-toggle-btn" onclick="toggleLuce()" style="position: fixed; right: 20px; bottom: 20px; width: 60px; height: 60px; background: #f5c400; border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; color: #0f172a;">
     <i class="fa fa-comment-dots" style="font-size: 1.5rem;"></i>
 </div>
-<script type="module">
-/* ================= CONFIGURATION & IMPORTS ================= */
+<script type="module">/* ================= CONFIGURATION & IMPORTS ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { 
+    getAuth, 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    signOut, 
+    onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
@@ -769,30 +779,57 @@ const userAvatar = document.getElementById("userAvatar");
 const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 
-// Synchronisation en temps réel de l'état de connexion
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    if(userAvatar) userAvatar.src = user.photoURL || "https://www.gravatar.com/avatar/?d=mp";
-    if(userName) userName.textContent = user.displayName;
-    if(userEmail) userEmail.textContent = user.email;
-    localStorage.setItem("umbrellaUser", JSON.stringify({ name: user.displayName, email: user.email, avatar: user.photoURL }));
-  } else {
-    localStorage.removeItem("umbrellaUser");
-  }
-});
+// Fonction pour mettre à jour l'UI proprement
+const updateUI = (user) => {
+    if (user) {
+        if (userAvatar) userAvatar.src = user.photoURL || "https://www.gravatar.com/avatar/?d=mp";
+        if (userName) userName.textContent = user.displayName || "Utilisateur";
+        if (userEmail) userEmail.textContent = user.email;
+        localStorage.setItem("umbrellaUser", JSON.stringify({ 
+            name: user.displayName, 
+            email: user.email, 
+            avatar: user.photoURL 
+        }));
+    } else {
+        if (userAvatar) userAvatar.src = "https://www.gravatar.com/avatar/?d=mp";
+        if (userName) userName.textContent = "Invité";
+        if (userEmail) userEmail.textContent = "Non connecté";
+        localStorage.removeItem("umbrellaUser");
+    }
+};
 
+onAuthStateChanged(auth, updateUI);
+
+// Connexion Google
 const googleBtn = document.getElementById("googleLogin");
 if (googleBtn) {
-  googleBtn.onclick = () => {
-    signInWithPopup(auth, provider).then(() => location.reload()).catch(err => console.error(err));
-  };
+    googleBtn.addEventListener('click', async (e) => {
+        e.preventDefault(); // Empêche tout comportement par défaut
+        
+        try {
+            // L'appel doit être immédiat après le clic
+            const result = await signInWithPopup(auth, provider);
+            console.log("Connecté :", result.user.displayName);
+            // Pas besoin de reload si onAuthStateChanged est bien configuré
+        } catch (error) {
+            if (error.code === 'auth/popup-blocked') {
+                alert("La fenêtre de connexion a été bloquée. Veuillez autoriser les popups pour ce site dans la barre d'adresse.");
+            } else if (error.code === 'auth/cancelled-popup-request') {
+                console.log("Popup fermée trop vite par l'utilisateur.");
+            } else {
+                console.error("Erreur Firebase :", error.code, error.message);
+            }
+        }
+    });
 }
-
-window.logout = () => {
-  signOut(auth).then(() => {
-    localStorage.removeItem("umbrellaUser");
-    location.reload();
-  });
+// Déconnexion globale
+window.logout = async () => {
+    try {
+        await signOut(auth);
+        location.reload(); 
+    } catch (error) {
+        console.error("Erreur déconnexion :", error);
+    }
 };
 
 /* ================= CONTACT FONCTIONNEL (FIRESTORE) ================= */
@@ -800,34 +837,46 @@ const contactForm = document.getElementById('contactForm');
 const formStatus = document.getElementById('formStatus');
 
 if (contactForm) {
-  contactForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = contactForm.querySelector('button');
-    const originalText = btn.innerText;
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = contactForm.querySelector('button');
+        const originalText = btn.innerText;
 
-    btn.innerText = "Envoi...";
-    btn.disabled = true;
+        // UI State: Loading
+        btn.innerText = "Envoi en cours...";
+        btn.disabled = true;
+        if (formStatus) formStatus.style.display = "none";
 
-    try {
-      await addDoc(collection(db, "messages"), {
-        nom: document.getElementById('contactName').value,
-        email: document.getElementById('contactEmail').value,
-        message: document.getElementById('contactMessage').value,
-        date: serverTimestamp()
-      });
+        const formData = {
+            nom: document.getElementById('contactName').value.trim(),
+            email: document.getElementById('contactEmail').value.trim(),
+            message: document.getElementById('contactMessage').value.trim(),
+            date: serverTimestamp(),
+            source: "Web Umbrella" // Utile pour filtrer dans la DB
+        };
 
-      formStatus.style.display = "block";
-      formStatus.style.cssText = "background:#dcfce7; color:#166534; padding:10px; border-radius:8px; margin-top:10px;";
-      formStatus.innerText = "Message envoyé avec succès !";
-      contactForm.reset();
-    } catch (err) {
-      formStatus.innerText = "Erreur lors de l'envoi.";
-      console.error(err);
-    } finally {
-      btn.innerText = originalText;
-      btn.disabled = false;
-    }
-  });
+        try {
+            await addDoc(collection(db, "messages"), formData);
+
+            if (formStatus) {
+                formStatus.style.display = "block";
+                formStatus.className = "status-success"; // Utilisez une classe CSS plutôt que du style inline
+                formStatus.style.cssText = "background:#dcfce7; color:#166534; padding:15px; border-radius:10px; margin-top:15px; border: 1px solid #bbf7d0;";
+                formStatus.innerText = "✓ Votre message a été transmis avec succès.";
+            }
+            contactForm.reset();
+        } catch (err) {
+            console.error("Firestore Error:", err);
+            if (formStatus) {
+                formStatus.style.display = "block";
+                formStatus.style.cssText = "background:#fee2e2; color:#991b1b; padding:15px; border-radius:10px; margin-top:15px; border: 1px solid #fecaca;";
+                formStatus.innerText = "✕ Une erreur est survenue. Veuillez réessayer.";
+            }
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    });
 }
 
 /* ================= UI & NAVIGATION ================= */
@@ -862,8 +911,9 @@ if (searchBtn) {
 // 1. CONFIGURATION
 console.log("Luce Engine: Mode Assistant Vocal activé");
 
+// Note : Pour la production, protège cette clé via des restrictions de domaine
 const API_KEY = "AIzaSyCf1dH21kcnWpW-0rNqyLdPxy3-m19ixEM"; 
-const URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 let isTalking = false;
 
@@ -881,54 +931,62 @@ window.appendMessage = function(role, text) {
     const chat = document.getElementById('luce-chat');
     if (!chat) return;
     const msg = document.createElement('div');
-    msg.className = "msg " + role;
+    msg.className = `msg ${role}`;
     msg.innerText = text;
     chat.appendChild(msg);
-    chat.scrollTop = chat.scrollHeight;
+    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
 };
 
-// --- 2. MOTEUR DE VOIX (NAVIGATEUR) ---
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.lang = 'fr-FR';
-recognition.interimResults = false;
+// --- 2. MOTEUR DE VOIX (RECONNAISSANCE) ---
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'fr-FR';
+    recognition.interimResults = false;
 
-window.startLuceListening = function() {
-    if (isTalking) return;
-    const micBtn = document.getElementById('mic-btn');
-    if(micBtn) micBtn.style.color = "#ff4757"; 
-    recognition.start();
-};
+    window.startLuceListening = function() {
+        if (isTalking) return;
+        try {
+            recognition.start();
+            const micBtn = document.getElementById('mic-btn');
+            if(micBtn) micBtn.style.color = "#ff4757"; 
+        } catch (e) { console.error("Recognition déjà active"); }
+    };
 
-recognition.onresult = function(event) {
-    const transcript = event.results[0][0].transcript;
-    const input = document.getElementById('luce-msg');
-    if(input) {
-        input.value = transcript;
-        window.askLuce(); 
-    }
-};
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        const input = document.getElementById('luce-msg');
+        if(input) {
+            input.value = transcript;
+            window.askLuce(); 
+        }
+    };
 
-recognition.onend = () => {
-    const micBtn = document.getElementById('mic-btn');
-    if(micBtn) micBtn.style.color = "";
-};
+    recognition.onend = () => {
+        const micBtn = document.getElementById('mic-btn');
+        if(micBtn) micBtn.style.color = "";
+    };
+}
 
+// --- 3. SYNTHÈSE VOCALE (TTS) ---
 window.speakLuce = function(text) {
-    window.speechSynthesis.cancel(); 
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'fr-FR';
-    msg.pitch = 1.1; // Un peu plus "Siri"
-    msg.rate = 1.0;
+    // Nettoyage des caractères spéciaux Markdown pour une lecture fluide
+    const cleanText = text.replace(/[*_#]/g, '');
     
-    // Ajout d'un petit effet visuel sur l'avatar pendant qu'elle parle
+    window.speechSynthesis.cancel(); 
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'fr-FR';
+    utterance.pitch = 1.1; 
+    utterance.rate = 1.0;
+    
     const avatar = document.querySelector('.luce-avatar');
-    msg.onstart = () => avatar?.classList.add('speaking');
-    msg.onend = () => avatar?.classList.remove('speaking');
+    utterance.onstart = () => avatar?.classList.add('speaking');
+    utterance.onend = () => avatar?.classList.remove('speaking');
 
-    window.speechSynthesis.speak(msg);
+    window.speechSynthesis.speak(utterance);
 };
 
-// --- 3. LOGIQUE GEMINI ---
+// --- 4. LOGIQUE GEMINI ---
 window.askLuce = async function() {
     const input = document.getElementById('luce-msg');
     const userText = input.value.trim();
@@ -937,38 +995,44 @@ window.askLuce = async function() {
 
     isTalking = true;
     window.appendMessage("user", userText);
-    input.value = "Luce réfléchit...";
+    
+    const originalPlaceholder = input.placeholder;
+    input.value = "";
+    input.placeholder = "Luce réfléchit...";
     input.disabled = true;
 
     try {
         const response = await fetch(URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-goog-api-key': API_KEY
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                "contents": [{"parts": [{"text": "Tu es Luce d'Umbrella. Réponds brièvement (max 2 phrases) : " + userText}]}]
+                "contents": [{
+                    "parts": [{
+                        "text": `Tu es Luce, l'intelligence artificielle de l'écosystème Umbrella. 
+                        Ton ton est professionnel, concis et légèrement futuriste. 
+                        Réponds en maximum 2 phrases à : ${userText}`
+                    }]
+                }]
             })
         });
 
         const data = await response.json();
         
         if (data.error) {
-            window.appendMessage("bot", "Quota plein. Réessayez dans 1 min.");
-        } else if (data.candidates) {
+            const errorMsg = "Je rencontre une limite technique. Réessayez dans un instant.";
+            window.appendMessage("bot", errorMsg);
+            window.speakLuce(errorMsg);
+        } else if (data.candidates && data.candidates[0].content.parts[0].text) {
             const luceReply = data.candidates[0].content.parts[0].text;
             window.appendMessage("bot", luceReply);
-            
-            // LA MAGIE : Luce parle ici !
             window.speakLuce(luceReply);
         }
 
     } catch (e) {
-        window.appendMessage("bot", "Erreur réseau.");
+        window.appendMessage("bot", "Connexion interrompue. Vérifiez votre réseau.");
     } finally {
         isTalking = false;
-        input.value = "";
+        input.placeholder = originalPlaceholder;
         input.disabled = false;
         input.focus();
     }
@@ -976,4 +1040,3 @@ window.askLuce = async function() {
 </script>
 </body>
 </html>
-
