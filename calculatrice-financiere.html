@@ -2,165 +2,523 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Lab International | Umbrella®</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Finance Lab Pro | Umbrella® - Intelligence Financière</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
             --primary: #0f172a;
+            --primary-light: #1e293b;
             --accent: #f5c400;
-            --success: #4ade80;
-            --danger: #f87171;
-            --bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
-            --text-muted: #94a3b8;
+            --accent-dark: #e6b800;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: var(--text); 
+            min-height: 100vh; 
+            padding: 20px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 280px;
+            max-width: 380px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid;
+            color: var(--text);
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.info { border-left-color: var(--accent); }
+        .toast.warning { border-left-color: var(--warning); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .main-container {
-            width: 100%; max-width: 950px;
-            display: grid; grid-template-columns: 1fr 380px; gap: 30px;
-            background: var(--glass); backdrop-filter: blur(20px);
-            padding: 40px; border-radius: 32px; border: 1px solid var(--border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            background: var(--card);
+            padding: 40px;
+            border-radius: 32px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
         }
 
-        @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { 
+            .main-container { grid-template-columns: 1fr; padding: 25px; }
+        }
 
-        h1 { font-weight: 800; font-size: 1.8rem; color: var(--accent); margin-bottom: 5px; }
-        .header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        /* Header */
+        .header-flex { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        h1 { 
+            font-weight: 800; 
+            font-size: 2rem; 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         .currency-picker {
-            background:#0f172a; border: 1px solid var(--border);
-            color: #fff; padding: 8px 12px; border-radius: 10px; outline: none; font-weight: 600;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: 40px;
+            outline: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
         }
-
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 5px; }
-        .tab {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            color: #cbd5e1; padding: 10px 18px; border-radius: 12px;
-            cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: 0.3s; white-space: nowrap;
-        }
-        .tab.active { background: var(--accent); color: var(--primary); border-color: var(--accent); }
-
-        .form-group { margin-bottom: 20px; display: none; }
-        .form-group.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        label { display: block; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .input-field {
-            width: 100%; padding: 14px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border); border-radius: 14px;
-            color: white; font-size: 1.1rem; outline: none; transition: 0.3s;
-        }
-        .input-field:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
-
-        .results-side {
-            background: rgba(0,0,0,0.2); border-radius: 24px; padding: 30px;
-            border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between;
-        }
-
-        .res-card { margin-bottom: 25px; }
-        .res-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
-        .res-value { font-size: 2.2rem; font-weight: 800; color: #fff; transition: 0.3s; }
         
-        .progress-container { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 15px; overflow: hidden; }
-        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        .currency-picker:hover {
+            border-color: var(--accent);
+        }
+
+        /* Tabs */
+        .nav-tabs { 
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 30px; 
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 12px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab i { font-size: 1rem; }
+        
+        .tab.active { 
+            background: var(--accent); 
+            color: var(--primary); 
+            border-color: var(--accent);
+        }
+        
+        .tab:hover:not(.active) { 
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+
+        /* Form Groups */
+        .form-group { 
+            margin-bottom: 25px; 
+            display: none; 
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .form-group.active { display: block; }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        label { 
+            display: block; 
+            font-size: 0.7rem; 
+            color: var(--text-muted); 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        
+        .input-field {
+            width: 100%; 
+            padding: 14px 16px; 
+            background: var(--bg);
+            border: 1px solid var(--border); 
+            border-radius: 14px;
+            color: var(--text); 
+            font-size: 1rem; 
+            outline: none; 
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        
+        .input-field:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.1);
+        }
+        
+        select.input-field {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+        }
+
+        /* Results Side */
+        .results-side {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 24px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .results-side::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(245,196,0,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .res-card { 
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .res-label { 
+            font-size: 0.75rem; 
+            color: rgba(255,255,255,0.6); 
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .res-value { 
+            font-size: 2.5rem; 
+            font-weight: 800; 
+            color: #fff; 
+            transition: 0.3s;
+            letter-spacing: -1px;
+        }
+        
+        .res-value small {
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.7;
+        }
+        
+        .progress-container { 
+            width: 100%; 
+            height: 6px; 
+            background: rgba(255,255,255,0.2); 
+            border-radius: 10px; 
+            margin-top: 12px; 
+            overflow: hidden;
+        }
+        
+        .progress-bar { 
+            height: 100%; 
+            background: var(--accent); 
+            width: 0%; 
+            transition: 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            border-radius: 10px;
+        }
 
         .btn-action {
-            width: 100%; background: var(--accent); color: var(--primary); border: none;
-            padding: 14px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 20px;
+            width: 100%; 
+            background: var(--accent); 
+            color: var(--primary); 
+            border: none;
+            padding: 14px; 
+            border-radius: 40px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
         }
-        .btn-action:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(245, 196, 0, 0.2); }
+        
+        .btn-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            background: var(--accent-dark);
+        }
+        
+        .btn-secondary {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            margin-top: 30px;
+            transition: 0.3s;
+        }
+        
+        .back-link:hover {
+            color: var(--accent);
+            transform: translateX(-3px);
+        }
+        
+        .info-tip {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        @media (max-width: 550px) {
+            .main-container { padding: 20px; }
+            .tab { padding: 8px 16px; font-size: 0.75rem; }
+            .res-value { font-size: 1.8rem; }
+            h1 { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="input-side">
-            <div class="header-flex">
-                <div>
-                    <h1>Finance Lab</h1>
-                    <p style="color:#FFF; font-size: 0.85rem; opacity: 0.8;">Intelligence financière Umbrella®</p>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="main-container">
+    <div class="input-side">
+        <div class="header-flex">
+            <div>
+                <h1>Finance Lab Pro</h1>
+                <div class="subtitle">
+                    <i class="fa fa-chart-line"></i> Intelligence financière avancée
                 </div>
-                <select id="currency" class="currency-picker" onchange="calc()">
-                    <option value="€">EUR (€)</option>
-                    <option value="$">USD ($)</option>
-                    <option value="£">GBP (£)</option>
-                    <option value="CFA">CFA (FCFA)</option>
-                    <option value="CDF">CDF (FC)</option>
-                    <option value="MAD">MAD (Dh)</option>
-                </select>
             </div>
-
-            <div class="nav-tabs">
-                <div class="tab active" onclick="switchMode('marge', this)">Marge & Profit</div>
-                <div class="tab" onclick="switchMode('seuil', this)">Point Mort</div>
-                <div class="tab" onclick="switchMode('tva', this)">TVA Express</div>
-            </div>
-
-            <div id="marge-group" class="form-group active">
-                <label>Coût d'achat (HT)</label>
-                <input type="number" id="achat" class="input-field" placeholder="0.00" oninput="calc()">
-                <label style="margin-top:20px;">Prix de vente (HT)</label>
-                <input type="number" id="vente" class="input-field" placeholder="0.00" oninput="calc()">
-            </div>
-
-            <div id="seuil-group" class="form-group">
-                <label>Charges Fixes Annuelles</label>
-                <input type="number" id="fixes" class="input-field" placeholder="Ex: 50000" oninput="calc()">
-                <label style="margin-top:20px;">Taux de Marge / Variable (%)</label>
-                <input type="number" id="tauxM" class="input-field" placeholder="Ex: 30" oninput="calc()">
-                <label style="margin-top:20px;">Chiffre d'Affaires Actuel</label>
-                <input type="number" id="ca_actuel" class="input-field" placeholder="Progression vers le seuil" oninput="calc()">
-            </div>
-
-            <div id="tva-group" class="form-group">
-                <label>Base Hors Taxe (HT)</label>
-                <input type="number" id="baseHT" class="input-field" placeholder="0.00" oninput="calc()">
-                <label style="margin-top:20px;">Taux applicable</label>
-                <select id="tauxTVA" class="input-field" onchange="calc()" style="background: #1e293b; color: white;">
-                    <option value="20">Taux Normal (20%)</option>
-                    <option value="10">Intermédiaire (10%)</option>
-                    <option value="5.5">Réduit (5.5%)</option>
-                    <option value="16">Standard RDC (16%)</option>
-                </select>
-            </div>
-
-            <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:0.75rem; display:inline-block; margin-top:30px;">
-                <i class="fa fa-arrow-left"></i> Retour Dashboard
-            </a>
+            <select id="currency" class="currency-picker" onchange="calc()">
+                <option value="€">💶 EUR (€)</option>
+                <option value="$">💵 USD ($)</option>
+                <option value="£">💷 GBP (£)</option>
+                <option value="CFA">🪙 CFA (FCFA)</option>
+                <option value="CDF">🪙 CDF (FC)</option>
+                <option value="MAD">🪙 MAD (Dh)</option>
+            </select>
         </div>
 
-        <div class="results-side">
-            <div>
-                <div class="res-card">
-                    <p id="label-1" class="res-label">Marge Bénéficiaire</p>
-                    <p id="val-1" class="res-value">0.00 €</p>
-                </div>
-                <div class="res-card">
-                    <p id="label-2" class="res-label">Taux de Profitabilité</p>
-                    <p id="val-2" class="res-value" style="color: var(--accent);">0%</p>
-                    <div class="progress-container"><div id="bar" class="progress-bar"></div></div>
-                </div>
+        <div class="nav-tabs">
+            <div class="tab active" onclick="switchMode('marge', this)">
+                <i class="fa fa-chart-simple"></i> Marge & Profit
             </div>
-            
-            <button class="btn-action" onclick="window.print()">
-                <i class="fa fa-file-pdf"></i> Exporter l'Analyse
+            <div class="tab" onclick="switchMode('seuil', this)">
+                <i class="fa fa-chart-gantt"></i> Point Mort
+            </div>
+            <div class="tab" onclick="switchMode('tva', this)">
+                <i class="fa fa-calculator"></i> TVA Express
+            </div>
+            <div class="tab" onclick="switchMode('invest', this)">
+                <i class="fa fa-chart-line"></i> ROI
+            </div>
+        </div>
+
+        <!-- Marge & Profit -->
+        <div id="marge-group" class="form-group active">
+            <label><i class="fa fa-shopping-cart"></i> Coût d'achat (HT)</label>
+            <input type="number" id="achat" class="input-field" placeholder="0.00" oninput="calc()">
+            <label style="margin-top:20px;"><i class="fa fa-tag"></i> Prix de vente (HT)</label>
+            <input type="number" id="vente" class="input-field" placeholder="0.00" oninput="calc()">
+            <div class="info-tip">
+                <i class="fa fa-info-circle"></i> Marge brute = Prix vente - Coût d'achat
+            </div>
+        </div>
+
+        <!-- Point Mort -->
+        <div id="seuil-group" class="form-group">
+            <label><i class="fa fa-building"></i> Charges Fixes Annuelles</label>
+            <input type="number" id="fixes" class="input-field" placeholder="Ex: 50000" oninput="calc()">
+            <label style="margin-top:20px;"><i class="fa fa-percent"></i> Taux de Marge / Variable (%)</label>
+            <input type="number" id="tauxM" class="input-field" placeholder="Ex: 30" oninput="calc()">
+            <label style="margin-top:20px;"><i class="fa fa-chart-line"></i> Chiffre d'Affaires Actuel</label>
+            <input type="number" id="ca_actuel" class="input-field" placeholder="Progression vers le seuil" oninput="calc()">
+            <div class="info-tip">
+                <i class="fa fa-info-circle"></i> Point mort = Charges fixes / Taux de marge
+            </div>
+        </div>
+
+        <!-- TVA -->
+        <div id="tva-group" class="form-group">
+            <label><i class="fa fa-file-invoice"></i> Base Hors Taxe (HT)</label>
+            <input type="number" id="baseHT" class="input-field" placeholder="0.00" oninput="calc()">
+            <label style="margin-top:20px;"><i class="fa fa-percent"></i> Taux applicable</label>
+            <select id="tauxTVA" class="input-field" onchange="calc()">
+                <option value="20">🇫🇷 Taux Normal (20%)</option>
+                <option value="10">🇫🇷 Intermédiaire (10%)</option>
+                <option value="5.5">🇫🇷 Réduit (5.5%)</option>
+                <option value="16">🇨🇩 Standard RDC (16%)</option>
+                <option value="18">🇸🇳 Sénégal (18%)</option>
+                <option value="19">🇨🇮 Côte d'Ivoire (19%)</option>
+            </select>
+            <div class="info-tip">
+                <i class="fa fa-info-circle"></i> TVA = Base HT × Taux / 100
+            </div>
+        </div>
+
+        <!-- ROI - Nouveau module -->
+        <div id="invest-group" class="form-group">
+            <label><i class="fa fa-chart-line"></i> Investissement Initial</label>
+            <input type="number" id="invest" class="input-field" placeholder="0.00" oninput="calc()">
+            <label style="margin-top:20px;"><i class="fa fa-chart-simple"></i> Bénéfice Annuel Net</label>
+            <input type="number" id="profit" class="input-field" placeholder="0.00" oninput="calc()">
+            <label style="margin-top:20px;"><i class="fa fa-calendar"></i> Période (années)</label>
+            <input type="number" id="years" class="input-field" placeholder="5" value="5" oninput="calc()">
+            <div class="info-tip">
+                <i class="fa fa-info-circle"></i> ROI = (Bénéfice Annuel × Années) / Investissement × 100
+            </div>
+        </div>
+
+        <a href="index.html" class="back-link">
+            <i class="fa fa-arrow-left"></i> Retour au Dashboard
+        </a>
+    </div>
+
+    <div class="results-side">
+        <div>
+            <div class="res-card">
+                <div class="res-label" id="label-1">
+                    <i class="fa fa-chart-simple"></i> Marge Bénéficiaire
+                </div>
+                <div class="res-value" id="val-1">0.00 €</div>
+            </div>
+            <div class="res-card">
+                <div class="res-label" id="label-2">
+                    <i class="fa fa-percent"></i> Taux de Profitabilité
+                </div>
+                <div class="res-value" id="val-2" style="color: var(--accent);">0%</div>
+                <div class="progress-container"><div id="bar" class="progress-bar"></div></div>
+            </div>
+            <div id="extra-info" class="res-card" style="display: none;">
+                <div class="res-label"><i class="fa fa-clock"></i> Temps de retour</div>
+                <div class="res-value" id="payback" style="font-size: 1.5rem;">-</div>
+            </div>
+        </div>
+        
+        <div>
+            <button class="btn-action" onclick="exportAnalysis()">
+                <i class="fa fa-download"></i> Exporter l'Analyse
+            </button>
+            <button class="btn-secondary" onclick="resetForm()">
+                <i class="fa fa-undo"></i> Réinitialiser
             </button>
         </div>
     </div>
+</div>
 
 <script>
     let currentMode = 'marge';
+
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+        toast.innerHTML = `<i class="fa ${icons[type]}"></i><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
 
     function switchMode(mode, el) {
         currentMode = mode;
@@ -171,10 +529,29 @@
         
         const l1 = document.getElementById('label-1');
         const l2 = document.getElementById('label-2');
+        const extraInfo = document.getElementById('extra-info');
 
-        if(mode === 'marge') { l1.innerText = "Marge Bénéficiaire"; l2.innerText = "Taux de Profitabilité"; }
-        else if(mode === 'seuil') { l1.innerText = "Point Mort (Seuil)"; l2.innerText = "Progression Rentabilité"; }
-        else { l1.innerText = "Montant de la TVA"; l2.innerText = "Total TTC"; }
+        if(mode === 'marge') { 
+            l1.innerHTML = '<i class="fa fa-chart-simple"></i> Marge Bénéficiaire'; 
+            l2.innerHTML = '<i class="fa fa-percent"></i> Taux de Profitabilité';
+            extraInfo.style.display = 'none';
+        }
+        else if(mode === 'seuil') { 
+            l1.innerHTML = '<i class="fa fa-chart-gantt"></i> Point Mort (Seuil)'; 
+            l2.innerHTML = '<i class="fa fa-chart-line"></i> Progression Rentabilité';
+            extraInfo.style.display = 'none';
+        }
+        else if(mode === 'tva') { 
+            l1.innerHTML = '<i class="fa fa-calculator"></i> Montant de la TVA'; 
+            l2.innerHTML = '<i class="fa fa-file-invoice"></i> Total TTC';
+            extraInfo.style.display = 'none';
+        }
+        else if(mode === 'invest') { 
+            l1.innerHTML = '<i class="fa fa-chart-line"></i> Retour sur Investissement'; 
+            l2.innerHTML = '<i class="fa fa-percent"></i> ROI (%)';
+            extraInfo.style.display = 'block';
+            document.getElementById('extra-info').querySelector('.res-label').innerHTML = '<i class="fa fa-clock"></i> Temps de retour';
+        }
         calc();
     }
 
@@ -183,6 +560,7 @@
         const val1Disp = document.getElementById('val-1');
         const val2Disp = document.getElementById('val-2');
         const bar = document.getElementById('bar');
+        const paybackEl = document.getElementById('payback');
         
         let v1 = 0, v2 = 0, percent = 0;
 
@@ -211,7 +589,7 @@
             val2Disp.innerText = Math.min(percent, 100).toFixed(1) + " %";
             bar.style.background = percent >= 100 ? "var(--success)" : "var(--accent)";
         }
-        else {
+        else if(currentMode === 'tva') {
             const ht = parseFloat(document.getElementById('baseHT').value) || 0;
             const taux = parseFloat(document.getElementById('tauxTVA').value) || 0;
             v1 = ht * (taux / 100);
@@ -223,9 +601,125 @@
             val2Disp.innerText = v2.toFixed(2) + " " + symbol;
             bar.style.background = "var(--accent)";
         }
+        else if(currentMode === 'invest') {
+            const invest = parseFloat(document.getElementById('invest').value) || 0;
+            const profit = parseFloat(document.getElementById('profit').value) || 0;
+            const years = parseFloat(document.getElementById('years').value) || 1;
+            
+            const totalProfit = profit * years;
+            v1 = invest > 0 ? (totalProfit / invest) * 100 : 0;
+            v2 = v1;
+            percent = Math.min(v1, 100);
+            
+            // Temps de retour sur investissement
+            const paybackTime = profit > 0 ? invest / profit : 0;
+            
+            val1Disp.innerText = v1.toFixed(1) + " %";
+            val1Disp.style.color = v1 >= 0 ? (v1 >= 20 ? "var(--success)" : "var(--warning)") : "var(--danger)";
+            val2Disp.innerText = v1.toFixed(1) + " %";
+            
+            if(paybackEl) {
+                if(paybackTime > 0 && paybackTime < 100) {
+                    paybackEl.innerText = paybackTime.toFixed(1) + " an(s)";
+                } else {
+                    paybackEl.innerText = "> 100 ans";
+                }
+            }
+            
+            bar.style.background = v1 >= 20 ? "var(--success)" : (v1 >= 10 ? "var(--warning)" : "var(--danger)");
+        }
 
         bar.style.width = Math.min(Math.max(percent, 0), 100) + "%";
     }
+
+    function exportAnalysis() {
+        const symbol = document.getElementById('currency').value;
+        const modeNames = {
+            marge: 'Analyse de Marge',
+            seuil: 'Analyse du Point Mort',
+            tva: 'Calcul de TVA',
+            invest: 'Analyse ROI'
+        };
+        
+        let data = `=== ${modeNames[currentMode]} ===\n`;
+        data += `Date: ${new Date().toLocaleString()}\n`;
+        data += `Devise: ${symbol}\n\n`;
+        
+        if(currentMode === 'marge') {
+            const achat = document.getElementById('achat').value || 0;
+            const vente = document.getElementById('vente').value || 0;
+            const marge = vente - achat;
+            const taux = vente > 0 ? (marge / vente) * 100 : 0;
+            data += `Coût d'achat: ${achat} ${symbol}\n`;
+            data += `Prix de vente: ${vente} ${symbol}\n`;
+            data += `Marge: ${marge.toFixed(2)} ${symbol}\n`;
+            data += `Taux de marge: ${taux.toFixed(1)}%\n`;
+        } else if(currentMode === 'seuil') {
+            const fixes = document.getElementById('fixes').value || 0;
+            const taux = document.getElementById('tauxM').value || 0;
+            const ca = document.getElementById('ca_actuel').value || 0;
+            const seuil = taux > 0 ? (fixes / (taux / 100)) : 0;
+            data += `Charges fixes: ${fixes} ${symbol}\n`;
+            data += `Taux de marge: ${taux}%\n`;
+            data += `Point mort: ${seuil.toLocaleString()} ${symbol}\n`;
+            data += `CA actuel: ${ca} ${symbol}\n`;
+            data += `Progression: ${seuil > 0 ? ((ca / seuil) * 100).toFixed(1) : 0}%\n`;
+        } else if(currentMode === 'tva') {
+            const ht = document.getElementById('baseHT').value || 0;
+            const taux = document.getElementById('tauxTVA').value || 0;
+            const tva = ht * (taux / 100);
+            data += `Base HT: ${ht} ${symbol}\n`;
+            data += `Taux TVA: ${taux}%\n`;
+            data += `Montant TVA: ${tva.toFixed(2)} ${symbol}\n`;
+            data += `Total TTC: ${(ht + tva).toFixed(2)} ${symbol}\n`;
+        } else if(currentMode === 'invest') {
+            const invest = document.getElementById('invest').value || 0;
+            const profit = document.getElementById('profit').value || 0;
+            const years = document.getElementById('years').value || 1;
+            const roi = invest > 0 ? ((profit * years) / invest) * 100 : 0;
+            const payback = profit > 0 ? invest / profit : 0;
+            data += `Investissement: ${invest} ${symbol}\n`;
+            data += `Bénéfice annuel: ${profit} ${symbol}\n`;
+            data += `Période: ${years} an(s)\n`;
+            data += `ROI: ${roi.toFixed(1)}%\n`;
+            data += `Temps retour: ${payback.toFixed(1)} an(s)\n`;
+        }
+        
+        // Créer et télécharger le fichier
+        const blob = new Blob([data], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `finance_analysis_${currentMode}_${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('Analyse exportée avec succès', 'success');
+    }
+    
+    function resetForm() {
+        if(currentMode === 'marge') {
+            document.getElementById('achat').value = '';
+            document.getElementById('vente').value = '';
+        } else if(currentMode === 'seuil') {
+            document.getElementById('fixes').value = '';
+            document.getElementById('tauxM').value = '';
+            document.getElementById('ca_actuel').value = '';
+        } else if(currentMode === 'tva') {
+            document.getElementById('baseHT').value = '';
+            document.getElementById('tauxTVA').value = '20';
+        } else if(currentMode === 'invest') {
+            document.getElementById('invest').value = '';
+            document.getElementById('profit').value = '';
+            document.getElementById('years').value = '5';
+        }
+        calc();
+        showToast('Formulaire réinitialisé', 'info');
+    }
+    
+    // Initialisation
+    calc();
+    showToast('Finance Lab Pro - Prêt pour vos analyses', 'info');
 </script>
 </body>
 </html>
