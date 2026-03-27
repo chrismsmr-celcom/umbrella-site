@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Finance Lab Pro | Umbrella® - Intelligence Financière</title>
+    <title>Finance Lab Pro | Umbrella® - Suite Financière Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #0f172a;
@@ -13,9 +14,7 @@
             --accent: #f5c400;
             --accent-dark: #e6b800;
             --success: #10b981;
-            --success-light: #d1fae5;
             --danger: #ef4444;
-            --danger-light: #fee2e2;
             --warning: #f59e0b;
             --info: #3b82f6;
             --bg: #f8fafc;
@@ -23,10 +22,6 @@
             --border: #e2e8f0;
             --text: #1e293b;
             --text-muted: #64748b;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,7 +34,6 @@
             padding: 20px;
         }
 
-        /* Toast Notifications */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -56,19 +50,17 @@
             padding: 14px 20px;
             min-width: 280px;
             max-width: 380px;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
             display: flex;
             align-items: center;
             gap: 12px;
             animation: slideInRight 0.3s ease;
             border-left: 4px solid;
-            color: var(--text);
         }
 
         .toast.success { border-left-color: var(--success); }
         .toast.error { border-left-color: var(--danger); }
         .toast.info { border-left-color: var(--accent); }
-        .toast.warning { border-left-color: var(--warning); }
 
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
@@ -76,7 +68,7 @@
         }
 
         .main-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr 380px;
@@ -84,15 +76,14 @@
             background: var(--card);
             padding: 40px;
             border-radius: 32px;
-            box-shadow: var(--shadow-xl);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
             border: 1px solid var(--border);
         }
 
-        @media (max-width: 900px) { 
+        @media (max-width: 1000px) { 
             .main-container { grid-template-columns: 1fr; padding: 25px; }
         }
 
-        /* Header */
         .header-flex { 
             display: flex; 
             justify-content: space-between; 
@@ -109,57 +100,47 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 5px;
         }
         
         .subtitle {
             color: var(--text-muted);
             font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .currency-picker {
             background: var(--bg);
             border: 1px solid var(--border);
-            color: var(--text);
             padding: 10px 16px;
             border-radius: 40px;
             outline: none;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
-        }
-        
-        .currency-picker:hover {
-            border-color: var(--accent);
         }
 
-        /* Tabs */
         .nav-tabs { 
             display: flex; 
-            gap: 12px; 
+            gap: 10px; 
             margin-bottom: 30px; 
             flex-wrap: wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-bottom: 5px;
         }
         
         .tab {
             background: var(--bg);
             border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 12px 24px;
+            padding: 10px 18px;
             border-radius: 40px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 600;
             transition: 0.3s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            white-space: nowrap;
         }
-        
-        .tab i { font-size: 1rem; }
         
         .tab.active { 
             background: var(--accent); 
@@ -172,9 +153,8 @@
             transform: translateY(-2px);
         }
 
-        /* Form Groups */
         .form-group { 
-            margin-bottom: 25px; 
+            margin-bottom: 20px; 
             display: none; 
             animation: fadeIn 0.4s ease;
         }
@@ -190,7 +170,7 @@
             display: block; 
             font-size: 0.7rem; 
             color: var(--text-muted); 
-            margin-bottom: 8px; 
+            margin-bottom: 6px; 
             text-transform: uppercase; 
             letter-spacing: 1px;
             font-weight: 700;
@@ -198,15 +178,14 @@
         
         .input-field {
             width: 100%; 
-            padding: 14px 16px; 
+            padding: 12px 16px; 
             background: var(--bg);
             border: 1px solid var(--border); 
             border-radius: 14px;
             color: var(--text); 
-            font-size: 1rem; 
+            font-size: 0.95rem; 
             outline: none; 
             transition: 0.3s;
-            font-weight: 500;
         }
         
         .input-field:focus { 
@@ -223,7 +202,6 @@
             background-size: 20px;
         }
 
-        /* Results Side */
         .results-side {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             border-radius: 24px;
@@ -234,48 +212,29 @@
             position: relative;
             overflow: hidden;
         }
-        
-        .results-side::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(245,196,0,0.05) 0%, transparent 70%);
-            pointer-events: none;
-        }
 
         .res-card { 
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             position: relative;
             z-index: 1;
         }
         
         .res-label { 
-            font-size: 0.75rem; 
+            font-size: 0.7rem; 
             color: rgba(255,255,255,0.6); 
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         
         .res-value { 
-            font-size: 2.5rem; 
+            font-size: 2rem; 
             font-weight: 800; 
             color: #fff; 
             transition: 0.3s;
-            letter-spacing: -1px;
-        }
-        
-        .res-value small {
-            font-size: 0.9rem;
-            font-weight: 500;
-            opacity: 0.7;
         }
         
         .progress-container { 
@@ -283,7 +242,7 @@
             height: 6px; 
             background: rgba(255,255,255,0.2); 
             border-radius: 10px; 
-            margin-top: 12px; 
+            margin-top: 10px; 
             overflow: hidden;
         }
         
@@ -292,7 +251,6 @@
             background: var(--accent); 
             width: 0%; 
             transition: 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-            border-radius: 10px;
         }
 
         .btn-action {
@@ -300,25 +258,22 @@
             background: var(--accent); 
             color: var(--primary); 
             border: none;
-            padding: 14px; 
+            padding: 12px; 
             border-radius: 40px; 
             font-weight: 800; 
             cursor: pointer; 
             transition: 0.3s; 
-            margin-top: 20px;
+            margin-top: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            font-size: 0.9rem;
-            position: relative;
-            z-index: 1;
+            gap: 8px;
+            font-size: 0.85rem;
         }
         
         .btn-action:hover { 
             transform: translateY(-2px); 
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            background: var(--accent-dark);
         }
         
         .btn-secondary {
@@ -326,32 +281,23 @@
             background: rgba(255,255,255,0.1);
             color: white;
             border: 1px solid rgba(255,255,255,0.2);
-            padding: 12px;
+            padding: 10px;
             border-radius: 40px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.8rem;
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
+            margin-top: 10px;
+            font-size: 0.75rem;
         }
         
         .back-link {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 0.8rem;
-            margin-top: 30px;
+            font-size: 0.75rem;
+            margin-top: 25px;
             transition: 0.3s;
         }
         
@@ -361,18 +307,18 @@
         }
         
         .info-tip {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
-            margin-top: 8px;
+            margin-top: 6px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
         
         @media (max-width: 550px) {
             .main-container { padding: 20px; }
-            .tab { padding: 8px 16px; font-size: 0.75rem; }
-            .res-value { font-size: 1.8rem; }
+            .tab { padding: 6px 12px; font-size: 0.65rem; }
+            .res-value { font-size: 1.5rem; }
             h1 { font-size: 1.5rem; }
         }
     </style>
@@ -386,123 +332,193 @@
         <div class="header-flex">
             <div>
                 <h1>Finance Lab Pro</h1>
-                <div class="subtitle">
-                    <i class="fa fa-chart-line"></i> Intelligence financière avancée
-                </div>
+                <div class="subtitle"><i class="fa fa-chart-line"></i> 12 modules financiers avancés</div>
             </div>
             <select id="currency" class="currency-picker" onchange="calc()">
                 <option value="€">💶 EUR (€)</option>
                 <option value="$">💵 USD ($)</option>
                 <option value="£">💷 GBP (£)</option>
                 <option value="CFA">🪙 CFA (FCFA)</option>
-                <option value="CDF">🪙 CDF (FC)</option>
-                <option value="MAD">🪙 MAD (Dh)</option>
             </select>
         </div>
 
-        <div class="nav-tabs">
-            <div class="tab active" onclick="switchMode('marge', this)">
-                <i class="fa fa-chart-simple"></i> Marge & Profit
-            </div>
-            <div class="tab" onclick="switchMode('seuil', this)">
-                <i class="fa fa-chart-gantt"></i> Point Mort
-            </div>
-            <div class="tab" onclick="switchMode('tva', this)">
-                <i class="fa fa-calculator"></i> TVA Express
-            </div>
-            <div class="tab" onclick="switchMode('invest', this)">
-                <i class="fa fa-chart-line"></i> ROI
-            </div>
+        <div class="nav-tabs" id="tabsContainer">
+            <div class="tab active" onclick="switchMode('marge', this)"><i class="fa fa-chart-simple"></i> Marge</div>
+            <div class="tab" onclick="switchMode('seuil', this)"><i class="fa fa-chart-gantt"></i> Point Mort</div>
+            <div class="tab" onclick="switchMode('tva', this)"><i class="fa fa-calculator"></i> TVA</div>
+            <div class="tab" onclick="switchMode('invest', this)"><i class="fa fa-chart-line"></i> ROI</div>
+            <div class="tab" onclick="switchMode('loan', this)"><i class="fa fa-building-columns"></i> Prêt</div>
+            <div class="tab" onclick="switchMode('saving', this)"><i class="fa fa-piggy-bank"></i> Épargne</div>
+            <div class="tab" onclick="switchMode('tax', this)"><i class="fa fa-landmark"></i> Fiscalité</div>
+            <div class="tab" onclick="switchMode('cashflow', this)"><i class="fa fa-chart-line"></i> Cash Flow</div>
+            <div class="tab" onclick="switchMode('ratio', this)"><i class="fa fa-chart-pie"></i> Ratios</div>
+            <div class="tab" onclick="switchMode('salary', this)"><i class="fa fa-users"></i> Salaires</div>
+            <div class="tab" onclick="switchMode('pricing', this)"><i class="fa fa-tag"></i> Prix</div>
+            <div class="tab" onclick="switchMode('subsidy', this)"><i class="fa fa-gift"></i> Aides</div>
         </div>
 
-        <!-- Marge & Profit -->
+        <!-- Module 1: Marge -->
         <div id="marge-group" class="form-group active">
-            <label><i class="fa fa-shopping-cart"></i> Coût d'achat (HT)</label>
+            <label>Coût d'achat (HT)</label>
             <input type="number" id="achat" class="input-field" placeholder="0.00" oninput="calc()">
-            <label style="margin-top:20px;"><i class="fa fa-tag"></i> Prix de vente (HT)</label>
+            <label>Prix de vente (HT)</label>
             <input type="number" id="vente" class="input-field" placeholder="0.00" oninput="calc()">
-            <div class="info-tip">
-                <i class="fa fa-info-circle"></i> Marge brute = Prix vente - Coût d'achat
-            </div>
         </div>
 
-        <!-- Point Mort -->
+        <!-- Module 2: Point Mort -->
         <div id="seuil-group" class="form-group">
-            <label><i class="fa fa-building"></i> Charges Fixes Annuelles</label>
-            <input type="number" id="fixes" class="input-field" placeholder="Ex: 50000" oninput="calc()">
-            <label style="margin-top:20px;"><i class="fa fa-percent"></i> Taux de Marge / Variable (%)</label>
-            <input type="number" id="tauxM" class="input-field" placeholder="Ex: 30" oninput="calc()">
-            <label style="margin-top:20px;"><i class="fa fa-chart-line"></i> Chiffre d'Affaires Actuel</label>
-            <input type="number" id="ca_actuel" class="input-field" placeholder="Progression vers le seuil" oninput="calc()">
-            <div class="info-tip">
-                <i class="fa fa-info-circle"></i> Point mort = Charges fixes / Taux de marge
-            </div>
+            <label>Charges Fixes Annuelles</label>
+            <input type="number" id="fixes" class="input-field" placeholder="0" oninput="calc()">
+            <label>Taux de Marge (%)</label>
+            <input type="number" id="tauxM" class="input-field" placeholder="30" oninput="calc()">
+            <label>CA Actuel</label>
+            <input type="number" id="ca_actuel" class="input-field" placeholder="0" oninput="calc()">
         </div>
 
-        <!-- TVA -->
+        <!-- Module 3: TVA -->
         <div id="tva-group" class="form-group">
-            <label><i class="fa fa-file-invoice"></i> Base Hors Taxe (HT)</label>
-            <input type="number" id="baseHT" class="input-field" placeholder="0.00" oninput="calc()">
-            <label style="margin-top:20px;"><i class="fa fa-percent"></i> Taux applicable</label>
+            <label>Base Hors Taxe (HT)</label>
+            <input type="number" id="baseHT" class="input-field" placeholder="0" oninput="calc()">
+            <label>Taux TVA</label>
             <select id="tauxTVA" class="input-field" onchange="calc()">
-                <option value="20">🇫🇷 Taux Normal (20%)</option>
-                <option value="10">🇫🇷 Intermédiaire (10%)</option>
-                <option value="5.5">🇫🇷 Réduit (5.5%)</option>
-                <option value="16">🇨🇩 Standard RDC (16%)</option>
-                <option value="18">🇸🇳 Sénégal (18%)</option>
-                <option value="19">🇨🇮 Côte d'Ivoire (19%)</option>
+                <option value="20">France - Normal (20%)</option>
+                <option value="10">France - Intermédiaire (10%)</option>
+                <option value="5.5">France - Réduit (5.5%)</option>
+                <option value="16">RDC - Standard (16%)</option>
+                <option value="18">Sénégal (18%)</option>
+                <option value="19">Côte d'Ivoire (19%)</option>
             </select>
-            <div class="info-tip">
-                <i class="fa fa-info-circle"></i> TVA = Base HT × Taux / 100
-            </div>
         </div>
 
-        <!-- ROI - Nouveau module -->
+        <!-- Module 4: ROI -->
         <div id="invest-group" class="form-group">
-            <label><i class="fa fa-chart-line"></i> Investissement Initial</label>
-            <input type="number" id="invest" class="input-field" placeholder="0.00" oninput="calc()">
-            <label style="margin-top:20px;"><i class="fa fa-chart-simple"></i> Bénéfice Annuel Net</label>
-            <input type="number" id="profit" class="input-field" placeholder="0.00" oninput="calc()">
-            <label style="margin-top:20px;"><i class="fa fa-calendar"></i> Période (années)</label>
-            <input type="number" id="years" class="input-field" placeholder="5" value="5" oninput="calc()">
-            <div class="info-tip">
-                <i class="fa fa-info-circle"></i> ROI = (Bénéfice Annuel × Années) / Investissement × 100
-            </div>
+            <label>Investissement Initial</label>
+            <input type="number" id="invest" class="input-field" placeholder="0" oninput="calc()">
+            <label>Bénéfice Annuel Net</label>
+            <input type="number" id="profit" class="input-field" placeholder="0" oninput="calc()">
+            <label>Période (années)</label>
+            <input type="number" id="years" class="input-field" value="5" oninput="calc()">
         </div>
 
-        <a href="index.html" class="back-link">
-            <i class="fa fa-arrow-left"></i> Retour au Dashboard
-        </a>
+        <!-- Module 5: Prêt -->
+        <div id="loan-group" class="form-group">
+            <label>Montant du prêt</label>
+            <input type="number" id="loanAmount" class="input-field" placeholder="0" oninput="calc()">
+            <label>Taux annuel (%)</label>
+            <input type="number" id="loanRate" class="input-field" placeholder="3.5" step="0.1" oninput="calc()">
+            <label>Durée (mois)</label>
+            <input type="number" id="loanMonths" class="input-field" placeholder="12" oninput="calc()">
+        </div>
+
+        <!-- Module 6: Épargne -->
+        <div id="saving-group" class="form-group">
+            <label>Capital initial</label>
+            <input type="number" id="initialCapital" class="input-field" placeholder="0" oninput="calc()">
+            <label>Versement mensuel</label>
+            <input type="number" id="monthlySave" class="input-field" placeholder="0" oninput="calc()">
+            <label>Rendement annuel (%)</label>
+            <input type="number" id="yieldRate" class="input-field" placeholder="5" step="0.1" oninput="calc()">
+            <label>Durée (années)</label>
+            <input type="number" id="savingYears" class="input-field" value="10" oninput="calc()">
+        </div>
+
+        <!-- Module 7: Fiscalité -->
+        <div id="tax-group" class="form-group">
+            <label>Bénéfice imposable (€)</label>
+            <input type="number" id="taxableProfit" class="input-field" placeholder="0" oninput="calc()">
+            <label>Type de société</label>
+            <select id="companyType" class="input-field" onchange="calc()">
+                <option value="sas">SAS / SASU (25%)</option>
+                <option value="sarl">SARL / EURL (15% puis 25%)</option>
+                <option value="tns">TNS / Micro-entreprise</option>
+            </select>
+        </div>
+
+        <!-- Module 8: Cash Flow -->
+        <div id="cashflow-group" class="form-group">
+            <label>Chiffre d'affaires mensuel</label>
+            <input type="number" id="caMonthly" class="input-field" placeholder="0" oninput="calc()">
+            <label>Délai paiement clients (jours)</label>
+            <input type="number" id="clientDelay" class="input-field" value="30" oninput="calc()">
+            <label>Délai paiement fournisseurs (jours)</label>
+            <input type="number" id="supplierDelay" class="input-field" value="60" oninput="calc()">
+            <label>Stock moyen (€)</label>
+            <input type="number" id="stock" class="input-field" placeholder="0" oninput="calc()">
+        </div>
+
+        <!-- Module 9: Ratios Financiers -->
+        <div id="ratio-group" class="form-group">
+            <label>Actif total (€)</label>
+            <input type="number" id="totalAssets" class="input-field" placeholder="0" oninput="calc()">
+            <label>Capitaux propres (€)</label>
+            <input type="number" id="equity" class="input-field" placeholder="0" oninput="calc()">
+            <label>Dettes totales (€)</label>
+            <input type="number" id="totalDebt" class="input-field" placeholder="0" oninput="calc()">
+            <label>Résultat net (€)</label>
+            <input type="number" id="netIncome" class="input-field" placeholder="0" oninput="calc()">
+        </div>
+
+        <!-- Module 10: Salaires -->
+        <div id="salary-group" class="form-group">
+            <label>Salaire brut mensuel (€)</label>
+            <input type="number" id="grossSalary" class="input-field" placeholder="0" oninput="calc()">
+            <label>Statut</label>
+            <select id="salaryStatus" class="input-field" onchange="calc()">
+                <option value="cadre">Cadre</option>
+                <option value="noncadre">Non-cadre</option>
+                <option value="tns">TNS / Indépendant</option>
+            </select>
+        </div>
+
+        <!-- Module 11: Prix de vente -->
+        <div id="pricing-group" class="form-group">
+            <label>Coût de revient unitaire (€)</label>
+            <input type="number" id="unitCost" class="input-field" placeholder="0" oninput="calc()">
+            <label>Marge souhaitée (%)</label>
+            <input type="number" id="desiredMargin" class="input-field" placeholder="30" oninput="calc()">
+        </div>
+
+        <!-- Module 12: Aides & Subventions -->
+        <div id="subsidy-group" class="form-group">
+            <label>Type d'entreprise</label>
+            <select id="businessType" class="input-field" onchange="calc()">
+                <option value="creation">Création d'entreprise</option>
+                <option value="innovation">Innovation / R&D</option>
+                <option value="emploi">Embauche</option>
+                <option value="transition">Transition écologique</option>
+            </select>
+            <label>Région</label>
+            <select id="region" class="input-field" onchange="calc()">
+                <option value="idf">Île-de-France</option>
+                <option value="ara">Auvergne-Rhône-Alpes</option>
+                <option value="naq">Nouvelle-Aquitaine</option>
+                <option value="occ">Occitanie</option>
+                <option value="other">Autre région</option>
+            </select>
+        </div>
+
+        <a href="index.html" class="back-link"><i class="fa fa-arrow-left"></i> Retour Dashboard</a>
     </div>
 
     <div class="results-side">
         <div>
             <div class="res-card">
-                <div class="res-label" id="label-1">
-                    <i class="fa fa-chart-simple"></i> Marge Bénéficiaire
-                </div>
+                <div class="res-label" id="label-1"><i class="fa fa-chart-simple"></i> Résultat</div>
                 <div class="res-value" id="val-1">0.00 €</div>
             </div>
             <div class="res-card">
-                <div class="res-label" id="label-2">
-                    <i class="fa fa-percent"></i> Taux de Profitabilité
-                </div>
-                <div class="res-value" id="val-2" style="color: var(--accent);">0%</div>
+                <div class="res-label" id="label-2"><i class="fa fa-percent"></i> Taux / Ratio</div>
+                <div class="res-value" id="val-2">0%</div>
                 <div class="progress-container"><div id="bar" class="progress-bar"></div></div>
             </div>
             <div id="extra-info" class="res-card" style="display: none;">
-                <div class="res-label"><i class="fa fa-clock"></i> Temps de retour</div>
-                <div class="res-value" id="payback" style="font-size: 1.5rem;">-</div>
+                <div class="res-label"><i class="fa fa-info-circle"></i> Détail</div>
+                <div class="res-value" id="extraValue" style="font-size: 1.2rem;">-</div>
             </div>
         </div>
-        
         <div>
-            <button class="btn-action" onclick="exportAnalysis()">
-                <i class="fa fa-download"></i> Exporter l'Analyse
-            </button>
-            <button class="btn-secondary" onclick="resetForm()">
-                <i class="fa fa-undo"></i> Réinitialiser
-            </button>
+            <button class="btn-action" onclick="exportAnalysis()"><i class="fa fa-download"></i> Exporter</button>
+            <button class="btn-secondary" onclick="resetForm()"><i class="fa fa-undo"></i> Réinitialiser</button>
         </div>
     </div>
 </div>
@@ -527,199 +543,267 @@
         document.querySelectorAll('.form-group').forEach(g => g.classList.remove('active'));
         document.getElementById(mode + '-group').classList.add('active');
         
-        const l1 = document.getElementById('label-1');
-        const l2 = document.getElementById('label-2');
         const extraInfo = document.getElementById('extra-info');
-
-        if(mode === 'marge') { 
-            l1.innerHTML = '<i class="fa fa-chart-simple"></i> Marge Bénéficiaire'; 
-            l2.innerHTML = '<i class="fa fa-percent"></i> Taux de Profitabilité';
-            extraInfo.style.display = 'none';
+        const label1 = document.getElementById('label-1');
+        const label2 = document.getElementById('label-2');
+        
+        extraInfo.style.display = 'none';
+        
+        const labels = {
+            marge: { l1: 'Marge Bénéficiaire', l2: 'Taux de marge' },
+            seuil: { l1: 'Point Mort (CA)', l2: 'Progression' },
+            tva: { l1: 'Montant TVA', l2: 'Total TTC' },
+            invest: { l1: 'Retour sur Investissement', l2: 'ROI (%)' },
+            loan: { l1: 'Mensualité', l2: 'Intérêts totaux' },
+            saving: { l1: 'Capital final', l2: 'Intérêts gagnés' },
+            tax: { l1: 'Impôt à payer', l2: 'Taux effectif' },
+            cashflow: { l1: 'Besoin en FDR', l2: 'Trésorerie mini' },
+            ratio: { l1: 'Rentabilité financière', l2: 'Endettement' },
+            salary: { l1: 'Salaire net', l2: 'Coût employeur' },
+            pricing: { l1: 'Prix de vente conseillé', l2: 'Marge unitaire' },
+            subsidy: { l1: 'Aides estimées', l2: 'Éligibilité' }
+        };
+        
+        if(labels[mode]) {
+            label1.innerHTML = `<i class="fa ${mode === 'marge' ? 'fa-chart-simple' : mode === 'loan' ? 'fa-building-columns' : 'fa-chart-line'}"></i> ${labels[mode].l1}`;
+            label2.innerHTML = `<i class="fa ${mode === 'marge' ? 'fa-percent' : 'fa-chart-line'}"></i> ${labels[mode].l2}`;
         }
-        else if(mode === 'seuil') { 
-            l1.innerHTML = '<i class="fa fa-chart-gantt"></i> Point Mort (Seuil)'; 
-            l2.innerHTML = '<i class="fa fa-chart-line"></i> Progression Rentabilité';
-            extraInfo.style.display = 'none';
-        }
-        else if(mode === 'tva') { 
-            l1.innerHTML = '<i class="fa fa-calculator"></i> Montant de la TVA'; 
-            l2.innerHTML = '<i class="fa fa-file-invoice"></i> Total TTC';
-            extraInfo.style.display = 'none';
-        }
-        else if(mode === 'invest') { 
-            l1.innerHTML = '<i class="fa fa-chart-line"></i> Retour sur Investissement'; 
-            l2.innerHTML = '<i class="fa fa-percent"></i> ROI (%)';
+        
+        if(mode === 'loan' || mode === 'saving' || mode === 'cashflow' || mode === 'ratio') {
             extraInfo.style.display = 'block';
-            document.getElementById('extra-info').querySelector('.res-label').innerHTML = '<i class="fa fa-clock"></i> Temps de retour';
         }
+        
         calc();
     }
 
     function calc() {
         const symbol = document.getElementById('currency').value;
-        const val1Disp = document.getElementById('val-1');
-        const val2Disp = document.getElementById('val-2');
+        const val1 = document.getElementById('val-1');
+        const val2 = document.getElementById('val-2');
         const bar = document.getElementById('bar');
-        const paybackEl = document.getElementById('payback');
+        const extraValue = document.getElementById('extraValue');
         
         let v1 = 0, v2 = 0, percent = 0;
-
+        
+        // Module 1: Marge
         if(currentMode === 'marge') {
             const achat = parseFloat(document.getElementById('achat').value) || 0;
             const vente = parseFloat(document.getElementById('vente').value) || 0;
             v1 = vente - achat;
             v2 = vente > 0 ? (v1 / vente) * 100 : 0;
             percent = v2;
-            
-            val1Disp.innerText = v1.toFixed(2) + " " + symbol;
-            val1Disp.style.color = v1 >= 0 ? "var(--success)" : "var(--danger)";
-            val2Disp.innerText = v2.toFixed(1) + " %";
-            bar.style.background = v2 < 15 ? "var(--danger)" : "var(--accent)";
-        } 
+            val1.innerText = v1.toFixed(2) + " " + symbol;
+            val1.style.color = v1 >= 0 ? "var(--success)" : "var(--danger)";
+            val2.innerText = v2.toFixed(1) + " %";
+        }
+        // Module 2: Point Mort
         else if(currentMode === 'seuil') {
             const fixes = parseFloat(document.getElementById('fixes').value) || 0;
             const taux = parseFloat(document.getElementById('tauxM').value) || 0;
-            const caActuel = parseFloat(document.getElementById('ca_actuel').value) || 0;
-            
+            const ca = parseFloat(document.getElementById('ca_actuel').value) || 0;
             v1 = taux > 0 ? (fixes / (taux / 100)) : 0;
-            percent = v1 > 0 ? (caActuel / v1) * 100 : 0;
-            
-            val1Disp.innerText = v1.toLocaleString() + " " + symbol;
-            val1Disp.style.color = "#fff";
-            val2Disp.innerText = Math.min(percent, 100).toFixed(1) + " %";
-            bar.style.background = percent >= 100 ? "var(--success)" : "var(--accent)";
+            percent = v1 > 0 ? (ca / v1) * 100 : 0;
+            val1.innerText = v1.toLocaleString() + " " + symbol;
+            val2.innerText = Math.min(percent, 100).toFixed(1) + " %";
         }
+        // Module 3: TVA
         else if(currentMode === 'tva') {
             const ht = parseFloat(document.getElementById('baseHT').value) || 0;
             const taux = parseFloat(document.getElementById('tauxTVA').value) || 0;
             v1 = ht * (taux / 100);
             v2 = ht + v1;
             percent = 100;
-            
-            val1Disp.innerText = v1.toFixed(2) + " " + symbol;
-            val1Disp.style.color = "var(--accent)";
-            val2Disp.innerText = v2.toFixed(2) + " " + symbol;
-            bar.style.background = "var(--accent)";
+            val1.innerText = v1.toFixed(2) + " " + symbol;
+            val2.innerText = v2.toFixed(2) + " " + symbol;
         }
+        // Module 4: ROI
         else if(currentMode === 'invest') {
             const invest = parseFloat(document.getElementById('invest').value) || 0;
             const profit = parseFloat(document.getElementById('profit').value) || 0;
             const years = parseFloat(document.getElementById('years').value) || 1;
-            
             const totalProfit = profit * years;
             v1 = invest > 0 ? (totalProfit / invest) * 100 : 0;
             v2 = v1;
             percent = Math.min(v1, 100);
-            
-            // Temps de retour sur investissement
-            const paybackTime = profit > 0 ? invest / profit : 0;
-            
-            val1Disp.innerText = v1.toFixed(1) + " %";
-            val1Disp.style.color = v1 >= 0 ? (v1 >= 20 ? "var(--success)" : "var(--warning)") : "var(--danger)";
-            val2Disp.innerText = v1.toFixed(1) + " %";
-            
-            if(paybackEl) {
-                if(paybackTime > 0 && paybackTime < 100) {
-                    paybackEl.innerText = paybackTime.toFixed(1) + " an(s)";
-                } else {
-                    paybackEl.innerText = "> 100 ans";
-                }
-            }
-            
-            bar.style.background = v1 >= 20 ? "var(--success)" : (v1 >= 10 ? "var(--warning)" : "var(--danger)");
+            val1.innerText = v1.toFixed(1) + " %";
+            val2.innerText = v1.toFixed(1) + " %";
         }
-
+        // Module 5: Prêt
+        else if(currentMode === 'loan') {
+            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const rate = parseFloat(document.getElementById('loanRate').value) || 0;
+            const months = parseFloat(document.getElementById('loanMonths').value) || 1;
+            const monthlyRate = rate / 100 / 12;
+            const monthlyPayment = amount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+            const totalPayment = monthlyPayment * months;
+            const totalInterest = totalPayment - amount;
+            v1 = monthlyPayment;
+            v2 = totalInterest;
+            percent = (totalInterest / amount) * 100;
+            val1.innerText = v1.toFixed(2) + " " + symbol + "/mois";
+            val2.innerText = v2.toFixed(2) + " " + symbol;
+            if(extraValue) extraValue.innerText = "Coût total: " + totalPayment.toFixed(2) + " " + symbol;
+        }
+        // Module 6: Épargne
+        else if(currentMode === 'saving') {
+            const capital = parseFloat(document.getElementById('initialCapital').value) || 0;
+            const monthly = parseFloat(document.getElementById('monthlySave').value) || 0;
+            const rate = parseFloat(document.getElementById('yieldRate').value) || 0;
+            const years = parseFloat(document.getElementById('savingYears').value) || 1;
+            const monthlyRate = rate / 100 / 12;
+            const months = years * 12;
+            let futureValue = capital * Math.pow(1 + monthlyRate, months);
+            if(monthly > 0) {
+                futureValue += monthly * (Math.pow(1 + monthlyRate, months) - 1) / monthlyRate;
+            }
+            const totalInterest = futureValue - capital - (monthly * months);
+            v1 = futureValue;
+            v2 = totalInterest;
+            percent = (totalInterest / capital) * 100;
+            val1.innerText = v1.toFixed(2) + " " + symbol;
+            val2.innerText = v2.toFixed(2) + " " + symbol;
+            if(extraValue) extraValue.innerText = "Capital investi: " + (capital + monthly * months).toFixed(2) + " " + symbol;
+        }
+        // Module 7: Fiscalité
+        else if(currentMode === 'tax') {
+            const profit = parseFloat(document.getElementById('taxableProfit').value) || 0;
+            const type = document.getElementById('companyType').value;
+            let tax = 0;
+            if(type === 'sas') tax = profit * 0.25;
+            else if(type === 'sarl') {
+                if(profit <= 38120) tax = profit * 0.15;
+                else tax = 38120 * 0.15 + (profit - 38120) * 0.25;
+            }
+            else tax = profit * 0.22;
+            v1 = tax;
+            v2 = profit > 0 ? (tax / profit) * 100 : 0;
+            percent = v2;
+            val1.innerText = v1.toFixed(2) + " " + symbol;
+            val2.innerText = v2.toFixed(1) + " %";
+        }
+        // Module 8: Cash Flow
+        else if(currentMode === 'cashflow') {
+            const ca = parseFloat(document.getElementById('caMonthly').value) || 0;
+            const clientDelay = parseFloat(document.getElementById('clientDelay').value) || 0;
+            const supplierDelay = parseFloat(document.getElementById('supplierDelay').value) || 0;
+            const stock = parseFloat(document.getElementById('stock').value) || 0;
+            const dailyCA = ca / 30;
+            const clientCred = dailyCA * clientDelay;
+            const supplierCred = dailyCA * supplierDelay;
+            const bfr = clientCred - supplierCred + stock;
+            v1 = bfr;
+            v2 = ca > 0 ? (bfr / ca) * 100 : 0;
+            percent = Math.min(v2, 100);
+            val1.innerText = v1.toFixed(2) + " " + symbol;
+            val2.innerText = v2.toFixed(1) + " % du CA";
+            if(extraValue) extraValue.innerText = "Crédit clients: " + clientCred.toFixed(2) + " " + symbol;
+        }
+        // Module 9: Ratios
+        else if(currentMode === 'ratio') {
+            const assets = parseFloat(document.getElementById('totalAssets').value) || 0;
+            const equity = parseFloat(document.getElementById('equity').value) || 0;
+            const debt = parseFloat(document.getElementById('totalDebt').value) || 0;
+            const income = parseFloat(document.getElementById('netIncome').value) || 0;
+            const roe = equity > 0 ? (income / equity) * 100 : 0;
+            const debtRatio = assets > 0 ? (debt / assets) * 100 : 0;
+            v1 = roe;
+            v2 = debtRatio;
+            percent = Math.min(roe, 100);
+            val1.innerText = v1.toFixed(1) + " %";
+            val2.innerText = v2.toFixed(1) + " %";
+            if(extraValue) extraValue.innerText = "Fonds propres: " + equity.toFixed(2) + " " + symbol;
+        }
+        // Module 10: Salaires
+        else if(currentMode === 'salary') {
+            const gross = parseFloat(document.getElementById('grossSalary').value) || 0;
+            const status = document.getElementById('salaryStatus').value;
+            let net = gross * 0.77;
+            let employerCost = gross * 1.45;
+            if(status === 'cadre') net = gross * 0.75;
+            if(status === 'tns') { net = gross * 0.78; employerCost = gross; }
+            v1 = net;
+            v2 = employerCost;
+            percent = (employerCost / gross) * 100;
+            val1.innerText = v1.toFixed(2) + " " + symbol;
+            val2.innerText = v2.toFixed(2) + " " + symbol;
+            if(extraValue) extraValue.innerText = "Charges: " + (employerCost - gross).toFixed(2) + " " + symbol;
+        }
+        // Module 11: Prix de vente
+        else if(currentMode === 'pricing') {
+            const cost = parseFloat(document.getElementById('unitCost').value) || 0;
+            const margin = parseFloat(document.getElementById('desiredMargin').value) || 0;
+            const price = cost / (1 - margin / 100);
+            const unitMargin = price - cost;
+            v1 = price;
+            v2 = unitMargin;
+            percent = margin;
+            val1.innerText = v1.toFixed(2) + " " + symbol;
+            val2.innerText = v2.toFixed(2) + " " + symbol;
+        }
+        // Module 12: Aides
+        else if(currentMode === 'subsidy') {
+            const type = document.getElementById('businessType').value;
+            const region = document.getElementById('region').value;
+            let aid = 0;
+            let eligibility = "";
+            if(type === 'creation') { aid = 8000; eligibility = "ACRE + ARCE"; }
+            else if(type === 'innovation') { aid = 50000; eligibility = "Crédit Impôt Recherche"; }
+            else if(type === 'emploi') { aid = 4000; eligibility = "Aide à l'embauche"; }
+            else if(type === 'transition') { aid = 15000; eligibility = "Fonds Vert"; }
+            if(region === 'idf') aid += 2000;
+            else if(region === 'ara') aid += 1500;
+            v1 = aid;
+            v2 = 100;
+            percent = 100;
+            val1.innerText = v1.toFixed(2) + " " + symbol;
+            val2.innerText = eligibility;
+            if(extraValue) extraValue.innerText = "Aide " + (region === 'idf' ? "+2000€ IDF" : "+1500€ région");
+        }
+        
         bar.style.width = Math.min(Math.max(percent, 0), 100) + "%";
+        if(percent >= 80) bar.style.background = "var(--success)";
+        else if(percent >= 50) bar.style.background = "var(--accent)";
+        else bar.style.background = "var(--danger)";
     }
 
     function exportAnalysis() {
         const symbol = document.getElementById('currency').value;
-        const modeNames = {
-            marge: 'Analyse de Marge',
-            seuil: 'Analyse du Point Mort',
-            tva: 'Calcul de TVA',
-            invest: 'Analyse ROI'
-        };
-        
-        let data = `=== ${modeNames[currentMode]} ===\n`;
-        data += `Date: ${new Date().toLocaleString()}\n`;
+        let data = `=== Finance Lab Pro - ${new Date().toLocaleString()} ===\n`;
+        data += `Module: ${currentMode.toUpperCase()}\n`;
         data += `Devise: ${symbol}\n\n`;
         
-        if(currentMode === 'marge') {
-            const achat = document.getElementById('achat').value || 0;
-            const vente = document.getElementById('vente').value || 0;
-            const marge = vente - achat;
-            const taux = vente > 0 ? (marge / vente) * 100 : 0;
-            data += `Coût d'achat: ${achat} ${symbol}\n`;
-            data += `Prix de vente: ${vente} ${symbol}\n`;
-            data += `Marge: ${marge.toFixed(2)} ${symbol}\n`;
-            data += `Taux de marge: ${taux.toFixed(1)}%\n`;
-        } else if(currentMode === 'seuil') {
-            const fixes = document.getElementById('fixes').value || 0;
-            const taux = document.getElementById('tauxM').value || 0;
-            const ca = document.getElementById('ca_actuel').value || 0;
-            const seuil = taux > 0 ? (fixes / (taux / 100)) : 0;
-            data += `Charges fixes: ${fixes} ${symbol}\n`;
-            data += `Taux de marge: ${taux}%\n`;
-            data += `Point mort: ${seuil.toLocaleString()} ${symbol}\n`;
-            data += `CA actuel: ${ca} ${symbol}\n`;
-            data += `Progression: ${seuil > 0 ? ((ca / seuil) * 100).toFixed(1) : 0}%\n`;
-        } else if(currentMode === 'tva') {
-            const ht = document.getElementById('baseHT').value || 0;
-            const taux = document.getElementById('tauxTVA').value || 0;
-            const tva = ht * (taux / 100);
-            data += `Base HT: ${ht} ${symbol}\n`;
-            data += `Taux TVA: ${taux}%\n`;
-            data += `Montant TVA: ${tva.toFixed(2)} ${symbol}\n`;
-            data += `Total TTC: ${(ht + tva).toFixed(2)} ${symbol}\n`;
-        } else if(currentMode === 'invest') {
-            const invest = document.getElementById('invest').value || 0;
-            const profit = document.getElementById('profit').value || 0;
-            const years = document.getElementById('years').value || 1;
-            const roi = invest > 0 ? ((profit * years) / invest) * 100 : 0;
-            const payback = profit > 0 ? invest / profit : 0;
-            data += `Investissement: ${invest} ${symbol}\n`;
-            data += `Bénéfice annuel: ${profit} ${symbol}\n`;
-            data += `Période: ${years} an(s)\n`;
-            data += `ROI: ${roi.toFixed(1)}%\n`;
-            data += `Temps retour: ${payback.toFixed(1)} an(s)\n`;
-        }
+        const inputs = document.querySelectorAll('.form-group.active input, .form-group.active select');
+        inputs.forEach(input => {
+            const label = input.previousElementSibling?.innerText || input.id;
+            data += `${label}: ${input.value}\n`;
+        });
         
-        // Créer et télécharger le fichier
+        data += `\n--- RÉSULTATS ---\n`;
+        data += `${document.getElementById('label-1').innerText.replace(/<[^>]*>/g, '')}: ${document.getElementById('val-1').innerText}\n`;
+        data += `${document.getElementById('label-2').innerText.replace(/<[^>]*>/g, '')}: ${document.getElementById('val-2').innerText}\n`;
+        
         const blob = new Blob([data], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `finance_analysis_${currentMode}_${new Date().toISOString().split('T')[0]}.txt`;
+        a.download = `finance_${currentMode}_${new Date().toISOString().split('T')[0]}.txt`;
         a.click();
         URL.revokeObjectURL(url);
-        
-        showToast('Analyse exportée avec succès', 'success');
+        showToast('Analyse exportée', 'success');
     }
     
     function resetForm() {
-        if(currentMode === 'marge') {
-            document.getElementById('achat').value = '';
-            document.getElementById('vente').value = '';
-        } else if(currentMode === 'seuil') {
-            document.getElementById('fixes').value = '';
-            document.getElementById('tauxM').value = '';
-            document.getElementById('ca_actuel').value = '';
-        } else if(currentMode === 'tva') {
-            document.getElementById('baseHT').value = '';
-            document.getElementById('tauxTVA').value = '20';
-        } else if(currentMode === 'invest') {
-            document.getElementById('invest').value = '';
-            document.getElementById('profit').value = '';
-            document.getElementById('years').value = '5';
-        }
+        document.querySelectorAll('.form-group.active input').forEach(input => {
+            if(input.type === 'number') input.value = '';
+        });
+        document.querySelectorAll('.form-group.active select').forEach(select => {
+            select.selectedIndex = 0;
+        });
         calc();
         showToast('Formulaire réinitialisé', 'info');
     }
     
-    // Initialisation
     calc();
-    showToast('Finance Lab Pro - Prêt pour vos analyses', 'info');
 </script>
 </body>
 </html>
