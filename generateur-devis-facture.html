@@ -2,270 +2,787 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signature | Umbrella®</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Umbrella® Signature Pro | Générateur Devis & Factures</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary: #0f172a;
             --accent: #f5c400;
+            --accent-dark: #e6b800;
             --bg: #f8fafc;
             --white: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border-soft: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background: var(--bg); color: var(--text-main); 
             padding: 40px 20px;
         }
 
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 280px;
+            max-width: 380px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid;
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+        .toast.info { border-left-color: var(--accent); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Toolbar Premium */
         .toolbar {
-            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px);
-            padding: 12px 25px; border-radius: 20px; display: flex; gap: 20px;
-            align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1);
+            position: fixed; 
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(12px);
+            padding: 12px 24px; 
+            border-radius: 60px; 
+            display: flex; 
+            gap: 16px;
+            align-items: center; 
+            z-index: 1000; 
+            border: 1px solid rgba(255,255,255,0.15);
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .tool-btn {
-            background: none; border: none; color: white; cursor: pointer;
-            font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 8px;
+            background: none; 
+            border: none; 
+            color: white; 
+            cursor: pointer;
+            font-weight: 600; 
+            font-size: 0.8rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
             transition: 0.3s;
+            padding: 8px 12px;
+            border-radius: 40px;
         }
-        .tool-btn:hover { color: var(--accent); }
+        
+        .tool-btn:hover { 
+            background: rgba(255,255,255,0.1);
+            color: var(--accent); 
+        }
+        
         .tool-select {
-            background: rgba(255,255,255,0.1); border: none; color: #fff;
-            padding: 6px 12px; border-radius: 8px; outline: none; font-size: 0.75rem; cursor: pointer;
+            background: rgba(255,255,255,0.1); 
+            border: none; 
+            color: #fff;
+            padding: 8px 16px; 
+            border-radius: 40px; 
+            outline: none; 
+            font-size: 0.8rem; 
+            cursor: pointer;
+            font-weight: 500;
         }
+        
         .tool-select option { color: #000; }
 
+        /* Document Canvas */
         .invoice-canvas {
-            max-width: 850px; margin: 60px auto;
-            background: var(--white); padding: 70px;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.05);
-            border-radius: 2px; position: relative;
-            min-height: 1100px;
+            max-width: 1000px; 
+            margin: 100px auto 40px;
+            background: var(--white); 
+            padding: 50px 60px;
+            box-shadow: 0 40px 60px -20px rgba(0,0,0,0.15);
+            border-radius: 24px;
+            position: relative;
+            transition: all 0.3s;
         }
 
-        .brand-zone { margin-bottom: 50px; }
+        /* Logo Section */
+        .brand-zone { margin-bottom: 40px; }
+        
         .logo-uploader {
-            width: 180px; height: 90px; border: 2px dashed #e2e8f0;
-            border-radius: 12px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; cursor: pointer;
-            transition: 0.3s; color: var(--text-muted); overflow: hidden;
+            width: 160px; 
+            height: 80px; 
+            border: 2px dashed var(--border-soft);
+            border-radius: 16px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer;
+            transition: 0.3s; 
+            color: var(--text-muted); 
+            overflow: hidden;
+            background: var(--bg);
         }
-        .logo-uploader:hover { border-color: var(--accent); background: #fdfcf6; }
-        .logo-uploader i { font-size: 1.4rem; margin-bottom: 5px; }
-        .logo-uploader span { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
+        
+        .logo-uploader:hover { 
+            border-color: var(--accent); 
+            background: #fef9e6; 
+            transform: scale(1.02);
+        }
+        
+        .logo-uploader i { font-size: 1.6rem; margin-bottom: 5px; }
+        .logo-uploader span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
         #finalLogo { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
 
+        /* Meta Document */
         .doc-meta { text-align: right; }
-        .doc-type { font-size: 3rem; font-weight: 800; letter-spacing: -2px; line-height: 1; margin-bottom: 10px; color: var(--primary); }
-        .editable { border-radius: 4px; transition: 0.2s; outline: none; padding: 2px 5px; }
-        .editable:hover { background: #f1f5f9; }
-        .editable:focus { background: #f1f5f9; border-bottom: 2px solid var(--accent); }
-
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; margin: 60px 0; }
-        .label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 40px; }
-        th { text-align: left; padding: 15px 5px; border-bottom: 2px solid var(--primary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 15px 5px; border-bottom: 1px solid var(--border-soft); }
+        .doc-type { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            letter-spacing: -2px; 
+            line-height: 1; 
+            margin-bottom: 12px; 
+            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         
-        .row-qty { width: 60px; text-align: center; }
-        .row-price { width: 120px; }
-        .row-total { width: 130px; text-align: right; font-weight: 700; }
-
-        .btn-row-action { opacity: 0; color: #f87171; background: none; border: none; cursor: pointer; transition: 0.2s; padding: 5px; }
-        tr:hover .btn-row-action { opacity: 1; }
-
-        .summary-box { margin-top: 50px; display: flex; justify-content: flex-end; }
-        .summary-table { width: 320px; }
-        .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 0.9rem; }
-        .summary-row.main { border-top: 2px solid var(--primary); margin-top: 15px; padding-top: 20px; font-weight: 800; font-size: 1.3rem; }
-
-        .doc-footer { margin-top: 80px; border-top: 1px solid var(--border-soft); padding-top: 30px; font-size: 0.8rem; color: var(--text-muted); }
-
-        @media print {
-            body { background: white; padding: 0; }
-            .toolbar, .btn-row-action, .add-line-btn, #upIcon, #upText { display: none !important; }
-            .invoice-canvas { margin: 0; box-shadow: none; padding: 40px; width: 100%; }
-            .logo-uploader { border: none !important; }
-            .editable:hover { background: none; }
+        .editable { 
+            border-radius: 8px; 
+            transition: 0.2s; 
+            outline: none; 
+            padding: 4px 8px; 
+            cursor: text;
+            display: inline-block;
+            min-width: 50px;
+        }
+        
+        .editable:hover { background: #f1f5f9; }
+        .editable:focus { 
+            background: #fef9e6; 
+            border-bottom: 2px solid var(--accent); 
+            outline: none;
         }
 
-        .add-line-btn { margin-top: 25px; color: var(--text-muted); font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; background: none; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-        .add-line-btn:hover { color: var(--primary); transform: translateX(5px); }
+        /* Info Grid */
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 60px; 
+            margin: 50px 0; 
+        }
+        
+        .label { 
+            font-size: 0.7rem; 
+            font-weight: 800; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            margin-bottom: 12px; 
+            display: block; 
+        }
+
+        /* Table */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 40px; 
+        }
+        
+        th { 
+            text-align: left; 
+            padding: 16px 8px; 
+            border-bottom: 2px solid var(--primary); 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            font-weight: 800;
+            color: var(--text-muted);
+        }
+        
+        td { 
+            padding: 14px 8px; 
+            border-bottom: 1px solid var(--border-soft); 
+            vertical-align: middle;
+        }
+        
+        .row-qty { width: 80px; text-align: center; }
+        .row-price { width: 130px; }
+        .row-total { width: 140px; text-align: right; font-weight: 700; }
+
+        .btn-row-action { 
+            opacity: 0; 
+            color: var(--error); 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        tr:hover .btn-row-action { opacity: 1; }
+        .btn-row-action:hover { background: #fee2e2; transform: scale(1.1); }
+
+        /* Summary */
+        .summary-box { margin-top: 50px; display: flex; justify-content: flex-end; }
+        .summary-table { width: 350px; }
+        .summary-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px 0; 
+            font-size: 0.95rem; 
+        }
+        .summary-row.main { 
+            border-top: 2px solid var(--primary); 
+            margin-top: 15px; 
+            padding-top: 20px; 
+            font-weight: 800; 
+            font-size: 1.4rem; 
+        }
+
+        /* Footer */
+        .doc-footer { 
+            margin-top: 60px; 
+            border-top: 1px solid var(--border-soft); 
+            padding-top: 30px; 
+            font-size: 0.8rem; 
+            color: var(--text-muted); 
+        }
+
+        /* Buttons */
+        .add-line-btn { 
+            margin-top: 25px; 
+            color: var(--text-muted); 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            cursor: pointer; 
+            border: none; 
+            background: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 10px; 
+            transition: 0.2s; 
+            padding: 10px 16px;
+            border-radius: 40px;
+        }
+        
+        .add-line-btn:hover { 
+            color: var(--primary); 
+            background: #f1f5f9;
+            transform: translateX(5px); 
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn-save {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: var(--accent);
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        /* Print Styles */
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .toolbar, .btn-row-action, .add-line-btn, .action-buttons, .toast-container { display: none !important; }
+            .invoice-canvas { margin: 0; box-shadow: none; padding: 20px; width: 100%; max-width: 100%; border-radius: 0; }
+            .logo-uploader { border: none !important; background: none; }
+            .editable:hover { background: none; }
+            .editable { border: none; padding: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 20px 12px; }
+            .toolbar { 
+                position: fixed;
+                top: 10px;
+                padding: 8px 16px;
+                gap: 8px;
+                border-radius: 40px;
+                width: 95%;
+            }
+            .tool-btn { font-size: 0.7rem; padding: 6px 10px; }
+            .tool-select { padding: 6px 12px; font-size: 0.7rem; }
+            .invoice-canvas { padding: 30px 20px; margin-top: 80px; }
+            .info-grid { grid-template-columns: 1fr; gap: 30px; }
+            .doc-type { font-size: 2rem; }
+            .summary-table { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="toolbar">
-        <select id="docTypeSelect" class="tool-select" onchange="updateUI()">
-            <option value="Facture">Mode Facture</option>
-            <option value="Devis">Mode Devis</option>
-        </select>
-        <select id="currencySelect" class="tool-select" onchange="calc()">
-            <option value="€">EUR (€)</option>
-            <option value="$">USD ($)</option>
-            <option value="£">GBP (£)</option>
-            <option value="CFA">CFA (FCFA)</option>
-            <option value="CDF">CDF (FC)</option>
-            <option value="MAD">MAD (Dh)</option>
-        </select>
-        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
-        <button class="tool-btn" onclick="window.print()">
-            <i class="fa fa-print"></i> EXPORTER PDF
-        </button>
-    </div>
+<div class="toast-container" id="toastContainer"></div>
 
-    <div class="invoice-canvas">
-        
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div class="brand-zone">
-                <div class="logo-uploader" onclick="document.getElementById('fileIn').click()">
-                    <i class="fa fa-plus-circle" id="upIcon"></i>
-                    <span id="upText">Votre Logo</span>
-                    <img id="finalLogo">
-                </div>
-                <input type="file" id="fileIn" style="display:none" accept="image/*" onchange="loadLogo(this)">
-            </div>
+<div class="toolbar">
+    <select id="docTypeSelect" class="tool-select" onchange="updateUI()">
+        <option value="FACTURE">📄 FACTURE</option>
+        <option value="DEVIS">📋 DEVIS</option>
+    </select>
+    <select id="currencySelect" class="tool-select" onchange="calc()">
+        <option value="€">💶 EUR (€)</option>
+        <option value="$">💵 USD ($)</option>
+        <option value="£">💷 GBP (£)</option>
+        <option value="CFA">🪙 CFA (FCFA)</option>
+        <option value="CDF">🪙 CDF (FC)</option>
+        <option value="MAD">🪙 MAD (Dh)</option>
+    </select>
+    <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.2);"></div>
+    <button class="tool-btn" onclick="exportToPDF()">
+        <i class="fa fa-file-pdf"></i> EXPORTER PDF
+    </button>
+    <button class="tool-btn" onclick="exportToPNG()">
+        <i class="fa fa-image"></i> EXPORTER PNG
+    </button>
+    <button class="tool-btn" onclick="resetDocument()">
+        <i class="fa fa-refresh"></i> RÉINITIALISER
+    </button>
+</div>
 
-            <div class="doc-meta">
-                <div class="doc-type" id="docDisplay">FACTURE</div>
-                <div class="editable" contenteditable="true" style="font-weight: 700; color: var(--text-muted);">N° 2026-0492</div>
-                <div class="editable" contenteditable="true" style="color: var(--text-muted);">Date : 20 Février 2026</div>
+<div class="invoice-canvas" id="invoiceCanvas">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+        <div class="brand-zone">
+            <div class="logo-uploader" onclick="document.getElementById('fileIn').click()">
+                <i class="fa fa-plus-circle" id="upIcon"></i>
+                <span id="upText">Logo</span>
+                <img id="finalLogo">
             </div>
+            <input type="file" id="fileIn" style="display:none" accept="image/*" onchange="loadLogo(this)">
         </div>
 
-        <div class="info-grid">
-            <div>
-                <span class="label">Émis par</span>
-                <div class="editable" contenteditable="true" style="line-height: 1.6; font-size: 0.9rem; white-space: pre-wrap;"><strong>VOTRE SOCIÉTÉ</strong>
+        <div class="doc-meta">
+            <div class="doc-type" id="docDisplay">FACTURE</div>
+            <div class="editable" contenteditable="true" id="docNumber" style="font-weight: 700; color: var(--text-muted);">N° 2026-0492</div>
+            <div class="editable" contenteditable="true" id="docDate" style="color: var(--text-muted);">Date : 20 Février 2026</div>
+            <div class="editable" contenteditable="true" id="dueDate" style="color: var(--text-muted); font-size: 0.8rem;">Échéance : 20 Mars 2026</div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div>
+            <span class="label"><i class="fa fa-building"></i> Émis par</span>
+            <div class="editable" contenteditable="true" id="issuerInfo" style="line-height: 1.6; font-size: 0.9rem; white-space: pre-wrap;"><strong>VOTRE SOCIÉTÉ</strong>
 12 Rue de la Paix
 75002 Paris, France
-contact@votre-societe.com</div>
-            </div>
-            <div style="text-align: right;">
-                <span class="label">Facturé à</span>
-                <div class="editable" contenteditable="true" style="line-height: 1.6; font-size: 0.9rem; white-space: pre-wrap;"><strong>NOM DU CLIENT</strong>
+contact@votre-societe.com
+SIRET: 123 456 789 00012</div>
+        </div>
+        <div style="text-align: right;">
+            <span class="label"><i class="fa fa-user"></i> Facturé à</span>
+            <div class="editable" contenteditable="true" id="clientInfo" style="line-height: 1.6; font-size: 0.9rem; white-space: pre-wrap;"><strong>NOM DU CLIENT</strong>
 Adresse du client
 Code Postal, Ville
 SIRET : Optionnel</div>
-            </div>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th class="row-qty">Qté</th>
-                    <th class="row-price">P.U HT</th>
-                    <th class="row-total">Total HT</th>
-                    <th style="width: 40px;" class="no-print"></th>
-                </tr>
-            </thead>
-            <tbody id="items">
-                <tr>
-                    <td><div class="editable" contenteditable="true">Exemple de prestation premium</div></td>
-                    <td class="row-qty"><div class="editable" contenteditable="true" oninput="calc()">1</div></td>
-                    <td class="row-price"><div class="editable" contenteditable="true" oninput="calc()">1500.00</div></td>
-                    <td class="row-total">1500.00 €</td>
-                    <td class="no-print"><button class="btn-row-action" onclick="this.parentElement.parentElement.remove(); calc()"><i class="fa fa-times"></i></button></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <button class="add-line-btn" onclick="addLine()">
-            <i class="fa fa-plus"></i> Ajouter une ligne
-        </button>
-
-        <div class="summary-box">
-            <div class="summary-table">
-                <div class="summary-row">
-                    <span style="color: var(--text-muted);">Sous-total HT</span>
-                    <span id="stotal">1500.00 €</span>
-                </div>
-                <div class="summary-row">
-                    <span style="color: var(--text-muted);">TVA (<span contenteditable="true" id="tvaRate" oninput="calc()">20</span>%)</span>
-                    <span id="tax">300.00 €</span>
-                </div>
-                <div class="summary-row main">
-                    <span>TOTAL TTC</span>
-                    <span id="gtotal">1800.00 €</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="doc-footer">
-            <span class="label">Notes & Conditions</span>
-            <div class="editable" contenteditable="true" style="margin-top: 10px;">Paiement attendu sous 15 jours par virement bancaire.
-IBAN : FR76 0000 0000 0000 0000 0000 000</div>
-            <p style="margin-top: 40px; font-weight: 800; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary);">Propulsé par Umbrella® Signature</p>
         </div>
     </div>
 
-    <script>
-        function updateUI() {
-            document.getElementById('docDisplay').innerText = document.getElementById('docTypeSelect').value.toUpperCase();
-        }
+    <table id="invoiceTable">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th class="row-qty">Qté</th>
+                <th class="row-price">P.U HT</th>
+                <th class="row-total">Total HT</th>
+                <th style="width: 40px;" class="no-print"></th>
+            </tr>
+        </thead>
+        <tbody id="items">
+            <tr data-id="1">
+                <td><div class="editable" contenteditable="true" oninput="calc()">Prestation de conseil stratégique</div></td>
+                <td class="row-qty"><div class="editable" contenteditable="true" oninput="calc()">1</div></td>
+                <td class="row-price"><div class="editable" contenteditable="true" oninput="calc()">1500.00</div></td>
+                <td class="row-total">1500.00 €</td>
+                <td class="no-print"><button class="btn-row-action" onclick="removeLine(this)"><i class="fa fa-trash-alt"></i></button></td>
+            </tr>
+        </tbody>
+    </table>
 
-        function loadLogo(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('finalLogo');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    document.getElementById('upIcon').style.display = 'none';
-                    document.getElementById('upText').style.display = 'none';
-                    document.querySelector('.logo-uploader').style.border = 'none';
-                }
-                reader.readAsDataURL(input.files[0]);
+    <button class="add-line-btn" onclick="addLine()">
+        <i class="fa fa-plus-circle"></i> Ajouter une ligne
+    </button>
+
+    <div class="summary-box">
+        <div class="summary-table">
+            <div class="summary-row">
+                <span style="color: var(--text-muted);">Sous-total HT</span>
+                <span id="stotal">1500.00 €</span>
+            </div>
+            <div class="summary-row">
+                <span style="color: var(--text-muted);">
+                    TVA (<span contenteditable="true" id="tvaRate" oninput="calc()" style="display: inline-block; min-width: 35px;">20</span>%)
+                </span>
+                <span id="tax">300.00 €</span>
+            </div>
+            <div class="summary-row main">
+                <span>TOTAL TTC</span>
+                <span id="gtotal">1800.00 €</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn-save" onclick="saveDocument()">
+            <i class="fa fa-save"></i> Sauvegarder
+        </button>
+    </div>
+
+    <div class="doc-footer">
+        <span class="label">Notes & Conditions</span>
+        <div class="editable" contenteditable="true" id="notes" style="margin-top: 10px;">Paiement attendu sous 15 jours par virement bancaire.
+IBAN : FR76 0000 0000 0000 0000 0000 000
+BIC : XXXXXX</div>
+        <p style="margin-top: 40px; font-weight: 800; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); text-align: center;">
+            Propulsé par Umbrella® Signature Pro
+        </p>
+    </div>
+</div>
+
+<script>
+    let lineCounter = 1;
+    
+    // ==================== TOAST NOTIFICATIONS ====================
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+        toast.innerHTML = `<i class="fa ${icon}"></i><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ==================== UI UPDATE ====================
+    function updateUI() {
+        const type = document.getElementById('docTypeSelect').value;
+        document.getElementById('docDisplay').innerText = type;
+        showToast(`Mode ${type} activé`, 'success');
+    }
+
+    // ==================== LOGO MANAGEMENT ====================
+    function loadLogo(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('finalLogo');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('upIcon').style.display = 'none';
+                document.getElementById('upText').style.display = 'none';
+                document.querySelector('.logo-uploader').style.border = 'none';
+                showToast('Logo chargé avec succès', 'success');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // ==================== LINES MANAGEMENT ====================
+    function addLine() {
+        lineCounter++;
+        const tbody = document.getElementById('items');
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-id', lineCounter);
+        tr.innerHTML = `
+            <td><div class="editable" contenteditable="true" oninput="calc()">Nouvelle prestation</div></td>
+            <td class="row-qty"><div class="editable" contenteditable="true" oninput="calc()">1</div></td>
+            <td class="row-price"><div class="editable" contenteditable="true" oninput="calc()">0.00</div></td>
+            <td class="row-total">0.00</td>
+            <td class="no-print"><button class="btn-row-action" onclick="removeLine(this)"><i class="fa fa-trash-alt"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+        calc();
+        showToast('Ligne ajoutée', 'info');
+    }
+
+    function removeLine(btn) {
+        const row = btn.closest('tr');
+        if (document.querySelectorAll('#items tr').length > 1) {
+            row.remove();
+            calc();
+            showToast('Ligne supprimée', 'info');
+        } else {
+            showToast('Impossible de supprimer la dernière ligne', 'warning');
+        }
+    }
+
+    // ==================== CALCULS ====================
+    function calc() {
+        const cur = document.getElementById('currencySelect').value;
+        const tvaPercent = parseFloat(document.getElementById('tvaRate').innerText) || 0;
+        let sub = 0;
+
+        document.querySelectorAll('#items tr').forEach(row => {
+            const qtyDiv = row.cells[1]?.querySelector('.editable');
+            const priceDiv = row.cells[2]?.querySelector('.editable');
+            const totalCell = row.cells[3];
+            
+            const q = parseFloat(qtyDiv?.innerText.replace(/[^0-9.-]+/g, "") || 0);
+            const p = parseFloat(priceDiv?.innerText.replace(/[^0-9.-]+/g, "") || 0);
+            const tot = q * p;
+            sub += tot;
+            
+            if (totalCell) totalCell.innerText = tot.toFixed(2) + " " + cur;
+        });
+
+        const t = sub * (tvaPercent / 100);
+        const gt = sub + t;
+
+        document.getElementById('stotal').innerText = sub.toFixed(2) + " " + cur;
+        document.getElementById('tax').innerText = t.toFixed(2) + " " + cur;
+        document.getElementById('gtotal').innerText = gt.toFixed(2) + " " + cur;
+    }
+
+   // ==================== EXPORT PDF PROFESSIONNEL ====================
+async function exportToPDF() {
+    const element = document.getElementById('invoiceCanvas');
+    const docType = document.getElementById('docDisplay').innerText;
+    const docNumber = document.getElementById('docNumber').innerText;
+    
+    showToast('Génération du PDF en cours...', 'info');
+    
+    try {
+        // Créer une copie temporaire du document sans les éléments à exclure
+        const cloneElement = element.cloneNode(true);
+        
+        // Supprimer les éléments à ne PAS inclure dans le PDF
+        const elementsToRemove = cloneElement.querySelectorAll('.action-buttons, .btn-save, .add-line-btn');
+        elementsToRemove.forEach(el => el.remove());
+        
+        // Supprimer aussi les boutons de suppression de ligne
+        const deleteButtons = cloneElement.querySelectorAll('.btn-row-action');
+        deleteButtons.forEach(btn => btn.remove());
+        
+        // Ajouter temporairement au DOM pour la capture
+        cloneElement.style.position = 'absolute';
+        cloneElement.style.top = '-10000px';
+        cloneElement.style.left = '-10000px';
+        document.body.appendChild(cloneElement);
+        
+        // Capture du clone
+        const canvas = await html2canvas(cloneElement, {
+            scale: 3,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true,
+            windowWidth: cloneElement.scrollWidth,
+            windowHeight: cloneElement.scrollHeight
+        });
+        
+        // Supprimer le clone
+        document.body.removeChild(cloneElement);
+        
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        
+        const imgWidth = 210;
+        const pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        let pdf = new jsPDF('p', 'mm', 'a4');
+        let position = 0;
+        
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        
+        let heightLeft = imgHeight;
+        while (heightLeft > pageHeight) {
+            position = heightLeft - pageHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, -position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+        
+        pdf.save(`Umbrella_${docType}_${docNumber.replace(/[^a-z0-9]/gi, '_')}.pdf`);
+        showToast('PDF exporté avec succès !', 'success');
+        
+    } catch (error) {
+        console.error('Erreur PDF:', error);
+        showToast('Erreur lors de l\'export PDF', 'error');
+    }
+}
+
+// ==================== EXPORT PNG ====================
+async function exportToPNG() {
+    const element = document.getElementById('invoiceCanvas');
+    const docType = document.getElementById('docDisplay').innerText;
+    const docNumber = document.getElementById('docNumber').innerText;
+    
+    showToast('Génération de l\'image...', 'info');
+    
+    try {
+        // Créer une copie temporaire sans les boutons
+        const cloneElement = element.cloneNode(true);
+        
+        const elementsToRemove = cloneElement.querySelectorAll('.action-buttons, .btn-save, .add-line-btn, .btn-row-action');
+        elementsToRemove.forEach(el => el.remove());
+        
+        cloneElement.style.position = 'absolute';
+        cloneElement.style.top = '-10000px';
+        cloneElement.style.left = '-10000px';
+        document.body.appendChild(cloneElement);
+        
+        const canvas = await html2canvas(cloneElement, {
+            scale: 3,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true
+        });
+        
+        document.body.removeChild(cloneElement);
+        
+        const link = document.createElement('a');
+        link.download = `Umbrella_${docType}_${docNumber.replace(/[^a-z0-9]/gi, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        showToast('Image PNG exportée', 'success');
+    } catch (error) {
+        console.error('Erreur PNG:', error);
+        showToast('Erreur lors de l\'export PNG', 'error');
+    }
+}
+
+    // ==================== SAUVEGARDE LOCALE ====================
+    function saveDocument() {
+        const docData = {
+            docType: document.getElementById('docTypeSelect').value,
+            currency: document.getElementById('currencySelect').value,
+            docNumber: document.getElementById('docNumber').innerText,
+            docDate: document.getElementById('docDate').innerText,
+            dueDate: document.getElementById('dueDate').innerText,
+            issuerInfo: document.getElementById('issuerInfo').innerHTML,
+            clientInfo: document.getElementById('clientInfo').innerHTML,
+            notes: document.getElementById('notes').innerHTML,
+            tvaRate: document.getElementById('tvaRate').innerText,
+            items: []
+        };
+        
+        document.querySelectorAll('#items tr').forEach((row, index) => {
+            const desc = row.cells[0]?.querySelector('.editable')?.innerHTML || '';
+            const qty = row.cells[1]?.querySelector('.editable')?.innerText || '1';
+            const price = row.cells[2]?.querySelector('.editable')?.innerText || '0';
+            docData.items.push({ desc, qty, price, index });
+        });
+        
+        localStorage.setItem('umbrella_invoice_data', JSON.stringify(docData));
+        showToast('Document sauvegardé localement', 'success');
+    }
+    
+    function loadSavedDocument() {
+        const saved = localStorage.getItem('umbrella_invoice_data');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                document.getElementById('docTypeSelect').value = data.docType;
+                document.getElementById('currencySelect').value = data.currency;
+                document.getElementById('docNumber').innerText = data.docNumber;
+                document.getElementById('docDate').innerText = data.docDate;
+                document.getElementById('dueDate').innerText = data.dueDate;
+                document.getElementById('issuerInfo').innerHTML = data.issuerInfo;
+                document.getElementById('clientInfo').innerHTML = data.clientInfo;
+                document.getElementById('notes').innerHTML = data.notes;
+                document.getElementById('tvaRate').innerText = data.tvaRate;
+                
+                const tbody = document.getElementById('items');
+                tbody.innerHTML = '';
+                data.items.forEach((item) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><div class="editable" contenteditable="true" oninput="calc()">${item.desc}</div></td>
+                        <td class="row-qty"><div class="editable" contenteditable="true" oninput="calc()">${item.qty}</div></td>
+                        <td class="row-price"><div class="editable" contenteditable="true" oninput="calc()">${item.price}</div></td>
+                        <td class="row-total">0.00</td>
+                        <td class="no-print"><button class="btn-row-action" onclick="removeLine(this)"><i class="fa fa-trash-alt"></i></button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                updateUI();
+                calc();
+                showToast('Document chargé depuis la sauvegarde', 'success');
+            } catch(e) {
+                console.error('Erreur chargement:', e);
             }
         }
-
-        function addLine() {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><div class="editable" contenteditable="true">Nouvelle ligne de service</div></td>
-                <td class="row-qty"><div class="editable" contenteditable="true" oninput="calc()">1</div></td>
-                <td class="row-price"><div class="editable" contenteditable="true" oninput="calc()">0.00</div></td>
-                <td class="row-total">0.00</td>
-                <td class="no-print"><button class="btn-row-action" onclick="this.parentElement.parentElement.remove(); calc()"><i class="fa fa-times"></i></button></td>
-            `;
-            document.getElementById('items').appendChild(tr);
-            calc();
+    }
+    
+    function resetDocument() {
+        if (confirm('Réinitialiser toutes les données ? Cette action est irréversible.')) {
+            localStorage.removeItem('umbrella_invoice_data');
+            location.reload();
         }
+    }
 
-        function calc() {
-            const cur = document.getElementById('currencySelect').value;
-            const tvaPercent = parseFloat(document.getElementById('tvaRate').innerText) || 0;
-            let sub = 0;
-
-            document.querySelectorAll('#items tr').forEach(row => {
-                const q = parseFloat(row.cells[1].innerText.replace(/[^0-9.-]+/g,"")) || 0;
-                const p = parseFloat(row.cells[2].innerText.replace(/[^0-9.-]+/g,"")) || 0;
-                const tot = q * p;
-                sub += tot;
-                row.cells[3].innerText = tot.toFixed(2) + " " + cur;
-            });
-
-            const t = sub * (tvaPercent / 100);
-            const gt = sub + t;
-
-            document.getElementById('stotal').innerText = sub.toFixed(2) + " " + cur;
-            document.getElementById('tax').innerText = t.toFixed(2) + " " + cur;
-            document.getElementById('gtotal').innerText = gt.toFixed(2) + " " + cur;
+    // ==================== INITIALISATION ====================
+    function init() {
+        calc();
+        if (localStorage.getItem('umbrella_invoice_data')) {
+            setTimeout(() => {
+                if (confirm('Une sauvegarde existe. Voulez-vous la charger ?')) {
+                    loadSavedDocument();
+                }
+            }, 500);
         }
-
-        // Initialisation
-        window.onload = calc;
-    </script>
+        showToast('Générateur prêt - Export PDF de qualité professionnelle', 'info');
+    }
+    
+    // Sauvegarde automatique
+    document.addEventListener('input', () => {
+        clearTimeout(window.autoSaveTimeout);
+        window.autoSaveTimeout = setTimeout(() => saveDocument(), 2000);
+    });
+    
+    window.onload = init;
+</script>
 </body>
 </html>
