@@ -2,37 +2,73 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Studio | Umbrella®</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>QR Studio Pro | Umbrella® - Avec Supabase Cloud</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #0f172a;
             --accent: #f5c400;
-            --accent-soft: rgba(245, 196, 0, 0.15);
-            --bg: #0f172a; /* Fond sombre pour faire ressortir le QR */
-            --card: rgba(255, 255, 255, 0.03);
+            --accent-dark: #e6b800;
+            --bg: #0f172a;
             --glass: rgba(255, 255, 255, 0.05);
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background: radial-gradient(circle at top right, #1e293b, #0f172a);
             color: #fff; 
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
         }
 
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 280px;
+            max-width: 380px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid;
+            color: white;
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+        .toast.info { border-left-color: var(--accent); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         .main-container {
-            width: 100%;
-            max-width: 900px;
+            max-width: 1300px;
+            margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 350px;
+            grid-template-columns: 1fr 400px;
             gap: 30px;
             background: var(--glass);
             backdrop-filter: blur(20px);
@@ -41,52 +77,169 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        @media (max-width: 800px) {
+        @media (max-width: 1000px) {
             .main-container { grid-template-columns: 1fr; padding: 25px; }
         }
 
-        /* GAUCHE : ÉDITION */
-        .editor-side h1 { font-weight: 800; font-size: 1.8rem; margin-bottom: 5px; color: var(--accent); }
+        .editor-side h1 { 
+            font-weight: 800; 
+            font-size: 1.8rem; 
+            margin-bottom: 5px; 
+            background: linear-gradient(135deg, var(--accent) 0%, #ffd966 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
         .editor-side p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 30px; }
 
-        .type-tabs { display: flex; gap: 8px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; }
+        .type-tabs { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 30px; 
+            flex-wrap: wrap;
+        }
+        
         .tab {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             color: #cbd5e1;
-            padding: 10px 18px;
-            border-radius: 14px;
+            padding: 12px 20px;
+            border-radius: 40px;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 600;
-            white-space: nowrap;
             transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .tab.active { background: var(--accent); color: var(--primary); border-color: var(--accent); }
+        
+        .tab i { font-size: 1rem; }
+        
+        .tab.active { 
+            background: var(--accent); 
+            color: var(--primary); 
+            border-color: var(--accent);
+        }
+        
+        .tab:hover:not(.active) { 
+            background: rgba(245, 196, 0, 0.2);
+            transform: translateY(-2px);
+        }
 
-        .input-area { min-height: 180px; }
+        .input-area { min-height: 300px; }
         .group { display: none; }
         .group.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
-        label { display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        input {
+        label { 
+            display: block; 
+            font-size: 0.7rem; 
+            color: #94a3b8; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
+        input, textarea, select {
             width: 100%;
-            padding: 16px;
+            padding: 14px 16px;
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 14px;
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
             margin-bottom: 15px;
             transition: 0.3s;
+            font-family: inherit;
         }
-        input:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
+        
+        input:focus, textarea:focus, select:focus { 
+            border-color: var(--accent); 
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 0 2px rgba(245, 196, 0, 0.2);
+        }
+        
+        textarea { resize: vertical; min-height: 80px; }
 
-        /* DROITE : PREVIEW */
+        .media-upload {
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px dashed rgba(255,255,255,0.2);
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .media-upload:hover {
+            border-color: var(--accent);
+            background: rgba(245, 196, 0, 0.05);
+        }
+        
+        .media-upload i {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .media-preview {
+            margin-top: 15px;
+            display: none;
+            position: relative;
+        }
+        
+        .media-preview img, .media-preview video {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        
+        .remove-media {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--error);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: white;
+            font-size: 12px;
+        }
+
+        .customization-panel {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .color-picker input {
+            width: 50px;
+            height: 50px;
+            padding: 5px;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+        
         .preview-side {
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.3);
             border-radius: 24px;
             padding: 30px;
             display: flex;
@@ -95,128 +248,565 @@
             justify-content: center;
             text-align: center;
             border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
         }
 
         .qr-wrapper {
             background: white;
-            padding: 15px;
-            border-radius: 20px;
+            padding: 20px;
+            border-radius: 24px;
             margin-bottom: 25px;
             box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            transition: all 0.3s;
         }
-        #qrImage { width: 220px; height: 220px; display: block; border-radius: 10px; }
+        
+        #qrCanvas { 
+            width: 250px; 
+            height: 250px; 
+            display: block; 
+            border-radius: 12px;
+        }
 
         .btn-dl {
             width: 100%;
             background: var(--accent);
             color: var(--primary);
             border: none;
-            padding: 16px;
-            border-radius: 16px;
+            padding: 14px;
+            border-radius: 40px;
             font-weight: 800;
             font-size: 0.9rem;
             cursor: pointer;
             transition: 0.3s;
             text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .btn-dl:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(245, 196, 0, 0.2); }
+        
+        .btn-dl:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 20px rgba(245, 196, 0, 0.3);
+            background: var(--accent-dark);
+        }
+        
+        .btn-secondary {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .qr-stats {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.7rem;
+            color: #64748b;
+            text-align: center;
+        }
+        
+        .qr-stats span {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.8rem;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        
+        .back-link:hover {
+            color: var(--accent);
+            transform: translateX(-3px);
+        }
+        
+        .upload-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-top: 10px;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .upload-progress.active {
+            display: block;
+        }
+        
+        .upload-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+        
+        .info-box {
+            background: rgba(245, 196, 0, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-align: center;
+        }
+        
+        @media (max-width: 480px) {
+            .main-container { padding: 20px; }
+            .tab { padding: 8px 14px; font-size: 0.7rem; }
+            #qrCanvas { width: 200px; height: 200px; }
+            .qr-wrapper { padding: 15px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="editor-side">
-            <h1>QR Studio Pro</h1>
-            <p>Créez des QR codes intelligents pour votre business.</p>
+<div class="toast-container" id="toastContainer"></div>
 
-            <div class="type-tabs" id="tabs">
-                <div class="tab active" onclick="setMode('url', this)"><i class="fa fa-link"></i> Lien</div>
-                <div class="tab" onclick="setMode('prod', this)"><i class="fa fa-tag"></i> Produit</div>
-                <div class="tab" onclick="setMode('wifi', this)"><i class="fa fa-wifi"></i> WiFi</div>
-                <div class="tab" onclick="setMode('vcard', this)"><i class="fa fa-user"></i> Contact</div>
-            </div>
+<div class="main-container">
+    <div class="editor-side">
+        <h1>QR Studio Pro</h1>
+        <p>Créez des QR codes avec stockage cloud Supabase</p>
 
-            <div class="input-area">
-                <div id="url-group" class="group active">
-                    <label>Lien Web / PDF / Vidéo</label>
-                    <input type="text" id="url" placeholder="https://votre-destination.com" oninput="gen()">
-                </div>
-
-                <div id="prod-group" class="group">
-                    <label>Désignation Produit</label>
-                    <input type="text" id="pName" placeholder="Ex: Casquette Umbrella" oninput="gen()">
-                    <div style="display:flex; gap:10px;">
-                        <div style="flex:1">
-                            <label>Prix (€)</label>
-                            <input type="text" id="pPrice" placeholder="29.99" oninput="gen()">
-                        </div>
-                        <div style="flex:1">
-                            <label>Référence</label>
-                            <input type="text" id="pRef" placeholder="REF-01" oninput="gen()">
-                        </div>
-                    </div>
-                </div>
-
-                <div id="wifi-group" class="group">
-                    <label>Nom du réseau (SSID)</label>
-                    <input type="text" id="ssid" placeholder="Mon Réseau WiFi" oninput="gen()">
-                    <label>Clé de sécurité</label>
-                    <input type="password" id="pass" placeholder="••••••••" oninput="gen()">
-                </div>
-
-                <div id="vcard-group" class="group">
-                    <label>Nom & Prénom</label>
-                    <input type="text" id="vName" placeholder="John Doe" oninput="gen()">
-                    <label>Téléphone professionnel</label>
-                    <input type="text" id="vTel" placeholder="+33 6..." oninput="gen()">
-                </div>
-            </div>
-
-            <a href="index.html" style="color:#64748b; text-decoration:none; font-size:0.8rem;"><i class="fa fa-arrow-left"></i> Retour Dashboard</a>
+        <div class="type-tabs" id="tabs">
+            <div class="tab active" onclick="setMode('url', this)"><i class="fa fa-link"></i> Lien</div>
+            <div class="tab" onclick="setMode('photo', this)"><i class="fa fa-image"></i> Photo</div>
+            <div class="tab" onclick="setMode('video', this)"><i class="fa fa-video"></i> Vidéo</div>
+            <div class="tab" onclick="setMode('text', this)"><i class="fa fa-align-left"></i> Texte</div>
+            <div class="tab" onclick="setMode('wifi', this)"><i class="fa fa-wifi"></i> WiFi</div>
+            <div class="tab" onclick="setMode('vcard', this)"><i class="fa fa-user"></i> Contact</div>
         </div>
 
-        <div class="preview-side">
-            <div id="qrPlaceholder" style="margin-bottom:20px; opacity:0.3; display:none;">
-                <i class="fa fa-qrcode fa-5x"></i>
+        <div class="input-area">
+            <!-- URL / Lien -->
+            <div id="url-group" class="group active">
+                <label><i class="fa fa-link"></i> Lien Web / PDF / Vidéo</label>
+                <input type="text" id="url" placeholder="https://votre-destination.com" oninput="gen()">
+                <div class="info-box">
+                    <i class="fa fa-info-circle"></i> Liens courts recommandés pour une meilleure fiabilité
+                </div>
             </div>
-            <div class="qr-wrapper" id="qrFrame">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Umbrella" id="qrImage">
+
+            <!-- Photo Upload avec Supabase -->
+            <div id="photo-group" class="group">
+                <label><i class="fa fa-image"></i> Photo (stockage cloud)</label>
+                <div class="media-upload" onclick="document.getElementById('photoInput').click()">
+                    <i class="fa fa-cloud-upload-alt"></i>
+                    <p>Cliquez pour télécharger une photo</p>
+                    <small>JPG, PNG, GIF (max 10MB) - Stockage permanent</small>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="uploadToSupabase(this, 'photo')">
+                <div id="photoPreview" class="media-preview"></div>
+                <div id="photoUrl" style="display:none;"></div>
+                <div class="upload-progress" id="photoProgress">
+                    <div class="upload-progress-bar"></div>
+                </div>
             </div>
-            <button class="btn-dl" onclick="download()"><i class="fa fa-download"></i> Télécharger PNG</button>
-            <p style="margin-top:15px; font-size:0.7rem; color:#64748b;">Généré instantanément par Umbrella®</p>
+
+            <!-- Vidéo Upload avec Supabase -->
+            <div id="video-group" class="group">
+                <label><i class="fa fa-video"></i> Vidéo (stockage cloud)</label>
+                <div class="media-upload" onclick="document.getElementById('videoInput').click()">
+                    <i class="fa fa-cloud-upload-alt"></i>
+                    <p>Cliquez pour télécharger une vidéo</p>
+                    <small>MP4, WebM (max 50MB) - Stockage permanent</small>
+                </div>
+                <input type="file" id="videoInput" accept="video/*" style="display:none" onchange="uploadToSupabase(this, 'video')">
+                <div id="videoPreview" class="media-preview"></div>
+                <div id="videoUrl" style="display:none;"></div>
+                <div class="upload-progress" id="videoProgress">
+                    <div class="upload-progress-bar"></div>
+                </div>
+                <label>Ou lien YouTube/Vimeo (recommandé)</label>
+                <input type="text" id="videoLink" placeholder="https://youtube.com/watch?v=xxx" oninput="gen()">
+            </div>
+
+            <!-- Texte libre -->
+            <div id="text-group" class="group">
+                <label><i class="fa fa-align-left"></i> Texte à encoder</label>
+                <textarea id="text" rows="3" placeholder="Votre message texte ici..." oninput="gen()"></textarea>
+                <div class="info-box">
+                    <i class="fa fa-info-circle"></i> Limite: environ 2950 caractères max
+                </div>
+            </div>
+
+            <!-- WiFi -->
+            <div id="wifi-group" class="group">
+                <label><i class="fa fa-wifi"></i> Nom du réseau (SSID)</label>
+                <input type="text" id="ssid" placeholder="Mon Réseau WiFi" oninput="gen()">
+                <label>Type de sécurité</label>
+                <select id="wifiType" oninput="gen()">
+                    <option value="WPA">WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">Aucun mot de passe</option>
+                </select>
+                <label>Mot de passe</label>
+                <input type="password" id="wifiPass" placeholder="••••••••" oninput="gen()">
+            </div>
+
+            <!-- VCard -->
+            <div id="vcard-group" class="group">
+                <label><i class="fa fa-user"></i> Prénom & Nom</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="vFirstName" placeholder="Prénom" oninput="gen()" style="flex:1">
+                    <input type="text" id="vLastName" placeholder="Nom" oninput="gen()" style="flex:1">
+                </div>
+                <label>Téléphone</label>
+                <input type="tel" id="vTel" placeholder="+33 6 12 34 56 78" oninput="gen()">
+                <label>Email</label>
+                <input type="email" id="vEmail" placeholder="contact@exemple.com" oninput="gen()">
+                <label>Société</label>
+                <input type="text" id="vCompany" placeholder="Nom de l'entreprise" oninput="gen()">
+            </div>
         </div>
+
+        <div class="customization-panel">
+            <h4 style="font-size: 0.8rem; margin-bottom: 15px; color: var(--accent);">
+                <i class="fa fa-palette"></i> Personnalisation
+            </h4>
+            <div class="color-picker">
+                <div style="flex:1">
+                    <label>Couleur du QR</label>
+                    <input type="color" id="qrColor" value="#000000" onchange="gen()">
+                </div>
+                <div style="flex:1">
+                    <label>Couleur fond</label>
+                    <input type="color" id="bgColor" value="#FFFFFF" onchange="gen()">
+                </div>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-link"><i class="fa fa-arrow-left"></i> Retour au Dashboard</a>
     </div>
 
-<script>
-    let mode = 'url';
+    <div class="preview-side">
+        <div class="qr-wrapper">
+            <canvas id="qrCanvas" width="250" height="250"></canvas>
+        </div>
+        <button class="btn-dl" onclick="downloadPNG()">
+            <i class="fa fa-download"></i> Télécharger PNG
+        </button>
+        <div class="qr-stats">
+            <i class="fa fa-chart-simple"></i> Données: <span id="dataLength">0</span> caractères<br>
+            <i class="fa fa-shield"></i> Stockage: <span id="storageStatus">Supabase Cloud</span>
+        </div>
+        <p style="margin-top: 15px; font-size: 0.65rem; color: #475569;">
+            Scannez avec votre smartphone pour tester
+        </p>
+    </div>
+</div>
 
-    function setMode(newMode, el) {
-        mode = newMode;
+<script>
+    // ==================== CONFIGURATION SUPABASE ====================
+    // Remplace par tes identifiants Supabase
+    const SUPABASE_URL = 'https://mhbsoxbsqrxunxthnkzt.supabase.co';
+    const SUPABASE_ANON_KEY =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oYnNveGJzcXJ4dW54dGhua3p0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTg3NjcsImV4cCI6MjA5MDE5NDc2N30.SC7Da2qTEq5g2AB4CW_au3H2xGb67L2Id840BZxMsRc';
+    
+    
+    let currentMode = 'url';
+    let currentQR = null;
+    let uploadedPhotoUrl = '';
+    let uploadedVideoUrl = '';
+    
+    // Initialiser Supabase
+    try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase connecté');
+        document.getElementById('storageStatus').innerHTML = '✅ Supabase Cloud';
+    } catch (e) {
+        console.warn('Supabase non configuré, mode démo');
+        document.getElementById('storageStatus').innerHTML = '⚠️ Mode local';
+    }
+    
+    // ==================== UPLOAD VERS SUPABASE ====================
+    async function uploadToSupabase(fileInput, type) {
+        const file = fileInput.files[0];
+        if (!file) return;
+        
+        const maxSize = type === 'photo' ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
+        if (file.size > maxSize) {
+            showToast(`Fichier trop grand (max ${maxSize / 1024 / 1024}MB)`, 'error');
+            return;
+        }
+        
+        // Afficher la prévisualisation
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewId = type === 'photo' ? 'photoPreview' : 'videoPreview';
+            const preview = document.getElementById(previewId);
+            if (type === 'photo') {
+                preview.innerHTML = `
+                    <div style="position:relative">
+                        <img src="${e.target.result}" style="max-width:100%; max-height:150px; border-radius:12px">
+                        <button class="remove-media" onclick="clearMedia('${type}')"><i class="fa fa-times"></i></button>
+                    </div>
+                `;
+            } else {
+                preview.innerHTML = `
+                    <div style="position:relative">
+                        <video controls style="max-width:100%; max-height:150px; border-radius:12px">
+                            <source src="${e.target.result}" type="${file.type}">
+                        </video>
+                        <button class="remove-media" onclick="clearMedia('${type}')"><i class="fa fa-times"></i></button>
+                    </div>
+                `;
+            }
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+        
+        // Afficher la barre de progression
+        const progressId = type === 'photo' ? 'photoProgress' : 'videoProgress';
+        const progressBar = document.getElementById(progressId);
+        progressBar.classList.add('active');
+        const bar = progressBar.querySelector('.upload-progress-bar');
+        
+        // Upload vers Supabase
+        if (supabase) {
+            try {
+                const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                const { data, error } = await supabase.storage
+                    .from('qr-media')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+                
+                if (error) throw error;
+                
+                // Récupérer l'URL publique
+                const { data: publicUrl } = supabase.storage
+                    .from('qr-media')
+                    .getPublicUrl(fileName);
+                
+                const url = publicUrl.publicUrl;
+                
+                if (type === 'photo') {
+                    uploadedPhotoUrl = url;
+                    document.getElementById('photoUrl').innerHTML = url;
+                } else {
+                    uploadedVideoUrl = url;
+                    document.getElementById('videoUrl').innerHTML = url;
+                }
+                
+                bar.style.width = '100%';
+                setTimeout(() => {
+                    progressBar.classList.remove('active');
+                    bar.style.width = '0%';
+                }, 1000);
+                
+                showToast(`${type === 'photo' ? 'Photo' : 'Vidéo'} uploadée avec succès !`, 'success');
+                gen();
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('Erreur upload: ' + error.message, 'error');
+                progressBar.classList.remove('active');
+                clearMedia(type);
+            }
+        } else {
+            // Mode démo sans Supabase
+            showToast('Mode démo: utilisez un lien externe', 'warning');
+            if (type === 'photo') {
+                uploadedPhotoUrl = URL.createObjectURL(file);
+            } else {
+                uploadedVideoUrl = URL.createObjectURL(file);
+            }
+            gen();
+            progressBar.classList.remove('active');
+        }
+    }
+    
+    function clearMedia(type) {
+        if (type === 'photo') {
+            if (uploadedPhotoUrl && uploadedPhotoUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(uploadedPhotoUrl);
+            }
+            uploadedPhotoUrl = '';
+            document.getElementById('photoPreview').innerHTML = '';
+            document.getElementById('photoPreview').style.display = 'none';
+            document.getElementById('photoInput').value = '';
+        } else {
+            if (uploadedVideoUrl && uploadedVideoUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(uploadedVideoUrl);
+            }
+            uploadedVideoUrl = '';
+            document.getElementById('videoPreview').innerHTML = '';
+            document.getElementById('videoPreview').style.display = 'none';
+            document.getElementById('videoInput').value = '';
+            document.getElementById('videoLink').value = '';
+        }
+        gen();
+        showToast(`${type === 'photo' ? 'Photo' : 'Vidéo'} supprimée`, 'info');
+    }
+    
+    // ==================== QR CODE GENERATION ====================
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+        toast.innerHTML = `<i class="fa ${icon}"></i><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    function setMode(mode, el) {
+        currentMode = mode;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
-        
         document.querySelectorAll('.group').forEach(g => g.classList.remove('active'));
-        document.getElementById(newMode + '-group').classList.add('active');
+        document.getElementById(mode + '-group').classList.add('active');
         gen();
     }
-
+    
+    function truncateString(str, maxLength) {
+        if (str.length <= maxLength) return str;
+        return str.substring(0, maxLength - 30) + '...[tronqué]';
+    }
+    
     function gen() {
-        let val = "";
-        if(mode === 'url') val = document.getElementById('url').value;
-        else if(mode === 'prod') val = `PRODUIT: ${document.getElementById('pName').value}\nPRIX: ${document.getElementById('pPrice').value}€\nREF: ${document.getElementById('pRef').value}`;
-        else if(mode === 'wifi') val = `WIFI:S:${document.getElementById('ssid').value};T:WPA;P:${document.getElementById('pass').value};;`;
-        else if(mode === 'vcard') val = `BEGIN:VCARD\nVERSION:3.0\nFN:${document.getElementById('vName').value}\nTEL:${document.getElementById('vTel').value}\nEND:VCARD`;
-
-        const api = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(val || "Umbrella")}`;
-        document.getElementById('qrImage').src = api;
+        let data = "";
+        
+        switch(currentMode) {
+            case 'url':
+                data = document.getElementById('url').value;
+                break;
+            case 'photo':
+                data = uploadedPhotoUrl || '';
+                break;
+            case 'video':
+                const videoLink = document.getElementById('videoLink').value;
+                data = uploadedVideoUrl || videoLink || '';
+                break;
+            case 'text':
+                data = document.getElementById('text').value;
+                break;
+            case 'wifi':
+                const ssid = document.getElementById('ssid').value;
+                const wifiType = document.getElementById('wifiType').value;
+                const wifiPass = document.getElementById('wifiPass').value;
+                if(ssid) {
+                    data = `WIFI:S:${ssid};T:${wifiType === 'nopass' ? 'nopass' : wifiType};P:${wifiPass};;`;
+                }
+                break;
+            case 'vcard':
+                const firstName = document.getElementById('vFirstName').value;
+                const lastName = document.getElementById('vLastName').value;
+                const vTel = document.getElementById('vTel').value;
+                const vEmail = document.getElementById('vEmail').value;
+                const vCompany = document.getElementById('vCompany').value;
+                
+                if(firstName || lastName || vTel || vEmail) {
+                    data = `BEGIN:VCARD\nVERSION:3.0\nFN:${firstName} ${lastName}\nN:${lastName};${firstName};;;\n`;
+                    if(vCompany) data += `ORG:${vCompany}\n`;
+                    if(vTel) data += `TEL:${vTel}\n`;
+                    if(vEmail) data += `EMAIL:${vEmail}\n`;
+                    data += `END:VCARD`;
+                }
+                break;
+        }
+        
+        if (!data || data.trim() === "") {
+            data = "https://umbrella.app";
+        }
+        
+        const maxLength = 2950;
+        const originalLength = data.length;
+        if (originalLength > maxLength) {
+            data = truncateString(data, maxLength);
+            showToast(`Données trop longues (${originalLength} > ${maxLength}), tronquées`, 'warning');
+        }
+        
+        document.getElementById('dataLength').innerText = Math.min(originalLength, maxLength);
+        
+        try {
+            const qr = qrcode(0, 'M');
+            qr.addData(data);
+            qr.make();
+            
+            const qrColor = document.getElementById('qrColor').value;
+            const bgColor = document.getElementById('bgColor').value;
+            const size = 250;
+            
+            const canvas = document.getElementById('qrCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const moduleCount = qr.getModuleCount();
+            const moduleSize = size / moduleCount;
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, size, size);
+            
+            for (let row = 0; row < moduleCount; row++) {
+                for (let col = 0; col < moduleCount; col++) {
+                    if (qr.isDark(row, col)) {
+                        ctx.fillStyle = qrColor;
+                        ctx.fillRect(col * moduleSize, row * moduleSize, moduleSize, moduleSize);
+                    }
+                }
+            }
+            
+            currentQR = qr;
+            
+        } catch (error) {
+            console.error('Erreur génération:', error);
+            const canvas = document.getElementById('qrCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, 250, 250);
+            ctx.fillStyle = '#000000';
+            ctx.font = '12px Arial';
+            ctx.fillText('Erreur: données trop longues', 40, 125);
+            showToast('Données trop longues pour le QR code', 'error');
+        }
     }
-
-    function download() {
+    
+    function downloadPNG() {
+        const canvas = document.getElementById('qrCanvas');
+        if (!canvas) return;
+        
         const link = document.createElement('a');
-        link.href = document.getElementById('qrImage').src;
-        link.download = "QR_Umbrella.png";
+        const modeNames = { url: 'lien', photo: 'photo', video: 'video', text: 'texte', wifi: 'wifi', vcard: 'contact' };
+        const modeName = modeNames[currentMode] || 'qrcode';
+        link.download = `Umbrella_QR_${modeName}_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
         link.click();
+        showToast('QR Code téléchargé en PNG', 'success');
     }
+    
+    function init() {
+        gen();
+        showToast('QR Studio Pro avec Supabase - Prêt !', 'info');
+    }
+    
+    window.onload = init;
 </script>
 </body>
 </html>
