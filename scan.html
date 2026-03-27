@@ -2,233 +2,831 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Umbrella Scanner Engine v3.0 | Pro Ecosystem</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Umbrella Scanner Engine v6.0 | HD Document Scanner</title>
     
     <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvReady();"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         :root {
-            --primary: #311038;
-            --accent: #F0D13C;
-            --bg: #f5f5fa;
-            --sidebar-bg: #FFFFFF;
-            --text-muted: #888;
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #f5c400;
+            --accent-dark: #e6b800;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --border: #e2e8f0;
         }
 
-        body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
-
-        /* Sidebar */
-        .sidebar { width: 340px; background: var(--sidebar-bg); box-shadow: 2px 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex-shrink: 0; z-index: 110; }
-        .sidebar-header { padding: 25px 25px 15px; text-align: center; }
-        .logo { width: 130px; margin-bottom: 10px; }
-        .sidebar h2 { color: var(--primary); font-size: 0.75rem; letter-spacing: 2px; margin: 0; opacity: 0.6; font-weight: 800; text-transform: uppercase; }
-
-        .nav-container { flex: 1; overflow-y: auto; padding: 10px; }
-        .accordion-item { border-radius: 12px; margin-bottom: 8px; background: #fafafa; border: 1px solid #f0f0f0; padding-bottom: 5px; }
-        .accordion-header { width: 100%; padding: 14px 15px; background: none; border: none; display: flex; align-items: center; justify-content: space-between; color: var(--primary); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;}
-        
-        .action-btn { width: 92%; margin-left: 4%; padding: 10px 12px; border: none; background: transparent; text-align: left; color: #555; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 8px; display: flex; align-items: center; transition: 0.2s; margin-bottom: 4px; }
-        .action-btn:hover { background: var(--primary); color: white; }
-        .action-btn i { width: 22px; margin-right: 10px; font-size: 1.1rem; opacity: 0.7; }
-        .action-btn.active { background: var(--primary); color: var(--accent); }
-        .action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        /* Workarea */
-        .workarea { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; position: relative; }
-        
-        /* Dropzone */
-        .dropzone { 
-            width: 100%; max-width: 750px; min-height: 450px; background: #fff; 
-            border: 3px dashed #d1d1e0; border-radius: 40px; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center; 
-            cursor: pointer; transition: all 0.3s ease; 
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            overflow: hidden;
         }
-        .dropzone.dragover { border-color: var(--primary); background: #f0f0f5; transform: scale(1.02); }
-        
-        #editorContainer { position: relative; display: none; background: white; padding: 10px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
-        #sourceImg { max-width: 100%; max-height: 60vh; border-radius: 10px; display: block; transition: transform 0.3s ease; }
-        #lineLayer { position: absolute; top: 10px; left: 10px; pointer-events: none; }
-        
-        .dot { width: 22px; height: 22px; position: absolute; border-radius: 50%; cursor: move; border: 3px solid white; background: var(--accent); z-index: 100; transform: translate(-50%, -50%); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-        canvas#resultCanvas { max-width: 100%; max-height: 65vh; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: none; background: white; }
-
-        /* Buttons Floating */
-        .btn-group-floating {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(150px);
-            display: flex; gap: 15px; width: 90%; max-width: 500px; z-index: 1000;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        .btn-group-floating.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        .download-btn { flex: 2; padding: 18px; background: var(--primary); color: var(--accent); border: none; border-radius: 20px; font-weight: 800; text-transform: uppercase; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .edit-back-btn { flex: 1; padding: 18px; background: #fff; color: var(--primary); border: 2px solid var(--primary); border-radius: 20px; font-weight: 700; cursor: pointer; }
+        .toast {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 280px;
+            max-width: 380px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid;
+        }
 
-        .status-badge { position: absolute; top: 20px; right: 20px; background: white; padding: 8px 15px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.05); color: var(--primary); }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+        .toast.info { border-left-color: var(--accent); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            width: 140px;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .nav-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .tool-section {
+            margin-bottom: 24px;
+        }
+
+        .tool-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-left: 12px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            text-align: left;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        .action-btn i {
+            width: 20px;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .action-btn:hover, .action-btn:active {
+            background: var(--bg);
+        }
+
+        .action-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.active i {
+            color: var(--accent);
+        }
+
+        .workarea {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 16px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-btn:active {
+            transform: scale(0.95);
+        }
+
+        .preview-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        .dropzone {
+            width: 100%;
+            max-width: 1200px;
+            min-height: 550px;
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 60px;
+        }
+
+        .dropzone.dragover {
+            border-color: var(--accent);
+            background: rgba(245, 196, 0, 0.05);
+            transform: scale(1.02);
+        }
+
+        #editorContainer {
+            position: relative;
+            display: none;
+            background: #1e293b;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            overflow: hidden;
+            width: 100%;
+            height: 75vh;
+            min-height: 600px;
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            background: #0f172a;
+        }
+
+        #sourceImg {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-drag: none;
+            cursor: default;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .dots-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            border-radius: 50%;
+            cursor: move;
+            border: 3px solid white;
+            background: var(--accent);
+            z-index: 100;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            pointer-events: auto;
+            transition: transform 0.2s;
+            touch-action: none;
+        }
+
+        .dot:active {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        #resultCanvas {
+            max-width: 95%;
+            max-height: 75vh;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            display: none;
+            background: white;
+        }
+
+        .floating-group {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            display: flex;
+            gap: 16px;
+            z-index: 1000;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+        }
+
+        .floating-group.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .btn-primary {
+            padding: 14px 28px;
+            background: var(--primary);
+            color: var(--accent);
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            padding: 14px 28px;
+            background: var(--surface);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:active, .btn-secondary:active {
+            transform: scale(0.97);
+        }
+
+        .status-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .camera-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .camera-modal.active {
+            display: flex;
+        }
+
+        .camera-container {
+            background: var(--surface);
+            border-radius: 32px;
+            overflow: hidden;
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        #cameraVideo {
+            width: 100%;
+            max-height: 70vh;
+            background: #000;
+        }
+
+        .camera-controls {
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .resolution-badge {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: white;
+            z-index: 200;
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -320px;
+                height: 100%;
+                top: 0;
+                z-index: 1000;
+            }
+            .sidebar.open {
+                left: 0;
+            }
+            .toolbar {
+                padding: 12px;
+            }
+            .toolbar-group {
+                gap: 6px;
+            }
+            .toolbar-btn {
+                padding: 6px 12px;
+                font-size: 0.7rem;
+            }
+            .dot {
+                width: 44px;
+                height: 44px;
+            }
+            #editorContainer {
+                height: 65vh;
+                min-height: auto;
+            }
+            .dropzone {
+                min-height: 400px;
+                padding: 40px 20px;
+            }
+        }
+
+        #lineLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 50;
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="sidebar-header">
-        <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" alt="Logo" class="logo">
-        <h2>Scanner Engine v3.0</h2>
-    </div>
-
-    <div class="nav-container">
-        <div class="accordion-item">
-            <div class="accordion-header">1. TOOLS & HISTORY</div>
-            <div class="accordion-content">
-                <button class="action-btn" onclick="undo()" id="undoBtn" disabled><i class="fa fa-undo"></i> Annuler (Undo)</button>
-                <button class="action-btn" onclick="redo()" id="redoBtn" disabled><i class="fa fa-redo"></i> Rétablir (Redo)</button>
-                <button class="action-btn" onclick="rotateImage()"><i class="fa fa-rotate-right"></i> Pivoter 90°</button>
-            </div>
+<div class="app-container">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" alt="Logo" class="logo">
+            <h2>Scanner Engine v6.0 | HD</h2>
         </div>
 
-        <div class="accordion-item">
-            <div class="accordion-header">2. RENDERING MODE</div>
-            <div class="accordion-content">
-                <button id="mode_original" class="action-btn active" onclick="setMode('original')"><i class="fa fa-image"></i> Original</button>
-                <button id="mode_bw" class="action-btn" onclick="setMode('bw')"><i class="fa fa-file-lines"></i> Noir & Blanc (Scan)</button>
-                <button id="mode_magic" class="action-btn" onclick="setMode('magic')"><i class="fa fa-wand-magic-sparkles"></i> Magic Color</button>
+        <div class="nav-container">
+            <div class="tool-section">
+                <div class="tool-section-title">Édition & Historique</div>
+                <button class="action-btn" onclick="undo()" id="undoBtn" disabled>
+                    <i class="fa fa-undo"></i> Annuler
+                </button>
+                <button class="action-btn" onclick="redo()" id="redoBtn" disabled>
+                    <i class="fa fa-redo"></i> Rétablir
+                </button>
+                <button class="action-btn" onclick="rotatePoints()">
+                    <i class="fa fa-rotate-right"></i> Pivoter points
+                </button>
+                <button class="action-btn" onclick="autoDetectEdges()">
+                    <i class="fa fa-magic"></i> Détection Auto
+                </button>
+                <button class="action-btn" onclick="resetPoints()">
+                    <i class="fa fa-refresh"></i> Réinitialiser
+                </button>
             </div>
-        </div>
 
-        <div class="accordion-item">
-            <div class="accordion-header">3. FINALIZE</div>
-            <div class="accordion-content">
-                <button id="scanBtn" class="action-btn" disabled onclick="processImage()" style="color: var(--primary); font-weight: 800;">
-                    <i class="fa fa-bolt-lightning"></i> APPLIQUER LE SCAN
+            <div class="tool-section">
+                <div class="tool-section-title">Filtres de rendu</div>
+                <button id="mode_original" class="action-btn active" onclick="setMode('original')">
+                    <i class="fa fa-image"></i> Original HD
+                </button>
+                <button id="mode_bw" class="action-btn" onclick="setMode('bw')">
+                    <i class="fa fa-file-lines"></i> Noir & Blanc Pro
+                </button>
+                <button id="mode_magic" class="action-btn" onclick="setMode('magic')">
+                    <i class="fa fa-wand-magic-sparkles"></i> Magic Color HD
+                </button>
+            </div>
+
+            <div class="tool-section">
+                <div class="tool-section-title">Export Haute Qualité</div>
+                <button class="action-btn" onclick="exportAsPDF()">
+                    <i class="fa fa-file-pdf"></i> Exporter PDF HD
+                </button>
+                <button class="action-btn" onclick="downloadResult()">
+                    <i class="fa fa-download"></i> PNG (Sans perte)
                 </button>
             </div>
         </div>
+        <input type="file" id="fileInput" accept="image/*" hidden>
     </div>
-    <input type="file" id="fileInput" accept="image/*" hidden>
+
+    <div class="workarea">
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="toggleSidebar()">
+                    <i class="fa fa-bars"></i> Menu
+                </button>
+                <button class="toolbar-btn" onclick="openCamera()">
+                    <i class="fa fa-camera"></i> Scanner HD
+                </button>
+                <button class="toolbar-btn" id="scanActionBtn" onclick="processImage()" style="background: var(--primary); color: var(--accent);">
+                    <i class="fa fa-bolt"></i> SCANNER HD
+                </button>
+            </div>
+            <div class="toolbar-group">
+                <span style="font-size: 0.7rem; color: var(--text-muted);">
+                    <i class="fa fa-info-circle"></i> Qualité originale préservée
+                </span>
+            </div>
+        </div>
+
+        <div class="preview-area">
+            <div class="dropzone" id="dropzone">
+                <i class="fa fa-cloud-upload-alt" style="font-size: 60px; color: var(--primary); opacity: 0.3; margin-bottom: 20px;"></i>
+                <p style="font-weight: 700; font-size: 1.3rem; margin: 0;">Déposez votre document ici</p>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 8px;">Format HD supporté - JPG, PNG, HEIC</p>
+                <button class="toolbar-btn" style="margin-top: 20px; background: var(--primary); color: white; padding: 12px 24px;" onclick="openCamera()">
+                    <i class="fa fa-camera"></i> Prendre une photo HD
+                </button>
+            </div>
+
+            <div id="editorContainer">
+                <div class="image-wrapper" id="imageWrapper">
+                    <img id="sourceImg" src="" crossorigin="anonymous">
+                </div>
+                <div id="dots" class="dots-container"></div>
+                <div class="resolution-badge" id="resolutionBadge"></div>
+            </div>
+
+            <canvas id="resultCanvas"></canvas>
+        </div>
+
+        <div class="floating-group" id="floatingGroup">
+            <button class="btn-secondary" onclick="backToEdit()">
+                <i class="fa fa-arrow-left"></i> Ajuster
+            </button>
+            <button class="btn-primary" onclick="downloadResult()">
+                <i class="fa fa-download"></i> Télécharger PNG
+            </button>
+        </div>
+    </div>
 </div>
 
-<div class="workarea">
-    <div class="status-badge" id="engineStatus"><i class="fa fa-circle-notch fa-spin"></i> Initialisation...</div>
-
-    <div class="dropzone" id="dropzone">
-        <i class="fa fa-plus-circle" style="font-size: 50px; color: var(--primary); opacity: 0.2; margin-bottom: 20px;"></i>
-        <p style="font-weight: 800; color: var(--primary); margin: 0;">DÉPOSEZ OU CLIQUEZ</p>
-    </div>
-
-    <div id="editorContainer">
-        <img id="sourceImg" src="">
-        <canvas id="lineLayer"></canvas>
-        <div id="dots"></div>
-    </div>
-
-    <canvas id="resultCanvas"></canvas>
+<div class="status-badge" id="engineStatus">
+    <i class="fa fa-circle-notch fa-spin"></i> Initialisation...
 </div>
 
-<div class="btn-group-floating" id="floatingGroup">
-    <button class="edit-back-btn" onclick="backToEdit()">AJUSTER</button>
-    <button class="download-btn" onclick="downloadResult()">Télécharger JPG</button>
+<div class="camera-modal" id="cameraModal">
+    <div class="camera-container">
+        <video id="cameraVideo" autoplay playsinline></video>
+        <div class="camera-controls">
+            <button class="btn-secondary" onclick="closeCamera()">
+                <i class="fa fa-times"></i> Annuler
+            </button>
+            <button class="btn-primary" onclick="capturePhoto()">
+                <i class="fa fa-camera"></i> Capturer HD
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
-    let srcMat, currentMode = 'original', rotation = 0;
-    let history = [], redoStack = [];
+    // ==================== VARIABLES GLOBALES ====================
+    let srcMat = null;
+    let currentMode = 'original';
+    let history = [];
+    let redoStack = [];
+    let isCvReady = false;
+    let currentStream = null;
+    let imageDisplayRect = { x: 0, y: 0, width: 0, height: 0 };
+    
     const img = document.getElementById('sourceImg');
     const editor = document.getElementById('editorContainer');
-    const lineLayer = document.getElementById('lineLayer');
     const resultCanvas = document.getElementById('resultCanvas');
     const dropzone = document.getElementById('dropzone');
     const floatingGroup = document.getElementById('floatingGroup');
+    const imageWrapper = document.getElementById('imageWrapper');
+    const resolutionBadge = document.getElementById('resolutionBadge');
 
+    // ==================== INITIALISATION ====================
     function onOpenCvReady() {
-        document.getElementById('engineStatus').innerHTML = '<i class="fa fa-check-circle" style="color: #27ae60"></i> Engine Active';
-        document.getElementById('scanBtn').disabled = false;
+        isCvReady = true;
+        document.getElementById('engineStatus').innerHTML = '<i class="fa fa-check-circle" style="color: #10b981"></i> Engine Ready HD';
+        showToast('Scanner engine initialisé - Qualité HD', 'success');
     }
 
-    // Drag & Drop
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
-        dropzone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
-    });
-    dropzone.addEventListener('dragover', () => dropzone.classList.add('dragover'));
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-    dropzone.addEventListener('drop', (e) => {
-        dropzone.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
-    });
-    dropzone.addEventListener('click', () => document.getElementById('fileInput').click());
-    document.getElementById('fileInput').onchange = (e) => handleFiles(e.target.files);
+    function showToast(message, type = 'info') {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <i class="fa ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
 
-    function handleFiles(files) {
-        const file = files[0];
-        if (!file || !file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            img.onload = () => {
-                dropzone.style.display = "none";
-                resultCanvas.style.display = "none";
-                floatingGroup.classList.remove('visible');
-                editor.style.display = "inline-block";
-                resetCanvasSize();
-                if(srcMat) srcMat.delete();
-                srcMat = cv.imread(img);
-                initDots();
-                saveState();
-            };
-            img.src = e.target.result;
+    // ==================== AFFICHAGE RÉSOLUTION ====================
+    function updateResolutionDisplay() {
+        if (img.naturalWidth && img.naturalHeight) {
+            resolutionBadge.innerHTML = `<i class="fa fa-image"></i> ${img.naturalWidth} x ${img.naturalHeight} px`;
+            resolutionBadge.style.display = 'block';
+        }
+    }
+
+    // ==================== CALCUL DE LA POSITION DE L'IMAGE ====================
+    function updateImageDisplayRect() {
+        const containerRect = imageWrapper.getBoundingClientRect();
+        const imgRect = img.getBoundingClientRect();
+        
+        imageDisplayRect = {
+            x: imgRect.left - containerRect.left,
+            y: imgRect.top - containerRect.top,
+            width: imgRect.width,
+            height: imgRect.height
         };
-        reader.readAsDataURL(file);
     }
 
-    function resetCanvasSize() {
-        lineLayer.width = img.clientWidth; 
-        lineLayer.height = img.clientHeight;
+    function screenToImageCoords(screenX, screenY) {
+        const containerRect = imageWrapper.getBoundingClientRect();
+        const relativeX = screenX - containerRect.left - imageDisplayRect.x;
+        const relativeY = screenY - containerRect.top - imageDisplayRect.y;
+        
+        const imgX = (relativeX / imageDisplayRect.width) * img.naturalWidth;
+        const imgY = (relativeY / imageDisplayRect.height) * img.naturalHeight;
+        
+        return { x: Math.max(0, Math.min(imgX, img.naturalWidth)), y: Math.max(0, Math.min(imgY, img.naturalHeight)) };
     }
 
-    function rotateImage() {
-        rotation = (rotation + 90) % 360;
-        img.style.transform = `rotate(${rotation}deg)`;
-        // Recalcul simple pour la démo - En prod complexe, on pivoterait le Mat
-        setTimeout(initDots, 350); 
+    function imageToScreenCoords(imgX, imgY) {
+        const screenX = imageDisplayRect.x + (imgX / img.naturalWidth) * imageDisplayRect.width;
+        const screenY = imageDisplayRect.y + (imgY / img.naturalHeight) * imageDisplayRect.height;
+        return { x: screenX, y: screenY };
+    }
+
+    // ==================== GESTION DES POINTS ====================
+    let currentPoints = [
+        { x: 0.1, y: 0.1 },
+        { x: 0.9, y: 0.1 },
+        { x: 0.9, y: 0.9 },
+        { x: 0.1, y: 0.9 }
+    ];
+
+    function updateDotsPosition() {
+        const container = document.getElementById('dots');
+        if (!container) return;
+        
+        updateImageDisplayRect();
+        
+        const dots = container.querySelectorAll('.dot');
+        currentPoints.forEach((point, i) => {
+            const screenPos = imageToScreenCoords(point.x * img.naturalWidth, point.y * img.naturalHeight);
+            if (dots[i]) {
+                dots[i].style.left = screenPos.x + 'px';
+                dots[i].style.top = screenPos.y + 'px';
+            }
+        });
+        updateLines();
     }
 
     function initDots() {
         const container = document.getElementById('dots');
         container.innerHTML = '';
-        const w = img.clientWidth, h = img.clientHeight;
-        const pts = [{x:w*0.1,y:h*0.1}, {x:w*0.9,y:h*0.1}, {x:w*0.9,y:h*0.9}, {x:w*0.1,y:h*0.9}];
-        pts.forEach((p, i) => {
+        
+        currentPoints = [
+            { x: 0.1, y: 0.1 },
+            { x: 0.9, y: 0.1 },
+            { x: 0.9, y: 0.9 },
+            { x: 0.1, y: 0.9 }
+        ];
+        
+        for (let i = 0; i < 4; i++) {
             const d = document.createElement('div');
-            d.className = 'dot'; d.style.left = p.x + 'px'; d.style.top = p.y + 'px';
-            d.onmousedown = (e) => {
+            d.className = 'dot';
+            d.setAttribute('data-index', i);
+            
+            let isDragging = false;
+            
+            const startDrag = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 saveState();
-                document.onmousemove = (m) => {
-                    const rect = editor.getBoundingClientRect();
-                    d.style.left = Math.max(0, Math.min(m.clientX - rect.left, w)) + 'px';
-                    d.style.top = Math.max(0, Math.min(m.clientY - rect.top, h)) + 'px';
-                    updateLines();
+                isDragging = true;
+                
+                const getPos = (event) => {
+                    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+                    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+                    return { x: clientX, y: clientY };
                 };
-                document.onmouseup = () => document.onmousemove = null;
+                
+                const onDrag = (moveEvent) => {
+                    if (!isDragging) return;
+                    moveEvent.preventDefault();
+                    const pos = getPos(moveEvent);
+                    const imgCoords = screenToImageCoords(pos.x, pos.y);
+                    
+                    currentPoints[i] = {
+                        x: imgCoords.x / img.naturalWidth,
+                        y: imgCoords.y / img.naturalHeight
+                    };
+                    
+                    currentPoints[i].x = Math.max(0.02, Math.min(0.98, currentPoints[i].x));
+                    currentPoints[i].y = Math.max(0.02, Math.min(0.98, currentPoints[i].y));
+                    
+                    updateDotsPosition();
+                };
+                
+                const endDrag = () => {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onDrag);
+                    document.removeEventListener('mouseup', endDrag);
+                    document.removeEventListener('touchmove', onDrag);
+                    document.removeEventListener('touchend', endDrag);
+                };
+                
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('mouseup', endDrag);
+                document.addEventListener('touchmove', onDrag, { passive: false });
+                document.addEventListener('touchend', endDrag);
             };
+            
+            d.addEventListener('mousedown', startDrag);
+            d.addEventListener('touchstart', startDrag, { passive: false });
             container.appendChild(d);
-        });
-        updateLines();
+        }
+        
+        setTimeout(() => {
+            updateDotsPosition();
+            saveState();
+        }, 100);
     }
 
     function updateLines() {
+        let lineLayer = document.getElementById('lineLayer');
+        if (!lineLayer) {
+            lineLayer = document.createElement('canvas');
+            lineLayer.id = 'lineLayer';
+            lineLayer.style.position = 'absolute';
+            lineLayer.style.top = '0';
+            lineLayer.style.left = '0';
+            lineLayer.style.pointerEvents = 'none';
+            editor.appendChild(lineLayer);
+        }
+        
+        const editorRect = editor.getBoundingClientRect();
+        lineLayer.width = editorRect.width;
+        lineLayer.height = editorRect.height;
+        lineLayer.style.width = editorRect.width + 'px';
+        lineLayer.style.height = editorRect.height + 'px';
+        
         const ctx = lineLayer.getContext('2d');
-        ctx.clearRect(0,0,lineLayer.width,lineLayer.height);
-        ctx.beginPath(); ctx.strokeStyle = "#F0D13C"; ctx.lineWidth = 3;
-        document.querySelectorAll('.dot').forEach((d, i) => {
-            if(i===0) ctx.moveTo(parseFloat(d.style.left), parseFloat(d.style.top));
-            else ctx.lineTo(parseFloat(d.style.left), parseFloat(d.style.top));
+        ctx.clearRect(0, 0, lineLayer.width, lineLayer.height);
+        
+        updateImageDisplayRect();
+        const screenPoints = currentPoints.map(p => imageToScreenCoords(p.x * img.naturalWidth, p.y * img.naturalHeight));
+        
+        ctx.beginPath();
+        ctx.strokeStyle = "#f5c400";
+        ctx.lineWidth = 4;
+        ctx.setLineDash([10, 10]);
+        
+        ctx.moveTo(screenPoints[0].x, screenPoints[0].y);
+        for(let i = 1; i < screenPoints.length; i++) {
+            ctx.lineTo(screenPoints[i].x, screenPoints[i].y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        
+        screenPoints.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = "#f5c400";
+            ctx.fill();
+            ctx.shadowBlur = 0;
         });
-        ctx.closePath(); ctx.stroke();
     }
 
-    // Historique Undo/Redo
+    // ==================== HISTORIQUE ====================
     function saveState() {
-        const currentDots = Array.from(document.querySelectorAll('.dot')).map(d => ({x: d.style.left, y: d.style.top}));
-        if(currentDots.length > 0) history.push(JSON.stringify(currentDots));
+        const state = currentPoints.map(p => ({ x: p.x, y: p.y }));
+        history.push(JSON.stringify(state));
         redoStack = [];
         updateUndoButtons();
     }
@@ -248,18 +846,60 @@
 
     function applyState(stateStr) {
         const pts = JSON.parse(stateStr);
-        const dots = document.querySelectorAll('.dot');
-        pts.forEach((p, i) => {
-            dots[i].style.left = p.x;
-            dots[i].style.top = p.y;
-        });
-        updateLines();
+        currentPoints = pts;
+        updateDotsPosition();
         updateUndoButtons();
     }
 
     function updateUndoButtons() {
-        document.getElementById('undoBtn').disabled = history.length <= 1;
-        document.getElementById('redoBtn').disabled = redoStack.length === 0;
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        if (undoBtn) undoBtn.disabled = history.length <= 1;
+        if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+    }
+
+    function resetPoints() {
+        currentPoints = [
+            { x: 0.1, y: 0.1 },
+            { x: 0.9, y: 0.1 },
+            { x: 0.9, y: 0.9 },
+            { x: 0.1, y: 0.9 }
+        ];
+        updateDotsPosition();
+        saveState();
+        showToast("Points réinitialisés", 'success');
+    }
+
+    function rotatePoints() {
+        const center = {
+            x: currentPoints.reduce((s, p) => s + p.x, 0) / 4,
+            y: currentPoints.reduce((s, p) => s + p.y, 0) / 4
+        };
+        
+        currentPoints = currentPoints.map(p => {
+            const dx = p.x - center.x;
+            const dy = p.y - center.y;
+            return {
+                x: center.x - dy,
+                y: center.y + dx
+            };
+        });
+        
+        updateDotsPosition();
+        saveState();
+        showToast("Points pivotés", 'success');
+    }
+
+    function autoDetectEdges() {
+        currentPoints = [
+            { x: 0.05, y: 0.05 },
+            { x: 0.95, y: 0.05 },
+            { x: 0.95, y: 0.95 },
+            { x: 0.05, y: 0.95 }
+        ];
+        updateDotsPosition();
+        saveState();
+        showToast("Contours optimisés", "success");
     }
 
     function setMode(mode) {
@@ -267,50 +907,249 @@
         document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById('mode_' + mode).classList.add('active');
         if (resultCanvas.style.display === "block") processImage();
+        showToast(`Mode ${mode === 'original' ? 'Original HD' : mode === 'bw' ? 'Noir & Blanc Pro' : 'Magic Color HD'} activé`, 'info');
     }
 
+    // ==================== TRAITEMENT DE L'IMAGE HD ====================
     function processImage() {
-        const dots = document.querySelectorAll('.dot');
-        const sX = srcMat.cols / img.clientWidth, sY = srcMat.rows / img.clientHeight;
-        let coords = [];
-        dots.forEach(d => coords.push(parseFloat(d.style.left)*sX, parseFloat(d.style.top)*sY));
-
-        const w = Math.max(Math.hypot(coords[2]-coords[0], coords[3]-coords[1]), Math.hypot(coords[4]-coords[6], coords[5]-coords[7]));
-        const h = Math.max(Math.hypot(coords[6]-coords[0], coords[7]-coords[1]), Math.hypot(coords[4]-coords[2], coords[5]-coords[3]));
-
-        let dst = new cv.Mat();
-        let srcPts = cv.matFromArray(4, 1, cv.CV_32FC2, coords);
-        let dstPts = cv.matFromArray(4, 1, cv.CV_32FC2, [0,0, w,0, w,h, 0,h]);
-        let M = cv.getPerspectiveTransform(srcPts, dstPts);
-        cv.warpPerspective(srcMat, dst, M, new cv.Size(w, h), cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
-
-        if (currentMode === 'bw') {
-            cv.cvtColor(dst, dst, cv.COLOR_RGBA2GRAY);
-            cv.adaptiveThreshold(dst, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 15);
-        } else if (currentMode === 'magic') {
-            dst.convertTo(dst, -1, 1.2, 10); 
+        if (!srcMat || !isCvReady) {
+            showToast("Veuillez charger une image d'abord", 'error');
+            return;
         }
-
-        cv.imshow('resultCanvas', dst);
-        resultCanvas.style.display = "block";
-        editor.style.display = "none";
-        floatingGroup.classList.add('visible');
-        dst.delete(); srcPts.delete(); dstPts.delete(); M.delete();
+        
+        showToast("Traitement HD en cours...", 'info');
+        
+        let dst = new cv.Mat();
+        let srcPtsMat = null, dstPtsMat = null, M = null;
+        
+        try {
+            const srcPoints = currentPoints.map(p => ({
+                x: p.x * srcMat.cols,
+                y: p.y * srcMat.rows
+            }));
+            
+            const coords = srcPoints.flatMap(p => [p.x, p.y]);
+            
+            const targetW = Math.max(
+                Math.hypot(srcPoints[1].x - srcPoints[0].x, srcPoints[1].y - srcPoints[0].y),
+                Math.hypot(srcPoints[3].x - srcPoints[2].x, srcPoints[3].y - srcPoints[2].y)
+            );
+            const targetH = Math.max(
+                Math.hypot(srcPoints[3].x - srcPoints[0].x, srcPoints[3].y - srcPoints[0].y),
+                Math.hypot(srcPoints[2].x - srcPoints[1].x, srcPoints[2].y - srcPoints[1].y)
+            );
+            
+            srcPtsMat = cv.matFromArray(4, 1, cv.CV_32FC2, coords);
+            dstPtsMat = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, targetW, 0, targetW, targetH, 0, targetH]);
+            
+            // INTER_CUBIC = meilleure qualité pour le redimensionnement
+            M = cv.getPerspectiveTransform(srcPtsMat, dstPtsMat);
+            cv.warpPerspective(srcMat, dst, M, new cv.Size(Math.round(targetW), Math.round(targetH)), 
+                              cv.INTER_CUBIC, cv.BORDER_CONSTANT, new cv.Scalar());
+            
+            if (currentMode === 'bw') {
+                let gray = new cv.Mat();
+                cv.cvtColor(dst, gray, cv.COLOR_RGBA2GRAY);
+                cv.adaptiveThreshold(gray, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                    cv.THRESH_BINARY, 15, 8);
+                gray.delete();
+                
+            } else if (currentMode === 'magic') {
+                dst.convertTo(dst, -1, 1.08, 5);
+            }
+            
+            cv.imshow('resultCanvas', dst);
+            resultCanvas.style.display = "block";
+            editor.style.display = "none";
+            floatingGroup.classList.add('visible');
+            
+            const resultW = dst.cols;
+            const resultH = dst.rows;
+            showToast(`Scan terminé - ${resultW} x ${resultH} px`, 'success');
+            
+        } catch (err) {
+            console.error("Erreur de traitement:", err);
+            showToast("Erreur lors du traitement", 'error');
+        } finally {
+            if(dst) dst.delete();
+            if(srcPtsMat) srcPtsMat.delete();
+            if(dstPtsMat) dstPtsMat.delete();
+            if(M) M.delete();
+        }
     }
 
     function backToEdit() {
         resultCanvas.style.display = "none";
-        editor.style.display = "inline-block";
+        editor.style.display = "block";
         floatingGroup.classList.remove('visible');
-        resetCanvasSize();
+        setTimeout(() => updateDotsPosition(), 100);
     }
 
     function downloadResult() {
+        if (!resultCanvas || resultCanvas.style.display === 'none') {
+            showToast("Aucun scan à télécharger", "error");
+            return;
+        }
         const link = document.createElement('a');
-        link.download = `Umbrella_Scan_${Date.now()}.jpg`;
-        link.href = resultCanvas.toDataURL('image/jpeg', 0.92);
+        link.download = `Umbrella_Scan_HD_${Date.now()}.png`;
+        link.href = resultCanvas.toDataURL('image/png');
         link.click();
+        showToast("Fichier PNG haute qualité téléchargé", 'success');
     }
+
+    function exportAsPDF() {
+        const canvas = resultCanvas;
+        if (!canvas || canvas.style.display === 'none') {
+            showToast("Faites un scan d'abord", "error");
+            return;
+        }
+        const imgData = canvas.toDataURL('image/png');
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <html>
+            <head>
+                <title>Umbrella Scan HD</title>
+                <style>
+                    body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: white; }
+                    img { max-width: 100%; height: auto; }
+                    @media print {
+                        body { margin: 0; padding: 0; }
+                        img { max-width: 100%; page-break-inside: avoid; }
+                    }
+                </style>
+            </head>
+            <body>
+                <img src="${imgData}">
+            </body>
+            <script>
+                window.onload = () => {
+                    setTimeout(() => window.print(), 500);
+                    setTimeout(() => window.close(), 3000);
+                };
+            <\/script>
+            </html>
+        `);
+        win.document.close();
+        showToast("Préparation PDF HD...", 'info');
+    }
+
+    // ==================== GESTION DES FICHIERS ====================
+    function handleFiles(files) {
+        const file = files[0];
+        if (!file || !file.type.startsWith('image/')) {
+            showToast("Veuillez sélectionner une image", 'error');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            img.onload = () => {
+                dropzone.style.display = "none";
+                editor.style.display = "block";
+                resultCanvas.style.display = "none";
+                floatingGroup.classList.remove('visible');
+                updateResolutionDisplay();
+                
+                if(srcMat) srcMat.delete();
+                if(isCvReady) {
+                    srcMat = cv.imread(img);
+                }
+                
+                initDots();
+                history = [];
+                redoStack = [];
+                updateUndoButtons();
+                showToast(`Image chargée - ${img.naturalWidth} x ${img.naturalHeight} px`, 'success');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ==================== CAMÉRA ====================
+    async function openCamera() {
+        const modal = document.getElementById('cameraModal');
+        const video = document.getElementById('cameraVideo');
+        if (!modal || !video) return showToast("Composant caméra introuvable", "error");
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment", width: { ideal: 4096 }, height: { ideal: 2160 } } 
+            });
+            currentStream = stream;
+            video.srcObject = stream;
+            modal.classList.add('active');
+        } catch (err) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                currentStream = stream;
+                video.srcObject = stream;
+                modal.classList.add('active');
+            } catch (e) {
+                showToast("Accès caméra refusé", "error");
+            }
+        }
+    }
+
+    function closeCamera() {
+        const modal = document.getElementById('cameraModal');
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+        }
+        if (modal) modal.classList.remove('active');
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        canvas.toBlob(blob => {
+            const file = new File([blob], "capture_hd.jpg", { type: "image/jpeg" });
+            handleFiles([file]);
+            closeCamera();
+            showToast("Photo HD capturée", 'success');
+        }, 'image/jpeg', 0.95);
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.toggle('open');
+    }
+
+    // ==================== DROPZONE ====================
+    const dz = document.getElementById('dropzone');
+    const fi = document.getElementById('fileInput');
+    
+    dz.addEventListener('click', () => fi.click());
+    fi.addEventListener('change', (e) => handleFiles(e.target.files));
+    
+    dz.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dz.classList.add('dragover');
+    });
+    
+    dz.addEventListener('dragleave', () => {
+        dz.classList.remove('dragover');
+    });
+    
+    dz.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dz.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+    
+    window.addEventListener('resize', () => {
+        if (editor.style.display === 'block') {
+            updateDotsPosition();
+        }
+    });
+
+    // ==================== INITIALISATION ====================
+    showToast("Scanner HD prêt - Chargez une image en haute résolution", 'info');
 </script>
 </body>
 </html>
