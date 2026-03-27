@@ -9,14 +9,10 @@
 <link rel="manifest" href="assets/manifest.json">
 
 <meta name="theme-color" content="#ffffff">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Umbrella">
 <link rel="apple-touch-icon" href="assets/android-chrome-192x192.png">
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <style>
 :root {
@@ -26,6 +22,9 @@
   --bg: #f6f8fb;
   --text: #1f2937;
   --muted: #6b7280;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
 }
 
 /* Reset */
@@ -33,11 +32,99 @@
 body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);line-height:1.6;}
 a{text-decoration:none;}
 
+/* ================= TOAST NOTIFICATIONS ================= */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: white;
+  border-radius: 12px;
+  padding: 14px 20px;
+  min-width: 280px;
+  max-width: 380px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideInRight 0.3s ease;
+  border-left: 4px solid;
+}
+
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--error); }
+.toast.warning { border-left-color: var(--warning); }
+.toast.info { border-left-color: var(--accent); }
+
+.toast-icon { font-size: 1.2rem; }
+.toast.success .toast-icon { color: var(--success); }
+.toast.error .toast-icon { color: var(--error); }
+.toast.warning .toast-icon { color: var(--warning); }
+.toast.info .toast-icon { color: var(--accent); }
+
+.toast-content { flex: 1; font-size: 0.85rem; font-weight: 500; }
+.toast-close {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.8rem;
+  transition: color 0.2s;
+}
+.toast-close:hover { color: var(--text); }
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ================= LOADER GLOBAL ================= */
+.global-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.global-loader.active { display: flex; }
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(245,196,0,0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ================= NAVBAR ================= */
 .navbar{
   position:sticky;
   top:0;
-  z-index:3000; /* 🔥 toujours au-dessus du hero */
+  z-index:3000;
   background:#fff;
   padding:6px 30px;
   display:flex;
@@ -45,6 +132,7 @@ a{text-decoration:none;}
   justify-content:space-between;
   box-shadow:0 6px 25px rgba(0,0,0,.08);
   pointer-events:auto;
+  isolation: isolate;
 }
 
 .logo{
@@ -52,7 +140,6 @@ a{text-decoration:none;}
   flex-shrink:0;
 }
 
-/* LINKS DESKTOP */
 .nav-links{
   display:flex;
   gap:24px;
@@ -65,10 +152,10 @@ a{text-decoration:none;}
   font-weight:500;
   color:var(--muted);
   cursor:pointer;
+  transition: color 0.2s;
 }
 .nav-item span:hover{color:var(--text);}
 
-/* ICONS */
 .navbar-icons{
   display:flex;
   align-items:center;
@@ -81,19 +168,19 @@ a{text-decoration:none;}
   font-size:1.05rem;
   color:var(--muted);
   cursor:pointer;
+  transition: color 0.2s;
 }
 .navbar-icons i:hover{color:var(--text);}
 
-/* ACCOUNT */
 .account{position:relative;}
 .account img{
   height:36px;
   width:36px;
   border-radius:50%;
   cursor:pointer;
+  object-fit: cover;
 }
 
-/* ACCOUNT MENU */
 .account-menu{
   display:none;
   position:absolute;
@@ -111,9 +198,9 @@ a{text-decoration:none;}
 .account-menu strong{display:block;}
 .account-menu span{color:#777;font-size:.75rem;}
 .account-menu hr{margin:10px 0;border:none;border-top:1px solid #eee;}
-.account-menu a{display:block;color:#333;margin-bottom:8px}
+.account-menu a{display:block;color:#333;margin-bottom:8px;transition: color 0.2s;}
+.account-menu a:hover{color:var(--accent);}
 
-/* BURGER */
 .menu-toggle{
   display:none;
   font-size:1.4rem;
@@ -121,7 +208,6 @@ a{text-decoration:none;}
   color:var(--muted);
 }
 
-/* MOBILE MENU */
 .mobile-menu{
   display:none;
   position:absolute;
@@ -136,7 +222,8 @@ a{text-decoration:none;}
   z-index:3200;
 }
 .mobile-menu.active{display:flex;}
-.mobile-menu a{font-weight:500;color:#333}
+.mobile-menu a{font-weight:500;color:#333;transition: color 0.2s;}
+.mobile-menu a:hover{color:var(--accent);}
 
 /* ================= HERO DYNAMIQUE ================= */
 .hero{
@@ -146,7 +233,8 @@ a{text-decoration:none;}
   background-color:var(--bg);
   margin:20px;
   border-radius:20px;
-  pointer-events:none; /* 🔥 empêche le hero de bloquer la navbar */
+  pointer-events:none;
+  isolation: isolate;
 }
 
 .hero-slide{
@@ -168,20 +256,18 @@ a{text-decoration:none;}
   z-index:1;
 }
 
-/* OVERLAY FILM NOIR */
 .hero-slide .overlay{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,.55);
-  pointer-events:none; /* 🔥 clé absolue */
+  pointer-events:none;
 }
 
-/* CONTENU HERO */
 .hero-content{
   position:relative;
   z-index:2;
   max-width:600px;
-  pointer-events:auto; /* 🔥 CTA cliquables */
+  pointer-events:auto;
 }
 
 .hero-content h1{
@@ -202,6 +288,9 @@ a{text-decoration:none;}
   border-radius:30px;
   font-weight:700;
   cursor:pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-family: inherit;
 }
 
 .cta-primary{
@@ -216,12 +305,13 @@ a{text-decoration:none;}
 .cta-secondary{
   border:1px solid rgba(255,255,255,.5);
   color:#fff;
+  background: transparent;
 }
 .cta-secondary:hover{
   background:rgba(255,255,255,.2);
+  transform:scale(1.05);
 }
 
-/* DOTS */
 .hero-dots{
   position:absolute;
   bottom:20px;
@@ -238,8 +328,10 @@ a{text-decoration:none;}
   border-radius:50%;
   background:#bbb;
   cursor:pointer;
+  transition: background 0.3s;
 }
 .hero-dots .dot.active{background:#fff;}
+.hero-dots .dot:hover{background:var(--accent);}
 
 /* ================= MODAL RECHERCHE ================= */
 .modal{
@@ -263,6 +355,18 @@ a{text-decoration:none;}
   width:90%;
   text-align:center;
   position:relative;
+  animation: modalPop 0.3s ease;
+}
+
+@keyframes modalPop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .modal-content input{
@@ -271,6 +375,11 @@ a{text-decoration:none;}
   border-radius:8px;
   border:1px solid #ccc;
   font-size:.95rem;
+  transition: border-color 0.2s;
+}
+.modal-content input:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 .modal-content .close{
@@ -279,7 +388,9 @@ a{text-decoration:none;}
   right:14px;
   font-size:1.2rem;
   cursor:pointer;
+  transition: color 0.2s;
 }
+.modal-content .close:hover{color:var(--error);}
 
 /* ================= SECTIONS ================= */
 .section{padding:70px 20px;max-width:1200px;margin:auto;}
@@ -304,21 +415,8 @@ a{text-decoration:none;}
 .tool-card i{font-size:2rem;color:var(--secondary);}
 .tool-card h3{margin:15px 0 10px;}
 .tool-card p{font-size:.9rem;opacity:.85;}
-.tool-card a{display:inline-block;margin-top:12px;font-weight:600;color:var(--secondary);}
-
-.about{text-align:center;max-width:900px;margin:auto;}
-/* Style amélioré pour la section About */
-.about-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.subtitle {
-  max-width: 700px;
-  margin: 0 auto;
-  color: var(--muted);
-  font-size: 1.1rem;
-}
+.tool-card a{display:inline-block;margin-top:12px;font-weight:600;color:var(--secondary);transition: color 0.2s;}
+.tool-card a:hover{color:var(--accent);}
 
 .about-grid {
   display: grid;
@@ -329,7 +427,7 @@ a{text-decoration:none;}
 .about-card {
   background: #fff;
   padding: 30px;
-  border-radius: 12px; /* Coins moins arrondis pour un aspect plus pro */
+  border-radius: 12px;
   border: 1px solid #e5e7eb;
   transition: border-color 0.2s ease;
 }
@@ -355,7 +453,7 @@ a{text-decoration:none;}
   color: var(--muted);
   line-height: 1.5;
 }
-.contact{background:var(--bg);border-radius:20px;padding:40px;text-align:center;}
+
 .contact{
   background:var(--bg);
   border-radius:20px;
@@ -389,6 +487,11 @@ a{text-decoration:none;}
   border-radius:10px;
   border:1px solid #ccc;
   font-size:.95rem;
+  transition: border-color 0.2s;
+}
+.contact input:focus, .contact textarea:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 .contact button{
@@ -406,8 +509,12 @@ a{text-decoration:none;}
   background:#ffd700;
   transform:scale(1.05);
 }
+.contact button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 
-/* RESEAUX SOCIAUX */
 .socials{
   display:flex;
   justify-content:center;
@@ -422,6 +529,7 @@ a{text-decoration:none;}
 
 .socials a:hover{
   color:var(--accent);
+  transform: translateY(-2px);
 }
 
 /* ================= FOOTER ================= */
@@ -444,6 +552,7 @@ footer a{
   font-size:.85rem;
   margin-bottom:6px;
   transition:.2s;
+  cursor: pointer;
 }
 footer a:hover{color:#fff;}
 
@@ -457,105 +566,94 @@ footer a:hover{color:#fff;}
   flex-wrap:wrap;
   font-size:.8rem;
 }
+
+/* ================= LUCE ASSISTANT ================= */
 #luce-container {
-        position: fixed; right: 20px; bottom: 20px;
-        width: 350px; height: 500px;
-        background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px; display: flex; flex-direction: column;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 9999; overflow: hidden;
-    }
-
-    #luce-container.minimized { transform: translateX(370px); }
-
-    #luce-header {
-        padding: 20px; background: rgba(255,255,255,0.05);
-        display: flex; justify-content: space-between; align-items: center;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .luce-avatar {
-        width: 35px; height: 35px; background: var(--accent, #f5c400);
-        color: #0f172a; border-radius: 10px; display: flex;
-        align-items: center; justify-content: center; font-weight: 800;
-    }
-
-    #luce-chat { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-
-    .msg { padding: 12px 16px; border-radius: 15px; font-size: 0.85rem; max-width: 85%; line-height: 1.4; }
-    .msg.bot { background: rgba(255,255,255,0.05); border-bottom-left-radius: 2px; color: #cbd5e1; }
-    .msg.user { background: var(--accent, #f5c400); color: #0f172a; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: 600; }
-
-    #luce-input-area { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
-    #luce-input-area input {
-        flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-        padding: 10px; border-radius: 10px; color: white; outline: none; font-size: 0.8rem;
-    }
-    #luce-input-area button { background: var(--accent, #f5c400); border: none; padding: 10px; border-radius: 10px; cursor: pointer; }
-
-    /* Bouton pour réouvrir Luce */
-    #luce-toggle-btn {
-        position: fixed; right: 20px; bottom: 20px;
-        width: 60px; height: 60px; background: var(--accent, #f5c400);
-        border-radius: 20px; display: flex; align-items: center; justify-content: center;
-        cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 9998;
-    }
-    /* Animation de réflexion de Luce */
-.luce-thinking {
-    position: relative;
-}
-.luce-thinking::after {
-    content: '';
-    position: absolute;
-    top: -2px; left: -2px; right: -2px; bottom: -2px;
-    border: 2px solid var(--accent);
-    border-radius: 12px;
-    animation: pulseLuce 2s infinite;
+  position: fixed; right: 20px; bottom: 20px;
+  width: 350px; height: 500px;
+  background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px; display: flex; flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 9999; overflow: hidden;
 }
 
-@keyframes pulseLuce {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(1.3); opacity: 0; }
+#luce-container.minimized { transform: translateX(370px); }
+
+#luce-header {
+  padding: 20px; background: rgba(255,255,255,0.05);
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
-.luce-avatar.speaking {
-    box-shadow: 0 0 15px var(--accent);
-    transform: scale(1.05);
-    transition: all 0.3s ease;
+
+.luce-avatar {
+  width: 35px; height: 35px; background: var(--accent);
+  color: #0f172a; border-radius: 10px; display: flex;
+  align-items: center; justify-content: center; font-weight: 800;
+  transition: all 0.3s ease;
 }
-@keyframes siriWave {
-    0% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.1); filter: brightness(1.3); }
-    100% { transform: scale(1); filter: brightness(1); }
+
+#luce-chat { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+
+.msg { padding: 12px 16px; border-radius: 15px; font-size: 0.85rem; max-width: 85%; line-height: 1.4; }
+.msg.bot { background: rgba(255,255,255,0.05); border-bottom-left-radius: 2px; color: #cbd5e1; }
+.msg.user { background: var(--accent); color: #0f172a; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: 600; }
+
+#luce-input-area { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
+#luce-input-area input {
+  flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px; border-radius: 10px; color: white; outline: none; font-size: 0.8rem;
 }
+#luce-input-area input:focus { border-color: var(--accent); }
+#luce-input-area button { background: var(--accent); border: none; padding: 10px; border-radius: 10px; cursor: pointer; transition: transform 0.2s; }
+#luce-input-area button:hover { transform: scale(1.05); }
+
 #luce-toggle-btn {
-    background-color: #f5c400 !important; /* Force le jaune */
-    color: #0f172a !important;
+  position: fixed; right: 20px; bottom: 20px;
+  width: 60px; height: 60px; background: var(--accent);
+  border-radius: 20px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 9998;
+  transition: transform 0.3s;
+}
+#luce-toggle-btn:hover { transform: scale(1.05); }
+
+.luce-avatar.speaking {
+  box-shadow: 0 0 15px var(--accent);
+  transform: scale(1.05);
 }
 
-.cta-primary {
-    background: #f5c400 !important;
-}
 /* ================= RESPONSIVE ================= */
 @media(max-width:900px){
   .nav-links{display:none;}
   .menu-toggle{display:block;}
   .hero-content h1{font-size:2rem;}
   .hero-content p{font-size:.95rem;}
+  .hero-content { padding: 20px; }
+  .hero-slide { padding: 0 30px; }
 }
 
 @media(max-width:500px){
   .hero-content h1{font-size:1.6rem;}
   .hero-content p{font-size:.9rem;}
+  #luce-container { width: 320px; height: 450px; right: 10px; bottom: 80px; }
+  #luce-toggle-btn { width: 50px; height: 50px; }
 }
 </style>
 </head>
 <body>
 
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Global Loader -->
+<div id="globalLoader" class="global-loader">
+  <div class="loader-spinner"></div>
+</div>
+
 <!-- NAVBAR -->
 <nav class="navbar">
-  <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" class="logo">
+  <img src="https://i.postimg.cc/MGXwDDmH/Moniteo-removebg-preview.png" class="logo" alt="Umbrella Logo">
 
   <div class="nav-links">
     <div class="nav-item"><span>Umbrella Suit Pro</span></div>
@@ -566,37 +664,36 @@ footer a:hover{color:#fff;}
   </div>
 
 <div class="navbar-icons">
-  <!-- Recherche -->
   <i class="fa fa-search" id="searchBtn" aria-label="Recherche"></i>
-  <!-- Panier -->
   <i class="fa fa-shopping-cart" id="cartBtn" aria-label="Panier"></i>
    
-    <div class="account">
-      <img id="userAvatar" src="https://www.gravatar.com/avatar/?d=mp">
-      <div class="account-menu">
-        <strong id="userName">Invité</strong>
-        <span id="userEmail">Non connecté</span>
-        <hr>
-        <a href="#" onclick="logout()">Déconnexion</a>
-      </div>
+  <div class="account">
+    <img id="userAvatar" src="https://www.gravatar.com/avatar/?d=mp" alt="Avatar">
+    <div class="account-menu">
+      <strong id="userName">Invité</strong>
+      <span id="userEmail">Non connecté</span>
+      <hr>
+      <a href="#" onclick="logout()">Déconnexion</a>
     </div>
+  </div>
     
-     <div class="menu-toggle" id="menuToggle"><i class="fa fa-bars"></i></div>
-  </div>
+  <div class="menu-toggle" id="menuToggle"><i class="fa fa-bars"></i></div>
+</div>
 
-  <div class="mobile-menu" id="mobileMenu">
-    <a>Umbrella Suit Pro</a>
-    <a>Umbrella Advice</a>
-    <a>Umbrella Express</a>
-    <a>Offres TPE & PME</a>
-    <a>Support technique</a>
-    <a href="tarification.html" class="cta-primary">Souscrire Umbrella Pro</a>
-  </div>
+<div class="mobile-menu" id="mobileMenu">
+  <a>Umbrella Suit Pro</a>
+  <a>Umbrella Advice</a>
+  <a>Umbrella Express</a>
+  <a>Offres TPE & PME</a>
+  <a>Support technique</a>
+  <a href="tarification.html" class="cta-primary">Souscrire Umbrella Pro</a>
+</div>
 </nav>
+
 <div class="modal" id="searchModal">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <input type="text" placeholder="Rechercher un outil, une page…">
+    <input type="text" placeholder="Rechercher un outil, une page…" id="searchInput">
   </div>
 </div>
 
@@ -697,14 +794,14 @@ footer a:hover{color:#fff;}
   <div id="formStatus" style="display:none; margin-top:20px; padding:15px; border-radius:10px; font-weight:500;"></div>
 
   <div class="socials">
-    <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
-    <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
-    <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-    <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+    <a href="https://www.facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://www.twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+    <a href="https://www.linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://www.instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
   </div>
 </section>
 
-<!-- FOOTER PREMIUM -->
+<!-- FOOTER -->
 <footer>
   <div class="footer-grid">
     <div><h4>PRODUIT</h4><a>Accueil</a><a>Fonctionnalités</a><a>Tarification</a><a>Outils</a><a>FAQ</a></div>
@@ -719,37 +816,44 @@ footer a:hover{color:#fff;}
     <span>© Umbrella ® – Tous droits réservés</span>
   </div>
 </footer>
+
+<!-- LUCE ASSISTANT -->
 <div id="luce-container" class="minimized">
-    <div id="luce-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="luce-avatar">L</div>
-            <div>
-                <h4 style="font-size: 0.8rem; margin: 0;">LUCE</h4>
-                <span style="font-size: 0.6rem; color: #2ed573;">● En ligne</span>
-            </div>
-        </div>
-        <button onclick="toggleLuce()" style="background:none; border:none; color:white; cursor:pointer;">
-            <i class="fa fa-chevron-right"></i>
-        </button>
+  <div id="luce-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div class="luce-avatar">L</div>
+      <div>
+        <h4 style="font-size: 0.8rem; margin: 0;">LUCE</h4>
+        <span style="font-size: 0.6rem; color: #2ed573;">● En ligne</span>
+      </div>
     </div>
-    
-    <div id="luce-chat">
-        <div class="msg bot">Bonjour ! Je suis Luce. Comment puis-je optimiser votre business Umbrella® aujourd'hui ?</div>
-    </div>
+    <button onclick="toggleLuce()" style="background:none; border:none; color:white; cursor:pointer;">
+      <i class="fa fa-chevron-right"></i>
+    </button>
+  </div>
+  
+  <div id="luce-chat">
+    <div class="msg bot">Bonjour ! Je suis Luce. Comment puis-je optimiser votre business Umbrella® aujourd'hui ?</div>
+  </div>
 
-    <div id="luce-input-area">
-        <input type="text" id="luce-msg" placeholder="Posez une question..." onkeypress="handleLuce(event)">
-        <button onclick="askLuce()"><i class="fa fa-paper-plane"></i></button>
-        <button onclick="startLuceListening()" id="mic-btn">
-    <i class="fa fa-microphone"></i>
-</button>
-    </div>
+  <div id="luce-input-area">
+    <input type="text" id="luce-msg" placeholder="Posez une question..." onkeypress="handleLuce(event)">
+    <button onclick="askLuce()"><i class="fa fa-paper-plane"></i></button>
+    <button onclick="startLuceListening()" id="mic-btn">
+      <i class="fa fa-microphone"></i>
+    </button>
+  </div>
 </div>
 
-<div id="luce-toggle-btn" onclick="toggleLuce()" style="position: fixed; right: 20px; bottom: 20px; width: 60px; height: 60px; background: #f5c400; border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; color: #0f172a;">
-    <i class="fa fa-comment-dots" style="font-size: 1.5rem;"></i>
+<div id="luce-toggle-btn" onclick="toggleLuce()">
+  <i class="fa fa-comment-dots" style="font-size: 1.5rem;"></i>
 </div>
-<script type="module">/* ================= CONFIGURATION & IMPORTS ================= */
+
+<script type="module">
+// ================= CONFIGURATION =================
+// NOTE: En production, ces clés doivent être dans un fichier .env
+// et chargées via Vite ou autre bundler. Pour la démo, nous les utilisons directement.
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
 import { 
@@ -766,6 +870,7 @@ import {
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
+// Configuration Firebase (à déplacer en variables d'environnement en production)
 const firebaseConfig = {
   apiKey: "AIzaSyB3vSZcGoixj7j9HcC-G5cKXvEoDI9tcAw",
   authDomain: "umbrella-projet.firebaseapp.com",
@@ -782,12 +887,55 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 getAnalytics(app);
 
-/* ================= GESTION UTILISATEUR (AUTH) ================= */
+// ================= SYSTÈME DE TOAST =================
+const toastContainer = document.getElementById('toastContainer');
+
+window.showToast = function(message, type = 'info', duration = 3000) {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  let icon = '';
+  switch(type) {
+    case 'success': icon = '<i class="fa fa-check-circle"></i>'; break;
+    case 'error': icon = '<i class="fa fa-exclamation-circle"></i>'; break;
+    case 'warning': icon = '<i class="fa fa-exclamation-triangle"></i>'; break;
+    default: icon = '<i class="fa fa-info-circle"></i>';
+  }
+  
+  toast.innerHTML = `
+    <div class="toast-icon">${icon}</div>
+    <div class="toast-content">${message}</div>
+    <div class="toast-close"><i class="fa fa-times"></i></div>
+  `;
+  
+  toastContainer.appendChild(toast);
+  
+  const closeBtn = toast.querySelector('.toast-close');
+  closeBtn.onclick = () => toast.remove();
+  
+  setTimeout(() => {
+    if (toast.parentNode) toast.remove();
+  }, duration);
+  
+  return toast;
+};
+
+// ================= LOADER GLOBAL =================
+const globalLoader = document.getElementById('globalLoader');
+
+window.showLoader = function(show) {
+  if (show) {
+    globalLoader.classList.add('active');
+  } else {
+    globalLoader.classList.remove('active');
+  }
+};
+
+// ================= GESTION UTILISATEUR =================
 const userAvatar = document.getElementById("userAvatar");
 const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 
-// Fonction pour mettre à jour l'UI proprement
 const updateUI = (user) => {
     if (user) {
         if (userAvatar) userAvatar.src = user.photoURL || "https://www.gravatar.com/avatar/?d=mp";
@@ -798,6 +946,7 @@ const updateUI = (user) => {
             email: user.email, 
             avatar: user.photoURL 
         }));
+        showToast(`Bienvenue ${user.displayName || ''} !`, 'success');
     } else {
         if (userAvatar) userAvatar.src = "https://www.gravatar.com/avatar/?d=mp";
         if (userName) userName.textContent = "Invité";
@@ -812,35 +961,41 @@ onAuthStateChanged(auth, updateUI);
 const googleBtn = document.getElementById("googleLogin");
 if (googleBtn) {
     googleBtn.addEventListener('click', async (e) => {
-        e.preventDefault(); // Empêche tout comportement par défaut
+        e.preventDefault();
+        showLoader(true);
         
         try {
-            // L'appel doit être immédiat après le clic
             const result = await signInWithPopup(auth, provider);
             console.log("Connecté :", result.user.displayName);
-            // Pas besoin de reload si onAuthStateChanged est bien configuré
+            showToast(`Connexion réussie ! Bienvenue ${result.user.displayName}`, 'success');
         } catch (error) {
             if (error.code === 'auth/popup-blocked') {
-                alert("La fenêtre de connexion a été bloquée. Veuillez autoriser les popups pour ce site dans la barre d'adresse.");
-            } else if (error.code === 'auth/cancelled-popup-request') {
-                console.log("Popup fermée trop vite par l'utilisateur.");
+                showToast("La fenêtre de connexion a été bloquée. Veuillez autoriser les popups.", 'warning');
             } else {
                 console.error("Erreur Firebase :", error.code, error.message);
+                showToast("Erreur de connexion. Veuillez réessayer.", 'error');
             }
+        } finally {
+            showLoader(false);
         }
     });
 }
-// Déconnexion globale
+
 window.logout = async () => {
+    showLoader(true);
     try {
         await signOut(auth);
-        location.reload(); 
+        showToast("Déconnexion réussie", 'info');
+        location.reload();
     } catch (error) {
         console.error("Erreur déconnexion :", error);
+        showToast("Erreur lors de la déconnexion", 'error');
+    } finally {
+        showLoader(false);
     }
 };
 
-/* ================= CONTACT FONCTIONNEL (FIRESTORE) ================= */
+// ================= CONTACT FORM =================
 const contactForm = document.getElementById('contactForm');
 const formStatus = document.getElementById('formStatus');
 
@@ -850,7 +1005,6 @@ if (contactForm) {
         const btn = contactForm.querySelector('button');
         const originalText = btn.innerText;
 
-        // UI State: Loading
         btn.innerText = "Envoi en cours...";
         btn.disabled = true;
         if (formStatus) formStatus.style.display = "none";
@@ -860,7 +1014,7 @@ if (contactForm) {
             email: document.getElementById('contactEmail').value.trim(),
             message: document.getElementById('contactMessage').value.trim(),
             date: serverTimestamp(),
-            source: "Web Umbrella" // Utile pour filtrer dans la DB
+            source: "Web Umbrella"
         };
 
         try {
@@ -868,11 +1022,11 @@ if (contactForm) {
 
             if (formStatus) {
                 formStatus.style.display = "block";
-                formStatus.className = "status-success"; // Utilisez une classe CSS plutôt que du style inline
                 formStatus.style.cssText = "background:#dcfce7; color:#166534; padding:15px; border-radius:10px; margin-top:15px; border: 1px solid #bbf7d0;";
                 formStatus.innerText = "✓ Votre message a été transmis avec succès.";
             }
             contactForm.reset();
+            showToast("Message envoyé avec succès !", 'success');
         } catch (err) {
             console.error("Firestore Error:", err);
             if (formStatus) {
@@ -880,6 +1034,7 @@ if (contactForm) {
                 formStatus.style.cssText = "background:#fee2e2; color:#991b1b; padding:15px; border-radius:10px; margin-top:15px; border: 1px solid #fecaca;";
                 formStatus.innerText = "✕ Une erreur est survenue. Veuillez réessayer.";
             }
+            showToast("Erreur lors de l'envoi du message", 'error');
         } finally {
             btn.innerText = originalText;
             btn.disabled = false;
@@ -887,7 +1042,7 @@ if (contactForm) {
     });
 }
 
-/* ================= UI & NAVIGATION ================= */
+// ================= UI & NAVIGATION =================
 // Slider
 const slides = document.querySelectorAll(".hero-slide");
 const dots = document.querySelectorAll(".hero-dots .dot");
@@ -914,18 +1069,20 @@ const searchBtn = document.getElementById("searchBtn");
 const searchModal = document.getElementById("searchModal");
 if (searchBtn) {
   searchBtn.onclick = () => searchModal.classList.add("active");
-  searchModal.onclick = (e) => { if (e.target === searchModal) searchModal.classList.remove("active"); };
+  searchModal.onclick = (e) => { 
+    if (e.target === searchModal) searchModal.classList.remove("active"); 
+  };
 }
-// 1. CONFIGURATION
+
+// ================= LUCE ASSISTANT =================
 console.log("Luce Engine: Mode Assistant Vocal activé");
 
-// Note : Pour la production, protège cette clé via des restrictions de domaine
-const API_KEY = "AIzaSyCf1dH21kcnWpW-0rNqyLdPxy3-m19ixEM"; 
+// Note : En production, protéger cette clé via les variables d'environnement
+const API_KEY = "AIzaSyCf1dH21kcnWpW-0rNqyLdPxy3-m19ixEM";
 const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 let isTalking = false;
 
-// --- 1. FONCTIONS D'INTERFACE ---
 window.toggleLuce = function() {
     const container = document.getElementById('luce-container');
     if (container) container.classList.toggle('minimized');
@@ -945,7 +1102,7 @@ window.appendMessage = function(role, text) {
     chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
 };
 
-// --- 2. MOTEUR DE VOIX (RECONNAISSANCE) ---
+// Reconnaissance vocale
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
     const recognition = new SpeechRecognition();
@@ -976,9 +1133,8 @@ if (SpeechRecognition) {
     };
 }
 
-// --- 3. SYNTHÈSE VOCALE (TTS) ---
+// Synthèse vocale
 window.speakLuce = function(text) {
-    // Nettoyage des caractères spéciaux Markdown pour une lecture fluide
     const cleanText = text.replace(/[*_#]/g, '');
     
     window.speechSynthesis.cancel(); 
@@ -994,7 +1150,7 @@ window.speakLuce = function(text) {
     window.speechSynthesis.speak(utterance);
 };
 
-// --- 4. LOGIQUE GEMINI ---
+// Logique Gemini
 window.askLuce = async function() {
     const input = document.getElementById('luce-msg');
     const userText = input.value.trim();
@@ -1045,6 +1201,20 @@ window.askLuce = async function() {
         input.focus();
     }
 };
+
+// Gestion du panier (placeholder)
+document.getElementById('cartBtn')?.addEventListener('click', () => {
+    showToast('Fonctionnalité bientôt disponible !', 'info');
+});
+
+// Fermeture du menu mobile au clic extérieur
+document.addEventListener('click', (e) => {
+    if (mobileMenu && mobileMenu.classList.contains('active')) {
+        if (!menuToggle?.contains(e.target) && !mobileMenu.contains(e.target)) {
+            mobileMenu.classList.remove('active');
+        }
+    }
+});
 </script>
 </body>
 </html>
